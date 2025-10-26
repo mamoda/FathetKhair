@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buad-POS</title>
+    <title>نظام الكاشير المصري الاحترافي</title>
     <style>
         :root {
             --primary-color: #1a73e8;
@@ -13,6 +13,7 @@
             --light-color: #f8f9fa;
             --dark-color: #202124;
             --sidebar-width: 250px;
+            --transactions-width: 300px;
             --border-radius: 8px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
@@ -31,7 +32,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 15px;
         }
@@ -184,6 +185,60 @@
 
         .sidebar-menu a i {
             margin-left: 10px;
+        }
+
+        /* القائمة الحظية للمعاملات */
+        .transactions-sidebar {
+            width: var(--transactions-width);
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .transactions-sidebar h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-color);
+            padding-bottom: 10px;
+        }
+
+        .transactions-list {
+            list-style: none;
+        }
+
+        .transaction-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info h4 {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .transaction-info p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .transaction-time {
+            font-size: 11px;
+            color: #999;
         }
 
         /* المحتوى الرئيسي */
@@ -432,7 +487,7 @@
             border-radius: var(--border-radius);
         }
 
-        .products-table, .invoices-table, .inventory-table {
+        .products-table, .invoices-table, .inventory-table, .wholesale-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
@@ -440,13 +495,14 @@
 
         .products-table th, .products-table td,
         .invoices-table th, .invoices-table td,
-        .inventory-table th, .inventory-table td {
+        .inventory-table th, .inventory-table td,
+        .wholesale-table th, .wholesale-table td {
             padding: 12px;
             text-align: right;
             border-bottom: 1px solid #eee;
         }
 
-        .products-table th, .invoices-table th, .inventory-table th {
+        .products-table th, .invoices-table th, .inventory-table th, .wholesale-table th {
             background-color: var(--light-color);
             font-weight: bold;
         }
@@ -505,6 +561,12 @@
         }
 
         /* تصميم متجاوب */
+        @media (max-width: 1024px) {
+            .transactions-sidebar {
+                display: none;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-layout {
                 flex-direction: column;
@@ -528,7 +590,7 @@
     <!-- صفحة تسجيل الدخول -->
     <div class="login-container" id="loginPage">
         <div class="login-form">
-            <h2>تسجيل الدخول  </h2>
+            <h2>تسجيل الدخول إلى نظام الكاشير</h2>
             <div class="form-group">
                 <label for="username">اسم المستخدم</label>
                 <input type="text" id="username" placeholder="أدخل اسم المستخدم">
@@ -545,7 +607,7 @@
     <div class="dashboard" id="dashboard">
         <header class="header">
             <div class="container header-content">
-                <div class="logo">بُعد-نقاط البيع</div>
+                <div class="logo">نظام الكاشير المصري</div>
                 <div class="user-info">
                     <button class="logout-btn" id="logoutBtn">تسجيل الخروج</button>
                     <span id="userDisplay">مرحباً، مدير النظام</span>
@@ -563,211 +625,283 @@
             </aside>
 
             <!-- المحتوى الرئيسي -->
-            <div class="content-area">
-                <!-- صفحة الكاشير (للكاشير والأدمن) -->
-                <div class="cashier-page" id="cashierPage">
-                    <section class="barcode-section">
-                        <h3>مسح الباركود</h3>
-                        <div class="barcode-input">
-                            <input type="text" id="barcodeInput" placeholder="أدخل الباركود أو استخدم الماسح الضوئي">
-                            <button id="scanBarcodeBtn">بحث</button>
-                        </div>
-                    </section>
+            <div class="content-area" style="flex: 1; display: flex; gap: 20px;">
+                <!-- القائمة الحظية للمعاملات -->
+                <aside class="transactions-sidebar" id="transactionsSidebar">
+                    <h3>المعاملات الحديثة</h3>
+                    <ul class="transactions-list" id="transactionsList">
+                        <!-- سيتم ملء المعاملات ديناميكياً -->
+                    </ul>
+                </aside>
 
-                    <div class="main-content">
-                        <section class="products-section">
-                            <h3>المنتجات المتاحة</h3>
-                            <div class="products-grid" id="productsGrid">
-                                <!-- سيتم ملء المنتجات ديناميكياً باستخدام JavaScript -->
+                <!-- المحتوى الرئيسي -->
+                <div style="flex: 1;">
+                    <!-- صفحة الكاشير (للكاشير والأدمن) -->
+                    <div class="cashier-page" id="cashierPage">
+                        <section class="barcode-section">
+                            <h3>مسح الباركود</h3>
+                            <div class="barcode-input">
+                                <input type="text" id="barcodeInput" placeholder="أدخل الباركود أو استخدم الماسح الضوئي">
+                                <button id="scanBarcodeBtn">بحث</button>
                             </div>
                         </section>
 
-                        <section class="cart-section">
-                            <h3>سلة المشتريات</h3>
-                            <div class="cart-items" id="cartItems">
-                                <!-- سيتم ملء عناصر السلة ديناميكياً باستخدام JavaScript -->
+                        <div class="main-content">
+                            <section class="products-section">
+                                <h3>المنتجات المتاحة</h3>
+                                <div class="products-grid" id="productsGrid">
+                                    <!-- سيتم ملء المنتجات ديناميكياً باستخدام JavaScript -->
+                                </div>
+                            </section>
+
+                            <section class="cart-section">
+                                <h3>سلة المشتريات</h3>
+                                <div class="cart-items" id="cartItems">
+                                    <!-- سيتم ملء عناصر السلة ديناميكياً باستخدام JavaScript -->
+                                </div>
+                                <div class="cart-summary">
+                                    <div class="summary-row">
+                                        <span>المجموع الفرعي:</span>
+                                        <span id="subtotal">0.00 جنيه</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>الضريبة (14%):</span>
+                                        <span id="tax">0.00 جنيه</span>
+                                    </div>
+                                    <div class="summary-row total">
+                                        <span>الإجمالي:</span>
+                                        <span id="total">0.00 جنيه</span>
+                                    </div>
+                                    <button class="checkout-btn" id="checkoutBtn">إتمام الشراء</button>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <!-- صفحة إدارة المنتجات (للأدمن فقط) -->
+                    <div class="admin-page" id="productsPage">
+                        <h3>إدارة المنتجات</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productName">اسم المنتج</label>
+                                <input type="text" id="productName" placeholder="أدخل اسم المنتج">
                             </div>
-                            <div class="cart-summary">
-                                <div class="summary-row">
-                                    <span>المجموع الفرعي:</span>
-                                    <span id="subtotal">0.00 جنيه</span>
-                                </div>
-                                <div class="summary-row">
-                                    <span>الضريبة (14%):</span>
-                                    <span id="tax">0.00 جنيه</span>
-                                </div>
-                                <div class="summary-row total">
-                                    <span>الإجمالي:</span>
-                                    <span id="total">0.00 جنيه</span>
-                                </div>
-                                <button class="checkout-btn" id="checkoutBtn">إتمام الشراء</button>
+                            <div class="form-group">
+                                <label for="productPrice">السعر (جنيه)</label>
+                                <input type="number" id="productPrice" placeholder="أدخل السعر">
                             </div>
-                        </section>
-                    </div>
-                </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productBarcode">الباركود</label>
+                                <input type="text" id="productBarcode" placeholder="أدخل الباركود">
+                            </div>
+                            <div class="form-group">
+                                <label for="productCategory">الفئة</label>
+                                <select id="productCategory">
+                                    <option value="مأكولات">مأكولات</option>
+                                    <option value="مشروبات">مشروبات</option>
+                                    <option value="منتجات الألبان">منتجات الألبان</option>
+                                    <option value="الفواكه">الفواكه</option>
+                                    <option value="الخضروات">الخضروات</option>
+                                    <option value="اللحوم">اللحوم</option>
+                                    <option value="المخبوزات">المخبوزات</option>
+                                    <option value="الحلويات">الحلويات</option>
+                                    <option value="الأدوات المنزلية">الأدوات المنزلية</option>
+                                    <option value="العناية الشخصية">العناية الشخصية</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productStock">المخزون</label>
+                                <input type="number" id="productStock" placeholder="أدخل كمية المخزون">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn" id="addProductBtn">إضافة منتج</button>
+                            </div>
+                        </div>
 
-                <!-- صفحة إدارة المنتجات (للأدمن فقط) -->
-                <div class="admin-page" id="productsPage">
-                    <h3>إدارة المنتجات</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productName">اسم المنتج</label>
-                            <input type="text" id="productName" placeholder="أدخل اسم المنتج">
-                        </div>
-                        <div class="form-group">
-                            <label for="productPrice">السعر (جنيه)</label>
-                            <input type="number" id="productPrice" placeholder="أدخل السعر">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productBarcode">الباركود</label>
-                            <input type="text" id="productBarcode" placeholder="أدخل الباركود">
-                        </div>
-                        <div class="form-group">
-                            <label for="productCategory">الفئة</label>
-                            <select id="productCategory">
-                                <option value="مأكولات">مأكولات</option>
-                                <option value="مشروبات">مشروبات</option>
-                                <option value="منتجات الألبان">منتجات الألبان</option>
-                                <option value="الفواكه">الفواكه</option>
-                                <option value="الخضروات">الخضروات</option>
-                                <option value="اللحوم">اللحوم</option>
-                                <option value="المخبوزات">المخبوزات</option>
-                                <option value="الحلويات">الحلويات</option>
-                                <option value="الأدوات المنزلية">الأدوات المنزلية</option>
-                                <option value="العناية الشخصية">العناية الشخصية</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="productStock">المخزون</label>
-                            <input type="number" id="productStock" placeholder="أدخل كمية المخزون">
-                        </div>
-                        <div class="form-group">
-                            <button class="btn" id="addProductBtn">إضافة منتج</button>
-                        </div>
-                    </div>
-
-                    <table class="products-table">
-                        <thead>
-                            <tr>
-                                <th>الباركود</th>
-                                <th>اسم المنتج</th>
-                                <th>السعر</th>
-                                <th>المخزون</th>
-                                <th>الفئة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTableBody">
-                            <!-- سيتم ملء الجدول ديناميكياً -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- صفحة تخزين الباركود في الذاكرة (للأدمن فقط) -->
-                <div class="admin-page" id="barcodeMemoryPage">
-                    <h3>تخزين الباركود في الذاكرة</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="memoryBarcode">الباركود</label>
-                            <input type="text" id="memoryBarcode" placeholder="أدخل الباركود">
-                        </div>
-                        <div class="form-group">
-                            <label for="memoryProduct">المنتج المرتبط</label>
-                            <select id="memoryProduct">
-                                <!-- سيتم ملء الخيارات ديناميكياً -->
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <button class="btn" id="saveBarcodeBtn">حفظ الباركود في الذاكرة</button>
-                        </div>
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th>الباركود</th>
+                                    <th>اسم المنتج</th>
+                                    <th>السعر</th>
+                                    <th>المخزون</th>
+                                    <th>الفئة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <!-- سيتم ملء الجدول ديناميكياً -->
+                            </tbody>
+                        </table>
                     </div>
 
-                    <h4 style="margin-top: 30px;">الباركود المخزن</h4>
-                    <table class="products-table">
-                        <thead>
-                            <tr>
-                                <th>الباركود</th>
-                                <th>اسم المنتج</th>
-                                <th>تاريخ التخزين</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="barcodeMemoryTable">
-                            <!-- سيتم ملء الجدول ديناميكياً -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- صفحة الفواتير (للأدمن فقط) -->
-                <div class="admin-page" id="invoicesPage">
-                    <h3>تخزين وإدارة الفواتير</h3>
-                    <div class="search-box">
-                        <input type="text" id="invoiceSearch" placeholder="ابحث برقم الفاتورة أو اسم الكاشير...">
-                    </div>
-                    <table class="invoices-table">
-                        <thead>
-                            <tr>
-                                <th>رقم الفاتورة</th>
-                                <th>التاريخ</th>
-                                <th>الكاشير</th>
-                                <th>المجموع</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="invoicesTableBody">
-                            <!-- سيتم ملء الجدول ديناميكياً -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- صفحة إدارة المخزون (للأدمن فقط) -->
-                <div class="admin-page" id="inventoryPage">
-                    <h3>إدارة المخزون</h3>
-                    <div class="search-box">
-                        <input type="text" id="inventorySearch" placeholder="ابحث باسم المنتج أو الباركود...">
-                    </div>
-                    <table class="inventory-table">
-                        <thead>
-                            <tr>
-                                <th>اسم المنتج</th>
-                                <th>الباركود</th>
-                                <th>المخزون الحالي</th>
-                                <th>آخر تحديث</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody">
-                            <!-- سيتم ملء الجدول ديناميكياً -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- صفحة التقارير (للأدمن فقط) -->
-                <div class="admin-page" id="reportsPage">
-                    <h3>التقارير والإحصائيات</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="reportDateFrom">من تاريخ</label>
-                            <input type="date" id="reportDateFrom">
+                    <!-- صفحة تخزين الباركود في الذاكرة (للأدمن فقط) -->
+                    <div class="admin-page" id="barcodeMemoryPage">
+                        <h3>تخزين الباركود في الذاكرة</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="memoryBarcode">الباركود</label>
+                                <input type="text" id="memoryBarcode" placeholder="أدخل الباركود">
+                            </div>
+                            <div class="form-group">
+                                <label for="memoryProduct">المنتج المرتبط</label>
+                                <select id="memoryProduct">
+                                    <!-- سيتم ملء الخيارات ديناميكياً -->
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="reportDateTo">إلى تاريخ</label>
-                            <input type="date" id="reportDateTo">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <button class="btn" id="saveBarcodeBtn">حفظ الباركود في الذاكرة</button>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <button class="btn" id="generateReportBtn">إنشاء التقرير</button>
-                        </div>
+
+                        <h4 style="margin-top: 30px;">الباركود المخزن</h4>
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th>الباركود</th>
+                                    <th>اسم المنتج</th>
+                                    <th>تاريخ التخزين</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barcodeMemoryTable">
+                                <!-- سيتم ملء الجدول ديناميكياً -->
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div id="reportResults">
-                        <!-- سيتم عرض نتائج التقرير هنا -->
+                    <!-- صفحة الفواتير (للأدمن فقط) -->
+                    <div class="admin-page" id="invoicesPage">
+                        <h3>تخزين وإدارة الفواتير</h3>
+                        <div class="search-box">
+                            <input type="text" id="invoiceSearch" placeholder="ابحث برقم الفاتورة أو اسم الكاشير...">
+                        </div>
+                        <table class="invoices-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الفاتورة</th>
+                                    <th>التاريخ</th>
+                                    <th>الكاشير</th>
+                                    <th>المجموع</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoicesTableBody">
+                                <!-- سيتم ملء الجدول ديناميكياً -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- صفحة فواتير الجملة (للأدمن فقط) -->
+                    <div class="admin-page" id="wholesalePage">
+                        <h3>فواتير الجملة</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="wholesaleCustomer">اسم العميل</label>
+                                <input type="text" id="wholesaleCustomer" placeholder="أدخل اسم العميل">
+                            </div>
+                            <div class="form-group">
+                                <label for="wholesaleDiscount">خصم الجملة (%)</label>
+                                <input type="number" id="wholesaleDiscount" value="10" min="0" max="100">
+                            </div>
+                        </div>
+                        
+                        <div class="barcode-input" style="margin-bottom: 15px;">
+                            <input type="text" id="wholesaleBarcode" placeholder="أدخل باركود المنتج">
+                            <button id="addWholesaleProductBtn">إضافة</button>
+                        </div>
+
+                        <div class="cart-items" id="wholesaleCartItems" style="max-height: 300px; margin-bottom: 20px;">
+                            <!-- سيتم ملء عناصر سلة الجملة هنا -->
+                        </div>
+
+                        <div class="cart-summary">
+                            <div class="summary-row">
+                                <span>المجموع الفرعي:</span>
+                                <span id="wholesaleSubtotal">0.00 جنيه</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>خصم الجملة:</span>
+                                <span id="wholesaleDiscountAmount">0.00 جنيه</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>الضريبة (14%):</span>
+                                <span id="wholesaleTax">0.00 جنيه</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>الإجمالي بعد الخصم:</span>
+                                <span id="wholesaleTotal">0.00 جنيه</span>
+                            </div>
+                            <button class="checkout-btn" id="wholesaleCheckoutBtn">إتمام فاتورة الجملة</button>
+                        </div>
+
+                        <h4 style="margin-top: 30px;">فواتير الجملة السابقة</h4>
+                        <table class="wholesale-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم الفاتورة</th>
+                                    <th>العميل</th>
+                                    <th>التاريخ</th>
+                                    <th>الخصم</th>
+                                    <th>المجموع</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wholesaleTableBody">
+                                <!-- سيتم ملء الجدول ديناميكياً -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- صفحة إدارة المخزون (للأدمن فقط) -->
+                    <div class="admin-page" id="inventoryPage">
+                        <h3>إدارة المخزون</h3>
+                        <div class="search-box">
+                            <input type="text" id="inventorySearch" placeholder="ابحث باسم المنتج أو الباركود...">
+                        </div>
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>اسم المنتج</th>
+                                    <th>الباركود</th>
+                                    <th>المخزون الحالي</th>
+                                    <th>آخر تحديث</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- سيتم ملء الجدول ديناميكياً -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- صفحة التقارير (للأدمن فقط) -->
+                    <div class="admin-page" id="reportsPage">
+                        <h3>التقارير والإحصائيات</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="reportDateFrom">من تاريخ</label>
+                                <input type="date" id="reportDateFrom">
+                            </div>
+                            <div class="form-group">
+                                <label for="reportDateTo">إلى تاريخ</label>
+                                <input type="date" id="reportDateTo">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn" id="generateReportBtn">إنشاء التقرير</button>
+                            </div>
+                        </div>
+
+                        <div id="reportResults">
+                            <!-- سيتم عرض نتائج التقرير هنا -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -807,6 +941,14 @@
                 if (!localStorage.getItem('inventoryLog')) {
                     localStorage.setItem('inventoryLog', JSON.stringify([]));
                 }
+
+                if (!localStorage.getItem('wholesaleInvoices')) {
+                    localStorage.setItem('wholesaleInvoices', JSON.stringify([]));
+                }
+
+                if (!localStorage.getItem('recentTransactions')) {
+                    localStorage.setItem('recentTransactions', JSON.stringify([]));
+                }
             }
 
             generateProducts() {
@@ -826,7 +968,8 @@
                         category: category,
                         image: `https://via.placeholder.com/80?text=منتج${i}`,
                         stock: Math.floor(Math.random() * 100) + 10,
-                        minStock: 5
+                        minStock: 5,
+                        wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
                     });
                 }
                 return products;
@@ -950,7 +1093,57 @@
                 saleData.date = new Date().toISOString();
                 sales.push(saleData);
                 localStorage.setItem('sales', JSON.stringify(sales));
+
+                // إضافة إلى المعاملات الحديثة
+                this.addRecentTransaction({
+                    type: 'بيع',
+                    amount: saleData.total,
+                    details: `${saleData.items.length} منتج`,
+                    cashier: saleData.cashier,
+                    time: new Date().toISOString()
+                });
+                
                 return saleData.id;
+            }
+
+            // وظائف فواتير الجملة
+            getWholesaleInvoices() {
+                return JSON.parse(localStorage.getItem('wholesaleInvoices')) || [];
+            }
+
+            addWholesaleInvoice(invoiceData) {
+                const invoices = this.getWholesaleInvoices();
+                invoiceData.id = invoices.length > 0 ? Math.max(...invoices.map(i => i.id)) + 1 : 1;
+                invoiceData.date = new Date().toISOString();
+                invoices.push(invoiceData);
+                localStorage.setItem('wholesaleInvoices', JSON.stringify(invoices));
+
+                // إضافة إلى المعاملات الحديثة
+                this.addRecentTransaction({
+                    type: 'جملة',
+                    amount: invoiceData.total,
+                    details: `عميل: ${invoiceData.customer}`,
+                    cashier: invoiceData.cashier,
+                    time: new Date().toISOString()
+                });
+                
+                return invoiceData.id;
+            }
+
+            // وظائف المعاملات الحديثة
+            getRecentTransactions() {
+                return JSON.parse(localStorage.getItem('recentTransactions')) || [];
+            }
+
+            addRecentTransaction(transaction) {
+                const transactions = this.getRecentTransactions();
+                transactions.unshift(transaction);
+                // الاحتفاظ فقط بآخر 20 معاملة
+                if (transactions.length > 20) {
+                    transactions.pop();
+                }
+                localStorage.setItem('recentTransactions', JSON.stringify(transactions));
+                return transaction;
             }
 
             // وظائف ذاكرة الباركود
@@ -996,6 +1189,7 @@
 
         // سلة المشتريات
         let cart = [];
+        let wholesaleCart = [];
         let currentUser = null;
 
         // عناصر DOM
@@ -1007,12 +1201,14 @@
         const passwordInput = document.getElementById('password');
         const sidebarMenu = document.getElementById('sidebarMenu');
         const userDisplay = document.getElementById('userDisplay');
+        const transactionsList = document.getElementById('transactionsList');
 
         // صفحات النظام
         const cashierPage = document.getElementById('cashierPage');
         const productsPage = document.getElementById('productsPage');
         const barcodeMemoryPage = document.getElementById('barcodeMemoryPage');
         const invoicesPage = document.getElementById('invoicesPage');
+        const wholesalePage = document.getElementById('wholesalePage');
         const inventoryPage = document.getElementById('inventoryPage');
         const reportsPage = document.getElementById('reportsPage');
 
@@ -1045,6 +1241,19 @@
         const invoiceSearch = document.getElementById('invoiceSearch');
         const invoicesTableBody = document.getElementById('invoicesTableBody');
 
+        // عناصر صفحة فواتير الجملة
+        const wholesaleCustomer = document.getElementById('wholesaleCustomer');
+        const wholesaleDiscount = document.getElementById('wholesaleDiscount');
+        const wholesaleBarcode = document.getElementById('wholesaleBarcode');
+        const addWholesaleProductBtn = document.getElementById('addWholesaleProductBtn');
+        const wholesaleCartItems = document.getElementById('wholesaleCartItems');
+        const wholesaleSubtotal = document.getElementById('wholesaleSubtotal');
+        const wholesaleDiscountAmount = document.getElementById('wholesaleDiscountAmount');
+        const wholesaleTax = document.getElementById('wholesaleTax');
+        const wholesaleTotal = document.getElementById('wholesaleTotal');
+        const wholesaleCheckoutBtn = document.getElementById('wholesaleCheckoutBtn');
+        const wholesaleTableBody = document.getElementById('wholesaleTableBody');
+
         // عناصر صفحة المخزون
         const inventorySearch = document.getElementById('inventorySearch');
         const inventoryTableBody = document.getElementById('inventoryTableBody');
@@ -1064,6 +1273,7 @@
                 loadSidebarMenu();
                 showPage('cashierPage');
                 loadProducts();
+                loadRecentTransactions();
                 barcodeInput.focus();
             } else {
                 alert('اسم المستخدم أو كلمة المرور غير صحيحة');
@@ -1077,7 +1287,9 @@
             usernameInput.value = '';
             passwordInput.value = '';
             cart = [];
+            wholesaleCart = [];
             updateCart();
+            updateWholesaleCart();
             currentUser = null;
         });
 
@@ -1094,7 +1306,8 @@
             const adminMenuItems = [
                 { id: 'productsPage', name: 'إدارة المنتجات', icon: '📦' },
                 { id: 'barcodeMemoryPage', name: 'تخزين الباركود', icon: '📋' },
-                { id: 'invoicesPage', name: 'الفواتير', icon: '🧾' },
+                { id: 'invoicesPage', name: 'فواتير التجزئة', icon: '🧾' },
+                { id: 'wholesalePage', name: 'فواتير الجملة', icon: '📑' },
                 { id: 'inventoryPage', name: 'إدارة المخزون', icon: '📊' },
                 { id: 'reportsPage', name: 'التقارير', icon: '📈' }
             ];
@@ -1135,6 +1348,26 @@
             }
         }
 
+        // تحميل المعاملات الحديثة
+        function loadRecentTransactions() {
+            const transactions = db.getRecentTransactions();
+            transactionsList.innerHTML = '';
+            
+            transactions.forEach(transaction => {
+                const li = document.createElement('li');
+                li.className = 'transaction-item';
+                li.innerHTML = `
+                    <div class="transaction-info">
+                        <h4>${transaction.type} - ${transaction.details}</h4>
+                        <p>${transaction.cashier}</p>
+                        <div class="transaction-time">${new Date(transaction.time).toLocaleTimeString('ar-EG')}</div>
+                    </div>
+                    <div class="transaction-amount">${transaction.amount.toFixed(2)} ج.م</div>
+                `;
+                transactionsList.appendChild(li);
+            });
+        }
+
         // عرض الصفحة المحددة
         function showPage(pageId) {
             // إخفاء جميع الصفحات
@@ -1142,6 +1375,7 @@
             productsPage.style.display = 'none';
             barcodeMemoryPage.style.display = 'none';
             invoicesPage.style.display = 'none';
+            wholesalePage.style.display = 'none';
             inventoryPage.style.display = 'none';
             reportsPage.style.display = 'none';
             
@@ -1155,6 +1389,8 @@
                 loadBarcodeMemoryPage();
             } else if (pageId === 'invoicesPage') {
                 loadInvoicesPage();
+            } else if (pageId === 'wholesalePage') {
+                loadWholesalePage();
             } else if (pageId === 'inventoryPage') {
                 loadInventoryPage();
             } else if (pageId === 'reportsPage') {
@@ -1347,6 +1583,7 @@
             cart = [];
             updateCart();
             loadProducts(); // إعادة تحميل المنتجات لتحديث المخزون
+            loadRecentTransactions(); // تحديث المعاملات الحديثة
         });
 
         // تحميل جدول المنتجات في صفحة الإدارة
@@ -1410,7 +1647,8 @@
                 category: category,
                 image: `https://via.placeholder.com/80?text=${encodeURIComponent(name)}`,
                 stock: stock,
-                minStock: 5
+                minStock: 5,
+                wholesalePrice: price * 0.8 // سعر الجملة 80% من سعر التجزئة
             };
             
             db.addProduct(newProduct);
@@ -1582,7 +1820,272 @@
                 `;
                 
                 // عرض التفاصيل في نافذة منبثقة أو في مكان مخصص
-                alert(`تفاصيل الفاتورة #${sale.id}\n\n${invoiceDetails.replace(/<[^>]*>/g, '')}`);
+                alert(`تفاصيل الفاتورة #${saleId}\n\n${invoiceDetails.replace(/<[^>]*>/g, '')}`);
+            }
+        }
+
+        // تحميل صفحة فواتير الجملة
+        function loadWholesalePage() {
+            // تحميل فواتير الجملة السابقة
+            const wholesaleInvoices = db.getWholesaleInvoices();
+            wholesaleTableBody.innerHTML = '';
+            
+            wholesaleInvoices.forEach(invoice => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${invoice.id}</td>
+                    <td>${invoice.customer}</td>
+                    <td>${new Date(invoice.date).toLocaleDateString('ar-EG')}</td>
+                    <td>${invoice.discount}%</td>
+                    <td>${invoice.total.toFixed(2)} جنيه</td>
+                    <td>
+                        <button class="action-btn view-btn" data-id="${invoice.id}">عرض</button>
+                    </td>
+                `;
+                wholesaleTableBody.appendChild(row);
+            });
+            
+            // إضافة أحداث لأزرار العرض
+            document.querySelectorAll('#wholesaleTableBody .view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const invoiceId = parseInt(this.getAttribute('data-id'));
+                    viewWholesaleInvoice(invoiceId);
+                });
+            });
+            
+            // إضافة حدث لإضافة منتج إلى سلة الجملة
+            addWholesaleProductBtn.addEventListener('click', function() {
+                const barcode = wholesaleBarcode.value.trim();
+                if (barcode) {
+                    addProductToWholesaleCart(barcode);
+                    wholesaleBarcode.value = '';
+                    wholesaleBarcode.focus();
+                }
+            });
+            
+            wholesaleBarcode.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    const barcode = wholesaleBarcode.value.trim();
+                    if (barcode) {
+                        addProductToWholesaleCart(barcode);
+                        wholesaleBarcode.value = '';
+                        wholesaleBarcode.focus();
+                    }
+                }
+            });
+        }
+
+        // إضافة منتج إلى سلة الجملة
+        function addProductToWholesaleCart(barcode) {
+            const product = db.getProductByBarcode(barcode);
+            if (product) {
+                const existingItem = wholesaleCart.find(item => item.id === product.id);
+                
+                if (existingItem) {
+                    if (existingItem.quantity < product.stock) {
+                        existingItem.quantity += 1;
+                    } else {
+                        alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+                        return;
+                    }
+                } else {
+                    if (product.stock > 0) {
+                        wholesaleCart.push({
+                            id: product.id,
+                            name: product.name,
+                            price: product.wholesalePrice || product.price * 0.8, // استخدام سعر الجملة إذا موجود
+                            image: product.image,
+                            barcode: product.barcode,
+                            quantity: 1,
+                            stock: product.stock
+                        });
+                    } else {
+                        alert('المنتج غير متوفر في المخزون!');
+                        return;
+                    }
+                }
+                
+                updateWholesaleCart();
+            } else {
+                alert('المنتج غير موجود!');
+            }
+        }
+
+        // تحديث سلة الجملة
+        function updateWholesaleCart() {
+            wholesaleCartItems.innerHTML = '';
+            
+            let subtotal = 0;
+            
+            wholesaleCart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <img src="${item.image}" alt="${item.name}">
+                        <div>
+                            <div>${item.name}</div>
+                            <div>${item.price} جنيه (جملة)</div>
+                        </div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="decrease-btn">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="increase-btn">+</button>
+                    </div>
+                    <div>${itemTotal.toFixed(2)} جنيه</div>
+                    <button class="remove-item">×</button>
+                `;
+                
+                // إضافة أحداث للأزرار
+                const decreaseBtn = cartItem.querySelector('.decrease-btn');
+                const increaseBtn = cartItem.querySelector('.increase-btn');
+                const removeBtn = cartItem.querySelector('.remove-item');
+                
+                decreaseBtn.addEventListener('click', () => {
+                    if (item.quantity > 1) {
+                        item.quantity -= 1;
+                        updateWholesaleCart();
+                    }
+                });
+                
+                increaseBtn.addEventListener('click', () => {
+                    const product = db.getProductById(item.id);
+                    if (item.quantity < product.stock) {
+                        item.quantity += 1;
+                        updateWholesaleCart();
+                    } else {
+                        alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+                    }
+                });
+                
+                removeBtn.addEventListener('click', () => {
+                    wholesaleCart = wholesaleCart.filter(cartItem => cartItem.id !== item.id);
+                    updateWholesaleCart();
+                });
+                
+                wholesaleCartItems.appendChild(cartItem);
+            });
+            
+            // حساب الخصم والضريبة والإجمالي
+            const discountRate = parseFloat(wholesaleDiscount.value) / 100;
+            const discountAmount = subtotal * discountRate;
+            const afterDiscount = subtotal - discountAmount;
+            const tax = afterDiscount * 0.14;
+            const total = afterDiscount + tax;
+            
+            wholesaleSubtotal.textContent = `${subtotal.toFixed(2)} جنيه`;
+            wholesaleDiscountAmount.textContent = `${discountAmount.toFixed(2)} جنيه`;
+            wholesaleTax.textContent = `${tax.toFixed(2)} جنيه`;
+            wholesaleTotal.textContent = `${total.toFixed(2)} جنيه`;
+        }
+
+        // إتمام فاتورة الجملة
+        wholesaleCheckoutBtn.addEventListener('click', function() {
+            if (wholesaleCart.length === 0) {
+                alert('سلة الجملة فارغة. أضف منتجات قبل إتمام الفاتورة.');
+                return;
+            }
+            
+            const customer = wholesaleCustomer.value.trim();
+            if (!customer) {
+                alert('يرجى إدخال اسم العميل');
+                return;
+            }
+            
+            const subtotal = parseFloat(wholesaleSubtotal.textContent);
+            const discountAmount = parseFloat(wholesaleDiscountAmount.textContent);
+            const tax = parseFloat(wholesaleTax.textContent);
+            const total = parseFloat(wholesaleTotal.textContent);
+            const discountRate = parseFloat(wholesaleDiscount.value);
+            
+            // حفظ فاتورة الجملة في قاعدة البيانات
+            const invoiceId = db.addWholesaleInvoice({
+                customer: customer,
+                items: [...wholesaleCart],
+                subtotal: subtotal,
+                discount: discountRate,
+                discountAmount: discountAmount,
+                tax: tax,
+                total: total,
+                cashier: currentUser.username
+            });
+            
+            // تحديث المخزون
+            wholesaleCart.forEach(item => {
+                db.updateProductStock(item.id, item.quantity);
+            });
+            
+            alert(`تم إتمام فاتورة الجملة بنجاح! \nرقم الفاتورة: ${invoiceId} \nالمبلغ الإجمالي: ${total.toFixed(2)} جنيه`);
+            
+            // تفريغ سلة الجملة بعد إتمام الفاتورة
+            wholesaleCart = [];
+            wholesaleCustomer.value = '';
+            updateWholesaleCart();
+            loadWholesalePage(); // تحديث صفحة فواتير الجملة
+            loadRecentTransactions(); // تحديث المعاملات الحديثة
+        });
+
+        // عرض فاتورة الجملة
+        function viewWholesaleInvoice(invoiceId) {
+            const invoices = db.getWholesaleInvoices();
+            const invoice = invoices.find(i => i.id === invoiceId);
+            
+            if (invoice) {
+                let itemsHtml = '';
+                invoice.items.forEach(item => {
+                    itemsHtml += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price} جنيه</td>
+                            <td>${(item.price * item.quantity).toFixed(2)} جنيه</td>
+                        </tr>
+                    `;
+                });
+                
+                const invoiceDetails = `
+                    <div class="invoice-details">
+                        <h4>تفاصيل فاتورة الجملة #${invoice.id}</h4>
+                        <p><strong>العميل:</strong> ${invoice.customer}</p>
+                        <p><strong>التاريخ:</strong> ${new Date(invoice.date).toLocaleString('ar-EG')}</p>
+                        <p><strong>الكاشير:</strong> ${invoice.cashier}</p>
+                        <table class="invoice-items">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>الكمية</th>
+                                    <th>السعر</th>
+                                    <th>المجموع</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsHtml}
+                            </tbody>
+                        </table>
+                        <div class="summary-row">
+                            <span>المجموع الفرعي:</span>
+                            <span>${invoice.subtotal.toFixed(2)} جنيه</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>خصم الجملة (${invoice.discount}%):</span>
+                            <span>${invoice.discountAmount.toFixed(2)} جنيه</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>الضريبة (14%):</span>
+                            <span>${invoice.tax.toFixed(2)} جنيه</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>الإجمالي:</span>
+                            <span>${invoice.total.toFixed(2)} جنيه</span>
+                        </div>
+                    </div>
+                `;
+                
+                alert(`تفاصيل فاتورة الجملة #${invoiceId}\n\n${invoiceDetails.replace(/<[^>]*>/g, '')}`);
             }
         }
 
@@ -1667,11 +2170,13 @@
         function loadReportsPage() {
             const sales = db.getSales();
             const products = db.getProducts();
-            const inventoryLog = db.getInventoryLog();
+            const wholesaleInvoices = db.getWholesaleInvoices();
             
             // إحصائيات سريعة
             const totalSales = sales.length;
             const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
+            const totalWholesale = wholesaleInvoices.length;
+            const wholesaleRevenue = wholesaleInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
             const totalProducts = products.length;
             const lowStockProducts = products.filter(p => p.stock <= p.minStock).length;
             const outOfStockProducts = products.filter(p => p.stock === 0).length;
@@ -1681,12 +2186,14 @@
                     <h4>إحصائيات سريعة</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--primary-color); margin-bottom: 10px;">إجمالي المبيعات</h5>
+                            <h5 style="color: var(--primary-color); margin-bottom: 10px;">فواتير التجزئة</h5>
                             <p style="font-size: 24px; font-weight: bold;">${totalSales}</p>
+                            <p style="color: #666;">${totalRevenue.toFixed(2)} ج.م</p>
                         </div>
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--secondary-color); margin-bottom: 10px;">إجمالي الإيرادات</h5>
-                            <p style="font-size: 24px; font-weight: bold;">${totalRevenue.toFixed(2)} جنيه</p>
+                            <h5 style="color: var(--secondary-color); margin-bottom: 10px;">فواتير الجملة</h5>
+                            <p style="font-size: 24px; font-weight: bold;">${totalWholesale}</p>
+                            <p style="color: #666;">${wholesaleRevenue.toFixed(2)} ج.م</p>
                         </div>
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
                             <h5 style="color: var(--accent-color); margin-bottom: 10px;">إجمالي المنتجات</h5>
@@ -1718,6 +2225,9 @@
                 barcodeInput.focus();
             }
         });
+
+        // تحديث سلة الجملة عند تغيير نسبة الخصم
+        wholesaleDiscount.addEventListener('input', updateWholesaleCart);
     </script>
 </body>
 </html>
