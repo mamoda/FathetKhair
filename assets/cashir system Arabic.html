@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <link rel="stylesheet" href="styles/styles.css">
+    <title>فتحة خير</title>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li>
+                <a  href="#">المنتجات والمخزون</a>
+                <ul class="submenu">
+                    <li><a id="addNewProduct" href="#">إضافة منتج جديد</a></li>
+                    <li><a id="dashboardOption" href="#">عرض المنتجات</a></li>
+                </ul>
+            </li>
+            <li>
+                <a  href="#">إدارة العملاء</a>
+                <ul class="submenu">
+                    <li><a id="addNewClient" href="#">إضافة عميل جديد</a></li>
+                    <li><a id="clintOption" href="#">قائمة العملاء</a></li>
+                </ul>
+            </li>
+            <li>
+                <a  href="#">إدارة المبيعات</a>
+                <ul class="submenu">
+                    <li><a href="#">إضافة عملية بيع</a></li>
+                    <li><a id="salesOption" href="#">سجل المبيعات</a></li>
+                    <li><a id="salesResit" href="#"> فاتورة شراء</a></li>
+                </ul>
+            </li>
+            <li>
+                <a  href="#">التقارير وتحليل البيانات</a>
+                <ul class="submenu">
+                    <li><a id="reportOption" href="#">عرض التقارير</a></li>
+                    <li><a href="#">تحليل البيانات</a></li>
+                </ul>
+            </li>
+            <li>
+                <a  href="#"> الكاش والتحويل</a>
+                <ul class="submenu">
+                    <li><a id="cash" href="#"> الكاش</a></li>
+                    <li><a href="#">التحويل</a></li>
+                </ul>
+            </li>
+            <li>
+                <a  href="#">العمالة والمستلزمات</a>
+                <ul class="submenu">
+                    <li><a id="workers" href="#"> العمالة</a></li>
+                    <li><a id="things" href="#">المستلزمات</a></li>
+                </ul>
+            </li>
+            <li><a href="#">الإعدادات</a></li>
+        </ul>
+    </div>
+    <div id="containerContent" class="container">
+        <div class="tittle-style">
+            <h1>أسواق فتحة خير</h1>
+        </div>
+        <div class="list-bar">قائمة المنتجات</div>
+        <div class="item-list" id="itemList">
+            <div class="item flex">
+            </div>
+        </div>
+        <button class="btn" onclick="addItem()">إضافة منتج</button>
+        <button class="btn" id="saveProducts" >  حقظ منتج </button>
+        <button class="btn" id="printReceipt">طباعة الفاتورة</button>
+        <button class="btn btn-danger" onclick="resetForm()">استعادة</button>
+        <div class="total" id="total">المجموع: ج0.00</div>
+        <div id="scannerContainer">
+            <div id="scanner" style="width: 300px; height: 100px;"></div>
+          </div>        
+          <button class="btn" id="startScan">بدء الشاشة</button>
+        <p id="scanResult">شاشة الأكواد ستظهر هنا</p>
+    </div>
+    <div id="containerContent"></div>
+    <div id="salesSummary" class="sales-summary"></div>
+    <script src="scripts/script.js"></script>
+</body>
+</html>
