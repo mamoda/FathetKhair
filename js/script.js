@@ -55,7 +55,7 @@
                         price: Math.floor(Math.random() * 100) + 1,
                         barcode: this.generateBarcode(),
                         category: category,
-                        image: `https://via.placeholder.com/80?text=منتج${i}`,
+                        image: `shop-organic-products-supermarket_182089-263.avif${i}`,
                         stock: Math.floor(Math.random() * 100) + 10,
                         minStock: 5,
                         wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
