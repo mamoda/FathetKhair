@@ -73,7 +73,7 @@
                     "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=300", // مياه
                     
                     // منتجات الألبان
-                    "https://images.pexels.com/photos/5410385/pexels-photo-5410385.jpeg?auto=compress&cs=tinysrgb&w=300", // حليب
+                    "/assets/roomy.avif", // حليب
                     "https://images.pexels.com/photos/5410322/pexels-photo-5410322.jpeg?auto=compress&cs=tinysrgb&w=300", // جبن
                     "https://images.pexels.com/photos/5410328/pexels-photo-5410328.jpeg?auto=compress&cs=tinysrgb&w=300", // زبادي
                     "https://images.pexels.com/photos/5410325/pexels-photo-5410325.jpeg?auto=compress&cs=tinysrgb&w=300", // زبدة
