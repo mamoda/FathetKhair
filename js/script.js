@@ -1,4 +1,4 @@
-   // قاعدة بيانات محلية باستخدام localStorage
+        // قاعدة بيانات محلية باستخدام localStorage
         class Database {
             constructor() {
                 this.initializeDatabase();
@@ -46,7 +46,6 @@
                     "مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", 
                     "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"
                 ];
-
                 // صور حقيقية للمنتجات من Pexels (مجانية للاستخدام)
                 const productImages = [
                     // فواكه
@@ -134,371 +133,6 @@
                         barcode: this.generateBarcode(),
                         category: category,
                         image: randomImage,
-                        stock: Math.floor(Math.random() * 100) + 10,
-                        minStock: 5,
-                        wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
-                    });
-                }
-                return products;
-            }
-
-            generateBarcode() {
-                return 'EG' + Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
-            }
-
-            // باقي دوال قاعدة البيانات تبقى كما هي
-            getUsers() {
-                return JSON.parse(localStorage.getItem('users')) || [];
-            }
-
-            getProducts() {
-                return JSON.parse(localStorage.getItem('products')) || [];
-            }
-
-            getProductByBarcode(barcode) {
-                const products = this.getProducts();
-                return products.find(product => product.barcode === barcode);
-            }
-
-            getProductById(id) {
-                const products = this.getProducts();
-                return products.find(product => product.id === parseInt(id));
-            }
-
-            addProduct(product) {
-                const products = this.getProducts();
-                product.id = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-                products.push(product);
-                localStorage.setItem('products', JSON.stringify(products));
-                
-                // تسجيل في سجل المخزون
-                this.addInventoryLog({
-                    productId: product.id,
-                    productName: product.name,
-                    change: product.stock,
-                    type: 'add',
-                    reason: 'إضافة منتج جديد',
-                    date: new Date().toISOString()
-                });
-                
-                return product.id;
-            }
-
-            updateProduct(productId, updatedData) {
-                const products = this.getProducts();
-                const productIndex = products.findIndex(p => p.id === productId);
-                if (productIndex !== -1) {
-                    const oldStock = products[productIndex].stock;
-                    products[productIndex] = { ...products[productIndex], ...updatedData };
-                    localStorage.setItem('products', JSON.stringify(products));
-                    
-                    // تسجيل في سجل المخزون إذا تغير المخزون
-                    if (oldStock !== updatedData.stock) {
-                        this.addInventoryLog({
-                            productId: productId,
-                            productName: products[productIndex].name,
-                            change: updatedData.stock - oldStock,
-                            type: updatedData.stock > oldStock ? 'add' : 'subtract',
-                            reason: 'تعديل المخزون',
-                            date: new Date().toISOString()
-                        });
-                    }
-                    
-                    return true;
-                }
-                return false;
-            }
-
-            deleteProduct(productId) {
-                const products = this.getProducts();
-                const product = products.find(p => p.id === productId);
-                const filteredProducts = products.filter(p => p.id !== productId);
-                localStorage.setItem('products', JSON.stringify(filteredProducts));
-                
-                // تسجيل في سجل المخزون
-                this.addInventoryLog({
-                    productId: productId,
-                    productName: product.name,
-                    change: -product.stock,
-                    type: 'subtract',
-                    reason: 'حذف المنتج',
-                    date: new Date().toISOString()
-                });
-                
-                return true;
-            }
-
-            updateProductStock(productId, quantity) {
-                const products = this.getProducts();
-                const productIndex = products.findIndex(p => p.id === productId);
-                if (productIndex !== -1) {
-                    const oldStock = products[productIndex].stock;
-                    products[productIndex].stock -= quantity;
-                    localStorage.setItem('products', JSON.stringify(products));
-                    
-                    // تسجيل في سجل المخزون
-                    this.addInventoryLog({
-                        productId: productId,
-                        productName: products[productIndex].name,
-                        change: -quantity,
-                        type: 'subtract',
-                        reason: 'بيع منتج',
-                        date: new Date().toISOString()
-                    });
-                }
-            }
-
-            getSales() {
-                return JSON.parse(localStorage.getItem('sales')) || [];
-            }
-
-            addSale(saleData) {
-                const sales = this.getSales();
-                saleData.id = sales.length > 0 ? Math.max(...sales.map(s => s.id)) + 1 : 1;
-                saleData.date = new Date().toISOString();
-                sales.push(saleData);
-                localStorage.setItem('sales', JSON.stringify(sales));
-
-                // إضافة إلى المعاملات الحديثة
-                this.addRecentTransaction({
-                    type: 'بيع',
-                    amount: saleData.total,
-                    details: `${saleData.items.length} منتج`,
-                    cashier: saleData.cashier,
-                    time: new Date().toISOString()
-                });
-                
-                return saleData.id;
-            }
-
-            getWholesaleInvoices() {
-                return JSON.parse(localStorage.getItem('wholesaleInvoices')) || [];
-            }
-
-            addWholesaleInvoice(invoiceData) {
-                const invoices = this.getWholesaleInvoices();
-                invoiceData.id = invoices.length > 0 ? Math.max(...invoices.map(i => i.id)) + 1 : 1;
-                invoiceData.date = new Date().toISOString();
-                invoices.push(invoiceData);
-                localStorage.setItem('wholesaleInvoices', JSON.stringify(invoices));
-
-                // إضافة إلى المعاملات الحديثة
-                this.addRecentTransaction({
-                    type: 'جملة',
-                    amount: invoiceData.total,
-                    details: `عميل: ${invoiceData.customer}`,
-                    cashier: invoiceData.cashier,
-                    time: new Date().toISOString()
-                });
-                
-                return invoiceData.id;
-            }
-
-            getRecentTransactions() {
-                return JSON.parse(localStorage.getItem('recentTransactions')) || [];
-            }
-
-            addRecentTransaction(transaction) {
-                const transactions = this.getRecentTransactions();
-                transactions.unshift(transaction);
-                // الاحتفاظ فقط بآخر 20 معاملة
-                if (transactions.length > 20) {
-                    transactions.pop();
-                }
-                localStorage.setItem('recentTransactions', JSON.stringify(transactions));
-                return transaction;
-            }
-
-            getBarcodeMemory() {
-                return JSON.parse(localStorage.getItem('barcodeMemory')) || [];
-            }
-
-            addBarcodeToMemory(barcodeData) {
-                const barcodeMemory = this.getBarcodeMemory();
-                barcodeData.id = barcodeMemory.length > 0 ? Math.max(...barcodeMemory.map(b => b.id)) + 1 : 1;
-                barcodeData.storedAt = new Date().toISOString();
-                barcodeMemory.push(barcodeData);
-                localStorage.setItem('barcodeMemory', JSON.stringify(barcodeMemory));
-                return barcodeData.id;
-            }
-
-            removeBarcodeFromMemory(barcodeId) {
-                const barcodeMemory = this.getBarcodeMemory();
-                const filteredMemory = barcodeMemory.filter(b => b.id !== barcodeId);
-                localStorage.setItem('barcodeMemory', JSON.stringify(filteredMemory));
-                return true;
-            }
-
-            getInventoryLog() {
-                return JSON.parse(localStorage.getItem('inventoryLog')) || [];
-            }
-
-            addInventoryLog(logData) {
-                const inventoryLog = this.getInventoryLog();
-                logData.id = inventoryLog.length > 0 ? Math.max(...inventoryLog.map(l => l.id)) + 1 : 1;
-                inventoryLog.push(logData);
-                localStorage.setItem('inventoryLog', JSON.stringify(inventoryLog));
-                return logData.id;
-            }
-        }
-
-        // باقي الكود يبقى كما هو مع تعديلات بسيطة في عرض الصور
-        // ... (الكود السابق يبقى كما هو)
-
-        // تحميل المنتجات مع الصور الحقيقية
-        function loadProducts() {
-            const products = db.getProducts();
-            productsGrid.innerHTML = '';
-            
-            products.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                
-                // إضافة تحذير إذا كان المخزون منخفضاً
-                const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
-                
-                productCard.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'">
-                    <h4>${product.name}</h4>
-                    <div class="price">${product.price} جنيه</div>
-                    <div class="barcode">${product.barcode}</div>
-                    ${stockWarning}
-                `;
-                
-                productCard.addEventListener('click', () => addToCart(product));
-                
-                productsGrid.appendChild(productCard);
-            });
-        }
-
-        // تحديث السلة مع تحسين عرض الصور
-        function updateCart() {
-            cartItems.innerHTML = '';
-            
-            let subtotal = 0;
-            
-            cart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
-                subtotal += itemTotal;
-                
-                const cartItem = document.createElement('div');
-                cartItem.className = 'cart-item';
-                cartItem.innerHTML = `
-                    <div class="cart-item-info">
-                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'">
-                        <div class="cart-item-details">
-                            <div>${item.name}</div>
-                            <div>${item.price} جنيه</div>
-                        </div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="decrease-btn">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="increase-btn">+</button>
-                    </div>
-                    <div>${itemTotal.toFixed(2)} جنيه</div>
-                    <button class="remove-item">×</button>
-                `;
-                
-                // إضافة أحداث للأزرار
-                const decreaseBtn = cartItem.querySelector('.decrease-btn');
-                const increaseBtn = cartItem.querySelector('.increase-btn');
-                const removeBtn = cartItem.querySelector('.remove-item');
-                
-                decreaseBtn.addEventListener('click', () => {
-                    if (item.quantity > 1) {
-                        item.quantity -= 1;
-                        updateCart();
-                    }
-                });
-                
-                increaseBtn.addEventListener('click', () => {
-                    const product = db.getProductById(item.id);
-                    if (item.quantity < product.stock) {
-                        item.quantity += 1;
-                        updateCart();
-                    } else {
-                        alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
-                    }
-                });
-                
-                removeBtn.addEventListener('click', () => {
-                    cart = cart.filter(cartItem => cartItem.id !== item.id);
-                    updateCart();
-                });
-                
-                cartItems.appendChild(cartItem);
-            });
-            
-            // حساب الضريبة والإجمالي
-            const tax = subtotal * 0.14;
-            const total = subtotal + tax;
-            
-            subtotalElement.textContent = `${subtotal.toFixed(2)} جنيه`;
-            taxElement.textContent = `${tax.toFixed(2)} جنيه`;
-            totalElement.textContent = `${total.toFixed(2)} جنيه`;
-        }       
-       
-       
-       
-       // قاعدة بيانات محلية باستخدام localStorage
-        class Database {
-            constructor() {
-                this.initializeDatabase();
-            }
-
-            initializeDatabase() {
-                // التحقق من وجود البيانات في localStorage
-                if (!localStorage.getItem('users')) {
-                    const users = [
-                        { id: 1, username: "admin", password: "admin123", role: "admin" },
-                        { id: 2, username: "cashier", password: "cashier123", role: "cashier" }
-                    ];
-                    localStorage.setItem('users', JSON.stringify(users));
-                }
-
-                if (!localStorage.getItem('products')) {
-                    const products = this.generateProducts();
-                    localStorage.setItem('products', JSON.stringify(products));
-                }
-
-                if (!localStorage.getItem('sales')) {
-                    localStorage.setItem('sales', JSON.stringify([]));
-                }
-
-                if (!localStorage.getItem('barcodeMemory')) {
-                    localStorage.setItem('barcodeMemory', JSON.stringify([]));
-                }
-
-                if (!localStorage.getItem('inventoryLog')) {
-                    localStorage.setItem('inventoryLog', JSON.stringify([]));
-                }
-
-                if (!localStorage.getItem('wholesaleInvoices')) {
-                    localStorage.setItem('wholesaleInvoices', JSON.stringify([]));
-                }
-
-                if (!localStorage.getItem('recentTransactions')) {
-                    localStorage.setItem('recentTransactions', JSON.stringify([]));
-                }
-            }
-
-            generateProducts() {
-                const products = [];
-                const categories = [
-                    "مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", 
-                    "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"
-                ];
-
-                for (let i = 1; i <= 1000; i++) {
-                    const category = categories[Math.floor(Math.random() * categories.length)];
-                    products.push({
-                        id: i,
-                        name: `منتج ${i}`,
-                        price: Math.floor(Math.random() * 100) + 1,
-                        barcode: this.generateBarcode(),
-                        category: category,
-                        image: `shop-organic-products-supermarket_182089-263.avif${i}`,
                         stock: Math.floor(Math.random() * 100) + 10,
                         minStock: 5,
                         wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
@@ -972,7 +606,7 @@
                 const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
                 
                 productCard.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}">
+                    <img src="${product.image}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'" alt="${product.name}">
                     <h4>${product.name}</h4>
                     <div class="price">${product.price} جنيه</div>
                     <div class="barcode">${product.barcode}</div>
@@ -1760,3 +1394,456 @@
 
         // تحديث سلة الجملة عند تغيير نسبة الخصم
         wholesaleDiscount.addEventListener('input', updateWholesaleCart);
+
+
+
+
+
+
+
+
+
+
+
+
+
+           // قاعدة بيانات محلية باستخدام localStorage
+        // class Database {
+        //     constructor() {
+        //         this.initializeDatabase();
+        //     }
+
+        //     initializeDatabase() {
+        //         // التحقق من وجود البيانات في localStorage
+        //         if (!localStorage.getItem('users')) {
+        //             const users = [
+        //                 { id: 1, username: "admin", password: "admin123", role: "admin" },
+        //                 { id: 2, username: "cashier", password: "cashier123", role: "cashier" }
+        //             ];
+        //             localStorage.setItem('users', JSON.stringify(users));
+        //         }
+
+        //         if (!localStorage.getItem('products')) {
+        //             const products = this.generateProducts();
+        //             localStorage.setItem('products', JSON.stringify(products));
+        //         }
+
+        //         if (!localStorage.getItem('sales')) {
+        //             localStorage.setItem('sales', JSON.stringify([]));
+        //         }
+
+        //         if (!localStorage.getItem('barcodeMemory')) {
+        //             localStorage.setItem('barcodeMemory', JSON.stringify([]));
+        //         }
+
+        //         if (!localStorage.getItem('inventoryLog')) {
+        //             localStorage.setItem('inventoryLog', JSON.stringify([]));
+        //         }
+
+        //         if (!localStorage.getItem('wholesaleInvoices')) {
+        //             localStorage.setItem('wholesaleInvoices', JSON.stringify([]));
+        //         }
+
+        //         if (!localStorage.getItem('recentTransactions')) {
+        //             localStorage.setItem('recentTransactions', JSON.stringify([]));
+        //         }
+        //     }
+
+        //     generateProducts() {
+        //         const products = [];
+        //         const categories = [
+        //             "مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", 
+        //             "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"
+        //         ];
+
+        //         // صور حقيقية للمنتجات من Pexels (مجانية للاستخدام)
+        //         const productImages = [
+        //             // فواكه
+        //             "https://images.pexels.com/photos/161559/background-bitter-breakfast-bright-161559.jpeg?auto=compress&cs=tinysrgb&w=300", // برتقال
+        //             "https://images.pexels.com/photos/327098/pexels-photo-327098.jpeg?auto=compress&cs=tinysrgb&w=300", // تفاح
+        //             "https://images.pexels.com/photos/7195524/pexels-photo-7195524.jpeg?auto=compress&cs=tinysrgb&w=300", // موز
+        //             "https://images.pexels.com/photos/7195470/pexels-photo-7195470.jpeg?auto=compress&cs=tinysrgb&w=300", // فراولة
+                    
+        //             // خضروات
+        //             "https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=300", // جزر
+        //             "https://images.pexels.com/photos/143133/pexels-photo-143133.jpeg?auto=compress&cs=tinysrgb&w=300", // طماطم
+        //             "https://images.pexels.com/photos/2325843/pexels-photo-2325843.jpeg?auto=compress&cs=tinysrgb&w=300", // خس
+        //             "https://images.pexels.com/photos/4117746/pexels-photo-4117746.jpeg?auto=compress&cs=tinysrgb&w=300", // بصل
+                    
+        //             // مأكولات
+        //             "https://images.pexels.com/photos/4109116/pexels-photo-4109116.jpeg?auto=compress&cs=tinysrgb&w=300", // أرز
+        //             "https://images.pexels.com/photos/4110097/pexels-photo-4110097.jpeg?auto=compress&cs=tinysrgb&w=300", // مكرونة
+        //             "https://images.pexels.com/photos/4108815/pexels-photo-4108815.jpeg?auto=compress&cs=tinysrgb&w=300", // دقيق
+        //             "https://images.pexels.com/photos/4108839/pexels-photo-4108839.jpeg?auto=compress&cs=tinysrgb&w=300", // سكر
+                    
+        //             // مشروبات
+        //             "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=300", // قهوة
+        //             "https://images.pexels.com/photos/312420/pexels-photo-312420.jpeg?auto=compress&cs=tinysrgb&w=300", // شاي
+        //             "https://images.pexels.com/photos/327095/pexels-photo-327095.jpeg?auto=compress&cs=tinysrgb&w=300", // عصير
+        //             "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=300", // مياه
+                    
+        //             // منتجات الألبان
+        //             "https://images.pexels.com/photos/5410385/pexels-photo-5410385.jpeg?auto=compress&cs=tinysrgb&w=300", // حليب
+        //             "https://images.pexels.com/photos/5410322/pexels-photo-5410322.jpeg?auto=compress&cs=tinysrgb&w=300", // جبن
+        //             "https://images.pexels.com/photos/5410328/pexels-photo-5410328.jpeg?auto=compress&cs=tinysrgb&w=300", // زبادي
+        //             "https://images.pexels.com/photos/5410325/pexels-photo-5410325.jpeg?auto=compress&cs=tinysrgb&w=300", // زبدة
+                    
+        //             // لحوم
+        //             "https://images.pexels.com/photos/618775/pexels-photo-618775.jpeg?auto=compress&cs=tinysrgb&w=300", // لحم
+        //             "https://images.pexels.com/photos/65175/pexels-photo-65175.jpeg?auto=compress&cs=tinysrgb&w=300", // دجاج
+        //             "https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg?auto=compress&cs=tinysrgb&w=300", // سمك
+                    
+        //             // مخبوزات
+        //             "https://images.pexels.com/photos/461060/pexels-photo-461060.jpeg?auto=compress&cs=tinysrgb&w=300", // خبز
+        //             "https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300", // كعك
+        //             "https://images.pexels.com/photos/4791267/pexels-photo-4791267.jpeg?auto=compress&cs=tinysrgb&w=300", // بسكويت
+                    
+        //             // حلويات
+        //             "https://images.pexels.com/photos/2144200/pexels-photo-2144200.jpeg?auto=compress&cs=tinysrgb&w=300", // شوكولاتة
+        //             "https://images.pexels.com/photos/132694/pexels-photo-132694.jpeg?auto=compress&cs=tinysrgb&w=300", // حلوى
+        //             "https://images.pexels.com/photos/1070850/pexels-photo-1070850.jpeg?auto=compress&cs=tinysrgb&w=300", // آيس كريم
+                    
+        //             // أدوات منزلية
+        //             "https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg?auto=compress&cs=tinysrgb&w=300", // منظفات
+        //             "https://images.pexels.com/photos/545014/pexels-photo-545014.jpeg?auto=compress&cs=tinysrgb&w=300", // ورق
+        //             "https://images.pexels.com/photos/4481257/pexels-photo-4481257.jpeg?auto=compress&cs=tinysrgb&w=300", // أدوات مطبخ
+                    
+        //             // عناية شخصية
+        //             "https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=300", // شامبو
+        //             "https://images.pexels.com/photos/4041391/pexels-photo-4041391.jpeg?auto=compress&cs=tinysrgb&w=300", // صابون
+        //             "https://images.pexels.com/photos/4041390/pexels-photo-4041390.jpeg?auto=compress&cs=tinysrgb&w=300"  // معجون أسنان
+        //         ];
+
+        //         // أسماء منتجات حقيقية
+        //         const productNames = {
+        //             "مأكولات": ["أرز مصرى", "سكر أبيض", "دقيق القمح", "زيت زيتون", "عسل نحل", "معكرونة", "عدس أصفر", "فول مدمس", "حمص شامي", "فاصوليا بيضاء"],
+        //             "مشروبات": ["شاي أحمد", "قهوة تركية", "نسكافيه", "عصير برتقال", "مياه معدنية", "بيبسي", "سفن أب", "شاي ليبتون", "قهوة نسكافيه", "عصير مانجو"],
+        //             "منتجات الألبان": ["حليب طازج", "جبنة رومي", "زبادي طبيعي", "قشطة", "لبنة", "جبنة فيتا", "حليب مجفف", "زبدة", "جبنة شيدر", "روب"],
+        //             "الفواكه": ["تفاح", "برتقال", "موز", "فراولة", "عنب", "مانجو", "بطيخ", "شمام", "كمثرى", "خوخ"],
+        //             "الخضروات": ["طماطم", "خيار", "جزر", "بصل", "ثوم", "فلفل رومي", "بطاطس", "باذنجان", "كوسة", "خس"],
+        //             "اللحوم": ["لحم بقري", "لحم ضأن", "دجاج طازج", "سمك بلطي", "جمبري", "كبدة", "لحم مفروم", "دجاج مجمد", "سجق", "همبرجر"],
+        //             "المخبوزات": ["خبز بلدي", "خبز توست", "كعك", "بسكويت", "كرواسون", "دونات", "كيك", "معمول", "بقلاوة", "كنافة"],
+        //             "الحلويات": ["شوكولاتة", "حلوى جيلي", "آيس كريم", "مهلبية", "أم علي", "بسبوسة", "قطايف", "لقيمات", "حلاوة طحينية", "ملبن"],
+        //             "الأدوات المنزلية": ["صابون أطباق", "منظف زجاج", "مطهر أرضيات", "منعم أقمشة", "كلور", "إسفنج", "مناديل ورقية", "أكياس قمامة", "شمع", "معطر جو"],
+        //             "العناية الشخصية": ["شامبو", "بلسم", "صابون", "معجون أسنان", "فرشاة أسنان", "مزيل عرق", "غسول وجه", "كريم ترطيب", "مستحضر حلاقة", "مناديل مبللة"]
+        //         };
+
+        //         for (let i = 1; i <= 1000; i++) {
+        //             const category = categories[Math.floor(Math.random() * categories.length)];
+        //             const categoryProducts = productNames[category];
+        //             const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
+                    
+        //             // اختيار صورة عشوائية من مجموعة الصور المتاحة
+        //             const randomImage = productImages[Math.floor(Math.random() * productImages.length)];
+                    
+        //             products.push({
+        //                 id: i,
+        //                 name: productName,
+        //                 price: Math.floor(Math.random() * 100) + 1,
+        //                 barcode: this.generateBarcode(),
+        //                 category: category,
+        //                 image: randomImage,
+        //                 stock: Math.floor(Math.random() * 100) + 10,
+        //                 minStock: 5,
+        //                 wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
+        //             });
+        //         }
+        //         return products;
+        //     }
+
+        //     generateBarcode() {
+        //         return 'EG' + Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
+        //     }
+
+        //     // باقي دوال قاعدة البيانات تبقى كما هي
+        //     getUsers() {
+        //         return JSON.parse(localStorage.getItem('users')) || [];
+        //     }
+
+        //     getProducts() {
+        //         return JSON.parse(localStorage.getItem('products')) || [];
+        //     }
+
+        //     getProductByBarcode(barcode) {
+        //         const products = this.getProducts();
+        //         return products.find(product => product.barcode === barcode);
+        //     }
+
+        //     getProductById(id) {
+        //         const products = this.getProducts();
+        //         return products.find(product => product.id === parseInt(id));
+        //     }
+
+        //     addProduct(product) {
+        //         const products = this.getProducts();
+        //         product.id = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+        //         products.push(product);
+        //         localStorage.setItem('products', JSON.stringify(products));
+                
+        //         // تسجيل في سجل المخزون
+        //         this.addInventoryLog({
+        //             productId: product.id,
+        //             productName: product.name,
+        //             change: product.stock,
+        //             type: 'add',
+        //             reason: 'إضافة منتج جديد',
+        //             date: new Date().toISOString()
+        //         });
+                
+        //         return product.id;
+        //     }
+
+        //     updateProduct(productId, updatedData) {
+        //         const products = this.getProducts();
+        //         const productIndex = products.findIndex(p => p.id === productId);
+        //         if (productIndex !== -1) {
+        //             const oldStock = products[productIndex].stock;
+        //             products[productIndex] = { ...products[productIndex], ...updatedData };
+        //             localStorage.setItem('products', JSON.stringify(products));
+                    
+        //             // تسجيل في سجل المخزون إذا تغير المخزون
+        //             if (oldStock !== updatedData.stock) {
+        //                 this.addInventoryLog({
+        //                     productId: productId,
+        //                     productName: products[productIndex].name,
+        //                     change: updatedData.stock - oldStock,
+        //                     type: updatedData.stock > oldStock ? 'add' : 'subtract',
+        //                     reason: 'تعديل المخزون',
+        //                     date: new Date().toISOString()
+        //                 });
+        //             }
+                    
+        //             return true;
+        //         }
+        //         return false;
+        //     }
+
+        //     deleteProduct(productId) {
+        //         const products = this.getProducts();
+        //         const product = products.find(p => p.id === productId);
+        //         const filteredProducts = products.filter(p => p.id !== productId);
+        //         localStorage.setItem('products', JSON.stringify(filteredProducts));
+                
+        //         // تسجيل في سجل المخزون
+        //         this.addInventoryLog({
+        //             productId: productId,
+        //             productName: product.name,
+        //             change: -product.stock,
+        //             type: 'subtract',
+        //             reason: 'حذف المنتج',
+        //             date: new Date().toISOString()
+        //         });
+                
+        //         return true;
+        //     }
+
+        //     updateProductStock(productId, quantity) {
+        //         const products = this.getProducts();
+        //         const productIndex = products.findIndex(p => p.id === productId);
+        //         if (productIndex !== -1) {
+        //             const oldStock = products[productIndex].stock;
+        //             products[productIndex].stock -= quantity;
+        //             localStorage.setItem('products', JSON.stringify(products));
+                    
+        //             // تسجيل في سجل المخزون
+        //             this.addInventoryLog({
+        //                 productId: productId,
+        //                 productName: products[productIndex].name,
+        //                 change: -quantity,
+        //                 type: 'subtract',
+        //                 reason: 'بيع منتج',
+        //                 date: new Date().toISOString()
+        //             });
+        //         }
+        //     }
+
+        //     getSales() {
+        //         return JSON.parse(localStorage.getItem('sales')) || [];
+        //     }
+
+        //     addSale(saleData) {
+        //         const sales = this.getSales();
+        //         saleData.id = sales.length > 0 ? Math.max(...sales.map(s => s.id)) + 1 : 1;
+        //         saleData.date = new Date().toISOString();
+        //         sales.push(saleData);
+        //         localStorage.setItem('sales', JSON.stringify(sales));
+
+        //         // إضافة إلى المعاملات الحديثة
+        //         this.addRecentTransaction({
+        //             type: 'بيع',
+        //             amount: saleData.total,
+        //             details: `${saleData.items.length} منتج`,
+        //             cashier: saleData.cashier,
+        //             time: new Date().toISOString()
+        //         });
+                
+        //         return saleData.id;
+        //     }
+
+        //     getWholesaleInvoices() {
+        //         return JSON.parse(localStorage.getItem('wholesaleInvoices')) || [];
+        //     }
+
+        //     addWholesaleInvoice(invoiceData) {
+        //         const invoices = this.getWholesaleInvoices();
+        //         invoiceData.id = invoices.length > 0 ? Math.max(...invoices.map(i => i.id)) + 1 : 1;
+        //         invoiceData.date = new Date().toISOString();
+        //         invoices.push(invoiceData);
+        //         localStorage.setItem('wholesaleInvoices', JSON.stringify(invoices));
+
+        //         // إضافة إلى المعاملات الحديثة
+        //         this.addRecentTransaction({
+        //             type: 'جملة',
+        //             amount: invoiceData.total,
+        //             details: `عميل: ${invoiceData.customer}`,
+        //             cashier: invoiceData.cashier,
+        //             time: new Date().toISOString()
+        //         });
+                
+        //         return invoiceData.id;
+        //     }
+
+        //     getRecentTransactions() {
+        //         return JSON.parse(localStorage.getItem('recentTransactions')) || [];
+        //     }
+
+        //     addRecentTransaction(transaction) {
+        //         const transactions = this.getRecentTransactions();
+        //         transactions.unshift(transaction);
+        //         // الاحتفاظ فقط بآخر 20 معاملة
+        //         if (transactions.length > 20) {
+        //             transactions.pop();
+        //         }
+        //         localStorage.setItem('recentTransactions', JSON.stringify(transactions));
+        //         return transaction;
+        //     }
+
+        //     getBarcodeMemory() {
+        //         return JSON.parse(localStorage.getItem('barcodeMemory')) || [];
+        //     }
+
+        //     addBarcodeToMemory(barcodeData) {
+        //         const barcodeMemory = this.getBarcodeMemory();
+        //         barcodeData.id = barcodeMemory.length > 0 ? Math.max(...barcodeMemory.map(b => b.id)) + 1 : 1;
+        //         barcodeData.storedAt = new Date().toISOString();
+        //         barcodeMemory.push(barcodeData);
+        //         localStorage.setItem('barcodeMemory', JSON.stringify(barcodeMemory));
+        //         return barcodeData.id;
+        //     }
+
+        //     removeBarcodeFromMemory(barcodeId) {
+        //         const barcodeMemory = this.getBarcodeMemory();
+        //         const filteredMemory = barcodeMemory.filter(b => b.id !== barcodeId);
+        //         localStorage.setItem('barcodeMemory', JSON.stringify(filteredMemory));
+        //         return true;
+        //     }
+
+        //     getInventoryLog() {
+        //         return JSON.parse(localStorage.getItem('inventoryLog')) || [];
+        //     }
+
+        //     addInventoryLog(logData) {
+        //         const inventoryLog = this.getInventoryLog();
+        //         logData.id = inventoryLog.length > 0 ? Math.max(...inventoryLog.map(l => l.id)) + 1 : 1;
+        //         inventoryLog.push(logData);
+        //         localStorage.setItem('inventoryLog', JSON.stringify(inventoryLog));
+        //         return logData.id;
+        //     }
+        // }
+
+        // // باقي الكود يبقى كما هو مع تعديلات بسيطة في عرض الصور
+        // // ... (الكود السابق يبقى كما هو)
+
+        // // تحميل المنتجات مع الصور الحقيقية
+        // function loadProducts() {
+        //     const products = db.getProducts();
+        //     productsGrid.innerHTML = '';
+            
+        //     products.forEach(product => {
+        //         const productCard = document.createElement('div');
+        //         productCard.className = 'product-card';
+                
+        //         // إضافة تحذير إذا كان المخزون منخفضاً
+        //         const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
+                
+        //         productCard.innerHTML = `
+        //             <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'">
+        //             <h4>${product.name}</h4>
+        //             <div class="price">${product.price} جنيه</div>
+        //             <div class="barcode">${product.barcode}</div>
+        //             ${stockWarning}
+        //         `;
+                
+        //         productCard.addEventListener('click', () => addToCart(product));
+                
+        //         productsGrid.appendChild(productCard);
+        //     });
+        // }
+
+        // // تحديث السلة مع تحسين عرض الصور
+        // function updateCart() {
+        //     cartItems.innerHTML = '';
+            
+        //     let subtotal = 0;
+            
+        //     cart.forEach(item => {
+        //         const itemTotal = item.price * item.quantity;
+        //         subtotal += itemTotal;
+                
+        //         const cartItem = document.createElement('div');
+        //         cartItem.className = 'cart-item';
+        //         cartItem.innerHTML = `
+        //             <div class="cart-item-info">
+        //                 <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'">
+        //                 <div class="cart-item-details">
+        //                     <div>${item.name}</div>
+        //                     <div>${item.price} جنيه</div>
+        //                 </div>
+        //             </div>
+        //             <div class="quantity-controls">
+        //                 <button class="decrease-btn">-</button>
+        //                 <span>${item.quantity}</span>
+        //                 <button class="increase-btn">+</button>
+        //             </div>
+        //             <div>${itemTotal.toFixed(2)} جنيه</div>
+        //             <button class="remove-item">×</button>
+        //         `;
+                
+        //         // إضافة أحداث للأزرار
+        //         const decreaseBtn = cartItem.querySelector('.decrease-btn');
+        //         const increaseBtn = cartItem.querySelector('.increase-btn');
+        //         const removeBtn = cartItem.querySelector('.remove-item');
+                
+        //         decreaseBtn.addEventListener('click', () => {
+        //             if (item.quantity > 1) {
+        //                 item.quantity -= 1;
+        //                 updateCart();
+        //             }
+        //         });
+                
+        //         increaseBtn.addEventListener('click', () => {
+        //             const product = db.getProductById(item.id);
+        //             if (item.quantity < product.stock) {
+        //                 item.quantity += 1;
+        //                 updateCart();
+        //             } else {
+        //                 alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+        //             }
+        //         });
+                
+        //         removeBtn.addEventListener('click', () => {
+        //             cart = cart.filter(cartItem => cartItem.id !== item.id);
+        //             updateCart();
+        //         });
+                
+        //         cartItems.appendChild(cartItem);
+        //     });
+            
+        //     // حساب الضريبة والإجمالي
+        //     const tax = subtotal * 0.14;
+        //     const total = subtotal + tax;
+            
+        //     subtotalElement.textContent = `${subtotal.toFixed(2)} جنيه`;
+        //     taxElement.textContent = `${tax.toFixed(2)} جنيه`;
+        //     totalElement.textContent = `${total.toFixed(2)} جنيه`;
+        // }
