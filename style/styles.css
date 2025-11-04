@@ -116,12 +116,6 @@
             font-weight: 400;
             font-style: normal;
         }
-       .reem-kufi-<uniquifier> {
-            font-family: "Reem Kufi", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: <weight>;
-            font-style: normal;
-        }
         .user-info {
             display: flex;
             align-items: center;
