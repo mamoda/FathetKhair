@@ -16,6 +16,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Cairo", sans-serif;
         }
 
         body {
@@ -111,8 +112,16 @@
             font-size: 24px;
             font-weight: bold;
             color: var(--primary-color);
+            font-family: "Reem Kufi", sans-serif;
+            font-weight: 400;
+            font-style: normal;
         }
-
+       .reem-kufi-<uniquifier> {
+            font-family: "Reem Kufi", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: <weight>;
+            font-style: normal;
+        }
         .user-info {
             display: flex;
             align-items: center;
