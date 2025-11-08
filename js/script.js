@@ -99,7 +99,7 @@
                 // صور حقيقية للمنتجات من Pexels (مجانية للاستخدام)
                 const productImages = [
                     // فواكه
-                    "https://images.pexels.com/photos/161559/background-bitter-breakfast-bright-161559.jpeg?auto=compress&cs=tinysrgb&w=300", // برتقال
+                    "https://www.terabox.com/main?category=3&vmode=grid", // برتقال
                     "https://images.pexels.com/photos/327098/pexels-photo-327098.jpeg?auto=compress&cs=tinysrgb&w=300", // تفاح
                     "https://images.pexels.com/photos/7195524/pexels-photo-7195524.jpeg?auto=compress&cs=tinysrgb&w=300", // موز
                     "https://images.pexels.com/photos/7195470/pexels-photo-7195470.jpeg?auto=compress&cs=tinysrgb&w=300", // فراولة
@@ -354,8 +354,8 @@
             addRecentTransaction(transaction) {
                 const transactions = this.getRecentTransactions();
                 transactions.unshift(transaction);
-                // الاحتفاظ فقط بآخر 20 معاملة
-                if (transactions.length > 20) {
+                // الاحتفاظ فقط بآخر 100 معاملة
+                if (transactions.length > 100) {
                     transactions.pop();
                 }
                 localStorage.setItem('recentTransactions', JSON.stringify(transactions));
