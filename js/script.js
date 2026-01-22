@@ -531,7 +531,7 @@
             // إضافة عناصر القائمة الأساسية
             baseMenuItems.forEach(item => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a href="#" data-page="${item.id}">${item.icon} ${item.name}</a>`;
+                li.innerHTML = `<a href="#" data-page="${item.id}"> ${item.name}</a>`;
                 sidebarMenu.appendChild(li);
             });
             
