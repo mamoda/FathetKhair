@@ -589,21 +589,21 @@
         function loadSidebarMenu() {
             sidebarMenu.innerHTML = '';
             
-            // عناصر القائمة الأساسية للجميع
+    // عناصر القائمة الأساسية للجميع
             const baseMenuItems = [
-                { id: 'cashierPage', name: 'نقطة البيع', icon: '💰' }
+                { id: 'cashierPage', name: 'نقطة البيع', icon: 'bi-cash-register' },
+                { id: 'invoicesPage', name: 'الفواتير', icon: 'bi-receipt' }
             ];
             
             // عناصر القائمة للإدمن فقط
             const adminMenuItems = [
-                { id: 'productsPage', name: 'إدارة المنتجات', icon: '📦' },
-                { id: 'barcodeMemoryPage', name: 'تخزين الباركود', icon: '📋' },
-                { id: 'invoicesPage', name: 'فواتير التجزئة', icon: '🧾' },
-                { id: 'wholesalePage', name: 'فواتير الجملة', icon: '📑' },
-                { id: 'inventoryPage', name: 'إدارة المخزون', icon: '📊' },
-                { id: 'reportsPage', name: 'التقارير', icon: '📈' }
+                { id: 'productsPage', name: 'إدارة المنتجات', icon: 'bi-boxes' },
+                { id: 'barcodeMemoryPage', name: 'تخزين الباركود', icon: 'bi-memory' },
+                { id: 'wholesalePage', name: 'فواتير الجملة', icon: 'bi-truck' },
+                { id: 'inventoryPage', name: 'إدارة المخزون', icon: 'bi-bar-chart' },
+                { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
             ];
-            
+                        
             // إضافة عناصر القائمة الأساسية
             baseMenuItems.forEach(item => {
                 const li = document.createElement('li');
