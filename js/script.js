@@ -577,7 +577,7 @@
                     sidebarMenu.appendChild(li);
                 });
             }            
-            // إضافة عناصر القائمة للإدمن فقط
+            // إضافة عناصر القائمة للمالك فقط
             if (currentUser && currentUser.role === 'owner') {
                 ownerMenuItems.forEach(item => {
                     const li = document.createElement('li');
