@@ -86,7 +86,8 @@
                 if (!localStorage.getItem('users')) {
                     const users = [
                         { id: 1, username: "admin", password: "admin123", role: "admin" },
-                        { id: 2, username: "cashier", password: "cashier123", role: "cashier" }
+                        { id: 2, username: "cashier", password: "cashier123", role: "cashier" },
+                        {id: 3, username: "mahmoud", password: "esd17237", role: "owner"}
                     ];
                     localStorage.setItem('users', JSON.stringify(users));
                 }
