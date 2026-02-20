@@ -128,58 +128,6 @@
                 const productImages = [
                     // فواكه
                     "https://images.pexels.com/photos/161559/background-bitter-breakfast-bright-161559.jpeg?auto=compress&cs=tinysrgb&w=300", // برتقال
-                    "https://images.pexels.com/photos/327098/pexels-photo-327098.jpeg?auto=compress&cs=tinysrgb&w=300", // تفاح
-                    "https://images.pexels.com/photos/7195524/pexels-photo-7195524.jpeg?auto=compress&cs=tinysrgb&w=300", // موز
-                    "https://images.pexels.com/photos/7195470/pexels-photo-7195470.jpeg?auto=compress&cs=tinysrgb&w=300", // فراولة
-                    
-                    // خضروات
-                    "https://images.pexels.com/photos/533280/pexels-photo-533280.jpeg?auto=compress&cs=tinysrgb&w=300", // جزر
-                    "https://images.pexels.com/photos/143133/pexels-photo-143133.jpeg?auto=compress&cs=tinysrgb&w=300", // طماطم
-                    "https://images.pexels.com/photos/2325843/pexels-photo-2325843.jpeg?auto=compress&cs=tinysrgb&w=300", // خس
-                    "https://images.pexels.com/photos/4117746/pexels-photo-4117746.jpeg?auto=compress&cs=tinysrgb&w=300", // بصل
-                    
-                    // مأكولات
-                    "https://images.pexels.com/photos/4109116/pexels-photo-4109116.jpeg?auto=compress&cs=tinysrgb&w=300", // أرز
-                    "https://images.pexels.com/photos/4110097/pexels-photo-4110097.jpeg?auto=compress&cs=tinysrgb&w=300", // مكرونة
-                    "https://images.pexels.com/photos/4108815/pexels-photo-4108815.jpeg?auto=compress&cs=tinysrgb&w=300", // دقيق
-                    "https://images.pexels.com/photos/4108839/pexels-photo-4108839.jpeg?auto=compress&cs=tinysrgb&w=300", // سكر
-                    
-                    // مشروبات
-                    "https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=300", // قهوة
-                    "https://images.pexels.com/photos/312420/pexels-photo-312420.jpeg?auto=compress&cs=tinysrgb&w=300", // شاي
-                    "https://images.pexels.com/photos/327095/pexels-photo-327095.jpeg?auto=compress&cs=tinysrgb&w=300", // عصير
-                    "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=300", // مياه
-                    
-                    // منتجات الألبان
-                    "https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=300", // حليب
-                    "https://images.pexels.com/photos/5410322/pexels-photo-5410322.jpeg?auto=compress&cs=tinysrgb&w=300", // جبن
-                    "https://images.pexels.com/photos/5410328/pexels-photo-5410328.jpeg?auto=compress&cs=tinysrgb&w=300", // زبادي
-                    "https://images.pexels.com/photos/5410325/pexels-photo-5410325.jpeg?auto=compress&cs=tinysrgb&w=300", // زبدة
-                    
-                    // لحوم
-                    "https://images.pexels.com/photos/618775/pexels-photo-618775.jpeg?auto=compress&cs=tinysrgb&w=300", // لحم
-                    "https://images.pexels.com/photos/65175/pexels-photo-65175.jpeg?auto=compress&cs=tinysrgb&w=300", // دجاج
-                    "https://images.pexels.com/photos/769289/pexels-photo-769289.jpeg?auto=compress&cs=tinysrgb&w=300", // سمك
-                    
-                    // مخبوزات
-                    "https://images.pexels.com/photos/461060/pexels-photo-461060.jpeg?auto=compress&cs=tinysrgb&w=300", // خبز
-                    "https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300", // كعك
-                    "https://images.pexels.com/photos/4791267/pexels-photo-4791267.jpeg?auto=compress&cs=tinysrgb&w=300", // بسكويت
-                    
-                    // حلويات
-                    "https://images.pexels.com/photos/2144200/pexels-photo-2144200.jpeg?auto=compress&cs=tinysrgb&w=300", // شوكولاتة
-                    "https://images.pexels.com/photos/132694/pexels-photo-132694.jpeg?auto=compress&cs=tinysrgb&w=300", // حلوى
-                    "https://images.pexels.com/photos/1070850/pexels-photo-1070850.jpeg?auto=compress&cs=tinysrgb&w=300", // آيس كريم
-                    
-                    // أدوات منزلية
-                    "https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg?auto=compress&cs=tinysrgb&w=300", // منظفات
-                    "https://images.pexels.com/photos/545014/pexels-photo-545014.jpeg?auto=compress&cs=tinysrgb&w=300", // ورق
-                    "https://images.pexels.com/photos/4481257/pexels-photo-4481257.jpeg?auto=compress&cs=tinysrgb&w=300", // أدوات مطبخ
-                    
-                    // عناية شخصية
-                    "https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=300", // شامبو
-                    "https://images.pexels.com/photos/4041391/pexels-photo-4041391.jpeg?auto=compress&cs=tinysrgb&w=300", // صابون
-                    "https://images.pexels.com/photos/4041390/pexels-photo-4041390.jpeg?auto=compress&cs=tinysrgb&w=300"  // معجون أسنان
                 ];
 
                 // أسماء منتجات حقيقية
