@@ -1,4 +1,4 @@
-        // نظام إدارة الجلسات
+  // نظام إدارة الجلسات
         class SessionManager {
             constructor() {
                 this.currentSessionKey = 'currentSession';
@@ -25,9 +25,11 @@
             getSession() {
                 // البحث في localStorage أولاً ثم sessionStorage
                 let sessionData = localStorage.getItem(this.currentSessionKey);
+                let storageType = 'localStorage';
                 
                 if (!sessionData) {
                     sessionData = sessionStorage.getItem(this.currentSessionKey);
+                    storageType = 'sessionStorage';
                 }
                 
                 if (!sessionData) return null;
@@ -587,7 +589,7 @@
         function loadSidebarMenu() {
             sidebarMenu.innerHTML = '';
             
-            // عناصر القائمة الأساسية للجميع
+    // عناصر القائمة الأساسية للجميع
             const baseMenuItems = [
                 { id: 'cashierPage', name: 'نقطة البيع', icon: 'bi-cash-register' },
                 { id: 'invoicesPage', name: 'الفواتير', icon: 'bi-receipt' }
@@ -601,8 +603,8 @@
                 { id: 'inventoryPage', name: 'إدارة المخزون', icon: 'bi-bar-chart' },
                 { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
             ];
-            
-            // إضافة عناصر القائمة الأساسية
+
+   // إضافة عناصر القائمة الأساسية
             baseMenuItems.forEach(item => {
                 const li = document.createElement('li');
                 li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
@@ -616,8 +618,7 @@
                     li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
                     sidebarMenu.appendChild(li);
                 });
-            }
-            
+            }            
             // إضافة أحداث النقر لعناصر القائمة
             const menuLinks = sidebarMenu.querySelectorAll('a');
             menuLinks.forEach(link => {
@@ -646,18 +647,9 @@
             transactions.forEach(transaction => {
                 const li = document.createElement('li');
                 li.className = 'transaction-item';
-                
-                // تحديد الأيقونة حسب نوع المعاملة
-                let icon = 'bi-cart';
-                if (transaction.type === 'جملة') {
-                    icon = 'bi-truck';
-                } else if (transaction.type === 'بيع') {
-                    icon = 'bi-cart-check';
-                }
-                
                 li.innerHTML = `
                     <div class="transaction-info">
-                        <h4><i class="bi ${icon}"></i> ${transaction.type} - ${transaction.details}</h4>
+                        <h4>${transaction.type} - ${transaction.details}</h4>
                         <p>${transaction.cashier}</p>
                         <div class="transaction-time">${new Date(transaction.time).toLocaleTimeString('ar-EG')}</div>
                     </div>
@@ -736,13 +728,13 @@
                 productCard.className = 'product-card';
                 
                 // إضافة تحذير إذا كان المخزون منخفضاً
-                const stockWarning = product.stock <= product.minStock ? `<div class="stock-low"><i class="bi bi-exclamation-triangle-fill"></i> منخفض (${product.stock})</div>` : '';
+                const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
                 
                 productCard.innerHTML = `
                     <img src="${product.image}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'" alt="${product.name}">
                     <h4>${product.name}</h4>
                     <div class="price">${product.price} جنيه</div>
-                    <div class="barcode"><i class="bi bi-upc-scan"></i> ${product.barcode}</div>
+                    <div class="barcode">${product.barcode}</div>
                     ${stockWarning}
                 `;
                 
@@ -804,12 +796,12 @@
                         </div>
                     </div>
                     <div class="quantity-controls">
-                        <button class="decrease-btn"><i class="bi bi-dash"></i></button>
+                        <button class="decrease-btn">-</button>
                         <span>${item.quantity}</span>
-                        <button class="increase-btn"><i class="bi bi-plus"></i></button>
+                        <button class="increase-btn">+</button>
                     </div>
                     <div>${itemTotal.toFixed(2)} جنيه</div>
-                    <button class="remove-item"><i class="bi bi-trash"></i></button>
+                    <button class="remove-item">×</button>
                 `;
                 
                 // إضافة أحداث للأزرار
@@ -899,8 +891,8 @@
                     <td>${product.stock}</td>
                     <td>${product.category}</td>
                     <td>
-                        <button class="action-btn edit-btn" data-id="${product.id}"><i class="bi bi-pencil"></i> تعديل</button>
-                        <button class="action-btn delete-btn" data-id="${product.id}"><i class="bi bi-trash"></i> حذف</button>
+                        <button class="action-btn edit-btn" data-id="${product.id}">تعديل</button>
+                        <button class="action-btn delete-btn" data-id="${product.id}">حذف</button>
                     </td>
                 `;
                 productsTableBody.appendChild(row);
@@ -1005,7 +997,7 @@
                     <td>${product ? product.name : 'منتج غير معروف'}</td>
                     <td>${new Date(item.storedAt).toLocaleDateString('ar-EG')}</td>
                     <td>
-                        <button class="action-btn delete-btn" data-id="${item.id}"><i class="bi bi-trash"></i> حذف</button>
+                        <button class="action-btn delete-btn" data-id="${item.id}">حذف</button>
                     </td>
                 `;
                 barcodeMemoryTable.appendChild(row);
@@ -1058,7 +1050,7 @@
                     <td>${sale.cashier}</td>
                     <td>${sale.total.toFixed(2)} جنيه</td>
                     <td>
-                        <button class="action-btn view-btn" data-id="${sale.id}"><i class="bi bi-eye"></i> عرض التفاصيل</button>
+                        <button class="action-btn view-btn" data-id="${sale.id}">عرض التفاصيل</button>
                     </td>
                 `;
                 invoicesTableBody.appendChild(row);
@@ -1155,7 +1147,7 @@
                     <td>${invoice.discount}%</td>
                     <td>${invoice.total.toFixed(2)} جنيه</td>
                     <td>
-                        <button class="action-btn view-btn" data-id="${invoice.id}"><i class="bi bi-eye"></i> عرض</button>
+                        <button class="action-btn view-btn" data-id="${invoice.id}">عرض</button>
                     </td>
                 `;
                 wholesaleTableBody.appendChild(row);
@@ -1227,12 +1219,12 @@
                         </div>
                     </div>
                     <div class="quantity-controls">
-                        <button class="decrease-btn"><i class="bi bi-dash"></i></button>
+                        <button class="decrease-btn">-</button>
                         <span>${item.quantity}</span>
-                        <button class="increase-btn"><i class="bi bi-plus"></i></button>
+                        <button class="increase-btn">+</button>
                     </div>
                     <div>${itemTotal.toFixed(2)} جنيه</div>
-                    <button class="remove-item"><i class="bi bi-trash"></i></button>
+                    <button class="remove-item">×</button>
                 `;
                 
                 // إضافة أحداث للأزرار
@@ -1425,15 +1417,12 @@
                 // تحديد حالة المخزون
                 let status = 'جيد';
                 let statusClass = '';
-                let statusIcon = 'bi-check-circle-fill';
                 if (product.stock === 0) {
                     status = 'نفذ';
                     statusClass = 'stock-low';
-                    statusIcon = 'bi-x-circle-fill';
                 } else if (product.stock <= product.minStock) {
                     status = 'منخفض';
                     statusClass = 'stock-low';
-                    statusIcon = 'bi-exclamation-triangle-fill';
                 }
                 
                 const row = document.createElement('tr');
@@ -1442,9 +1431,9 @@
                     <td>${product.barcode}</td>
                     <td>${product.stock}</td>
                     <td>${lastUpdateDate}</td>
-                    <td class="${statusClass}"><i class="bi ${statusIcon}"></i> ${status}</td>
+                    <td class="${statusClass}">${status}</td>
                     <td>
-                        <button class="action-btn edit-btn" data-id="${product.id}"><i class="bi bi-pencil"></i> تعديل المخزون</button>
+                        <button class="action-btn edit-btn" data-id="${product.id}">تعديل المخزون</button>
                     </td>
                 `;
                 inventoryTableBody.appendChild(row);
@@ -1505,28 +1494,28 @@
             
             document.getElementById('reportResults').innerHTML = `
                 <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                    <h4><i class="bi bi-graph-up"></i> إحصائيات سريعة</h4>
+                    <h4>إحصائيات سريعة</h4>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--primary-color); margin-bottom: 10px;"><i class="bi bi-receipt"></i> فواتير التجزئة</h5>
+                            <h5 style="color: var(--primary-color); margin-bottom: 10px;">فواتير التجزئة</h5>
                             <p style="font-size: 24px; font-weight: bold;">${totalSales}</p>
                             <p style="color: #666;">${totalRevenue.toFixed(2)} ج.م</p>
                         </div>
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--secondary-color); margin-bottom: 10px;"><i class="bi bi-truck"></i> فواتير الجملة</h5>
+                            <h5 style="color: var(--secondary-color); margin-bottom: 10px;">فواتير الجملة</h5>
                             <p style="font-size: 24px; font-weight: bold;">${totalWholesale}</p>
                             <p style="color: #666;">${wholesaleRevenue.toFixed(2)} ج.م</p>
                         </div>
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--accent-color); margin-bottom: 10px;"><i class="bi bi-box"></i> إجمالي المنتجات</h5>
+                            <h5 style="color: var(--accent-color); margin-bottom: 10px;">إجمالي المنتجات</h5>
                             <p style="font-size: 24px; font-weight: bold;">${totalProducts}</p>
                         </div>
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--danger-color); margin-bottom: 10px;"><i class="bi bi-exclamation-triangle"></i> منتجات منخفضة المخزون</h5>
+                            <h5 style="color: var(--danger-color); margin-bottom: 10px;">منتجات منخفضة المخزون</h5>
                             <p style="font-size: 24px; font-weight: bold;">${lowStockProducts}</p>
                         </div>
                         <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h5 style="color: var(--danger-color); margin-bottom: 10px;"><i class="bi bi-x-circle"></i> منتجات نفذت</h5>
+                            <h5 style="color: var(--danger-color); margin-bottom: 10px;">منتجات نفذت</h5>
                             <p style="font-size: 24px; font-weight: bold;">${outOfStockProducts}</p>
                         </div>
                     </div>
@@ -1540,4 +1529,3 @@
                 barcodeInput.focus();
             }
         });
-
