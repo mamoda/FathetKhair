@@ -1,22 +1,37 @@
-                // نظام إدارة الجلسات
+  // نظام إدارة الجلسات
         class SessionManager {
             constructor() {
                 this.currentSessionKey = 'currentSession';
             }
 
             // حفظ جلسة المستخدم
-            saveSession(user) {
+            saveSession(user, rememberMe = false) {
                 const sessionData = {
                     user: user,
                     loginTime: new Date().toISOString(),
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 ساعة
+                    expiresAt: new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000).toISOString() // 30 يوم إذا تم التذكر، يوم واحد إذا لم يتم
                 };
-                sessionStorage.setItem(this.currentSessionKey, JSON.stringify(sessionData));
+                
+                if (rememberMe) {
+                    // استخدام localStorage للتذكر الدائم
+                    localStorage.setItem(this.currentSessionKey, JSON.stringify(sessionData));
+                } else {
+                    // استخدام sessionStorage للجلسة المؤقتة
+                    sessionStorage.setItem(this.currentSessionKey, JSON.stringify(sessionData));
+                }
             }
 
             // استعادة جلسة المستخدم
             getSession() {
-                const sessionData = sessionStorage.getItem(this.currentSessionKey);
+                // البحث في localStorage أولاً ثم sessionStorage
+                let sessionData = localStorage.getItem(this.currentSessionKey);
+                let storageType = 'localStorage';
+                
+                if (!sessionData) {
+                    sessionData = sessionStorage.getItem(this.currentSessionKey);
+                    storageType = 'sessionStorage';
+                }
+                
                 if (!sessionData) return null;
 
                 const session = JSON.parse(sessionData);
@@ -32,23 +47,35 @@
 
             // مسح جلسة المستخدم
             clearSession() {
+                localStorage.removeItem(this.currentSessionKey);
                 sessionStorage.removeItem(this.currentSessionKey);
             }
 
             // تحديث وقت انتهاء الجلسة
             refreshSession() {
-                const sessionData = sessionStorage.getItem(this.currentSessionKey);
+                // البحث في localStorage أولاً ثم sessionStorage
+                let sessionData = localStorage.getItem(this.currentSessionKey);
+                let storageType = 'localStorage';
+                
+                if (!sessionData) {
+                    sessionData = sessionStorage.getItem(this.currentSessionKey);
+                    storageType = 'sessionStorage';
+                }
+                
                 if (sessionData) {
                     const session = JSON.parse(sessionData);
                     session.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-                    sessionStorage.setItem(this.currentSessionKey, JSON.stringify(session));
+                    
+                    if (storageType === 'localStorage') {
+                        localStorage.setItem(this.currentSessionKey, JSON.stringify(session));
+                    } else {
+                        sessionStorage.setItem(this.currentSessionKey, JSON.stringify(session));
+                    }
                 }
             }
         }
 
-     
-     
-     // قاعدة بيانات محلية باستخدام localStorage
+        // قاعدة بيانات محلية باستخدام localStorage
         class Database {
             constructor() {
                 this.initializeDatabase();
@@ -123,7 +150,7 @@
                     "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=300", // مياه
                     
                     // منتجات الألبان
-                    "/assets/roomy.avif", // حليب
+                    "https://images.pexels.com/photos/248412/pexels-photo-248412.jpeg?auto=compress&cs=tinysrgb&w=300", // حليب
                     "https://images.pexels.com/photos/5410322/pexels-photo-5410322.jpeg?auto=compress&cs=tinysrgb&w=300", // جبن
                     "https://images.pexels.com/photos/5410328/pexels-photo-5410328.jpeg?auto=compress&cs=tinysrgb&w=300", // زبادي
                     "https://images.pexels.com/photos/5410325/pexels-photo-5410325.jpeg?auto=compress&cs=tinysrgb&w=300", // زبدة
@@ -168,7 +195,7 @@
                     "العناية الشخصية": ["شامبو", "بلسم", "صابون", "معجون أسنان", "فرشاة أسنان", "مزيل عرق", "غسول وجه", "كريم ترطيب", "مستحضر حلاقة", "مناديل مبللة"]
                 };
 
-                for (let i = 1; i <= 1000; i++) {
+                for (let i = 1; i <= 100; i++) {
                     const category = categories[Math.floor(Math.random() * categories.length)];
                     const categoryProducts = productNames[category];
                     const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
@@ -415,6 +442,7 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
         const sidebarMenu = document.getElementById('sidebarMenu');
         const userDisplay = document.getElementById('userDisplay');
         const transactionsList = document.getElementById('transactionsList');
@@ -474,15 +502,49 @@
         const inventorySearch = document.getElementById('inventorySearch');
         const inventoryTableBody = document.getElementById('inventoryTableBody');
 
+        // التحقق من وجود جلسة سابقة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            const sessionManager = new SessionManager();
+            const savedUser = sessionManager.getSession();
+            
+            if (savedUser) {
+                // استعادة الجلسة
+                currentUser = savedUser;
+                loginPage.style.display = 'none';
+                dashboard.style.display = 'block';
+                userDisplay.textContent = `مرحباً، ${savedUser.username}`;
+                loadSidebarMenu();
+                showPage('cashierPage');
+                loadProducts();
+                loadRecentTransactions();
+                
+                // تحديث وقت انتهاء الجلسة
+                sessionManager.refreshSession();
+                
+                if (barcodeInput) {
+                    barcodeInput.focus();
+                }
+            } else {
+                loginPage.style.display = 'flex';
+                dashboard.style.display = 'none';
+            }
+        });
+
         // وظيفة تسجيل الدخول
         loginBtn.addEventListener('click', function() {
             const username = usernameInput.value;
             const password = passwordInput.value;
+            const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
             
             const user = users.find(u => u.username === username && u.password === password);
             
             if (user) {
                 currentUser = user;
+                
+                // حفظ الجلسة مع خاصية تذكرني
+                const sessionManager = new SessionManager();
+                sessionManager.saveSession(user, rememberMe);
+                
                 loginPage.style.display = 'none';
                 dashboard.style.display = 'block';
                 userDisplay.textContent = `مرحباً، ${username}`;
@@ -502,11 +564,25 @@
             loginPage.style.display = 'flex';
             usernameInput.value = '';
             passwordInput.value = '';
+            if (rememberMeCheckbox) {
+                rememberMeCheckbox.checked = false;
+            }
             cart = [];
             wholesaleCart = [];
             updateCart();
             updateWholesaleCart();
             currentUser = null;
+            
+            // مسح الجلسة من SessionManager
+            const sessionManager = new SessionManager();
+            sessionManager.clearSession();
+        });
+
+        // السماح بالدخول باستخدام زر Enter
+        passwordInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                loginBtn.click();
+            }
         });
 
         // تحميل القائمة الجانبية حسب صلاحية المستخدم
@@ -536,7 +612,7 @@
             });
             
             // إضافة عناصر القائمة للإدمن فقط
-            if (currentUser.role === 'admin') {
+            if (currentUser && currentUser.role === 'admin') {
                 adminMenuItems.forEach(item => {
                     const li = document.createElement('li');
                     li.innerHTML = `<a href="#" data-page="${item.id}">${item.icon} ${item.name}</a>`;
@@ -843,6 +919,23 @@
             });
         }
 
+        // تعديل منتج
+        function editProduct(productId) {
+            const product = db.getProductById(productId);
+            const newName = prompt('تعديل اسم المنتج:', product.name);
+            if (newName) {
+                const newPrice = prompt('تعديل السعر:', product.price);
+                if (newPrice) {
+                    db.updateProduct(productId, { 
+                        name: newName, 
+                        price: parseFloat(newPrice) 
+                    });
+                    loadProductsTable();
+                    loadProducts();
+                }
+            }
+        }
+
         // إضافة منتج جديد
         addProductBtn.addEventListener('click', function() {
             const name = productNameInput.value.trim();
@@ -1035,7 +1128,7 @@
                     </div>
                 `;
                 
-                // عرض التفاصيل في نافذة منبثقة أو في مكان مخصص
+                // عرض التفاصيل في نافذة منبثقة
                 alert(`تفاصيل الفاتورة #${saleId}\n\n${invoiceDetails.replace(/<[^>]*>/g, '')}`);
             }
         }
@@ -1067,27 +1160,6 @@
                     const invoiceId = parseInt(this.getAttribute('data-id'));
                     viewWholesaleInvoice(invoiceId);
                 });
-            });
-            
-            // إضافة حدث لإضافة منتج إلى سلة الجملة
-            addWholesaleProductBtn.addEventListener('click', function() {
-                const barcode = wholesaleBarcode.value.trim();
-                if (barcode) {
-                    addProductToWholesaleCart(barcode);
-                    wholesaleBarcode.value = '';
-                    wholesaleBarcode.focus();
-                }
-            });
-            
-            wholesaleBarcode.addEventListener('keyup', function(event) {
-                if (event.key === 'Enter') {
-                    const barcode = wholesaleBarcode.value.trim();
-                    if (barcode) {
-                        addProductToWholesaleCart(barcode);
-                        wholesaleBarcode.value = '';
-                        wholesaleBarcode.focus();
-                    }
-                }
             });
         }
 
@@ -1199,6 +1271,27 @@
             wholesaleTotal.textContent = `${total.toFixed(2)} جنيه`;
         }
 
+        // إضافة حدث لإضافة منتج إلى سلة الجملة
+        addWholesaleProductBtn.addEventListener('click', function() {
+            const barcode = wholesaleBarcode.value.trim();
+            if (barcode) {
+                addProductToWholesaleCart(barcode);
+                wholesaleBarcode.value = '';
+                wholesaleBarcode.focus();
+            }
+        });
+
+        wholesaleBarcode.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                const barcode = wholesaleBarcode.value.trim();
+                if (barcode) {
+                    addProductToWholesaleCart(barcode);
+                    wholesaleBarcode.value = '';
+                    wholesaleBarcode.focus();
+                }
+            }
+        });
+
         // إتمام فاتورة الجملة
         wholesaleCheckoutBtn.addEventListener('click', function() {
             if (wholesaleCart.length === 0) {
@@ -1305,6 +1398,9 @@
             }
         }
 
+        // تحديث سلة الجملة عند تغيير نسبة الخصم
+        wholesaleDiscount.addEventListener('input', updateWholesaleCart);
+
         // تحميل صفحة المخزون
         function loadInventoryPage() {
             const products = db.getProducts();
@@ -1345,7 +1441,7 @@
             });
             
             // إضافة أحداث لأزرار التعديل
-            document.querySelectorAll('.edit-btn').forEach(btn => {
+            document.querySelectorAll('#inventoryTableBody .edit-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const productId = parseInt(this.getAttribute('data-id'));
                     editInventory(productId);
@@ -1428,19 +1524,9 @@
             `;
         }
 
-        // السماح بالدخول باستخدام زر Enter
-        passwordInput.addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                loginBtn.click();
-            }
-        });
-
         // التركيز على حقل الباركود عند تحميل الصفحة
         window.addEventListener('load', function() {
             if (barcodeInput) {
                 barcodeInput.focus();
             }
         });
-
-        // تحديث سلة الجملة عند تغيير نسبة الخصم
-        wholesaleDiscount.addEventListener('input', updateWholesaleCart);
