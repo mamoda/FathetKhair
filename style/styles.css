@@ -157,7 +157,10 @@ h6 { font-size: 1rem; }
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     border-radius: 3px;
 }
-
+.login-form img{
+    width: 150px;
+    height: 150px;
+}
 .form-group {
     margin-bottom: 24px;
     position: relative;
