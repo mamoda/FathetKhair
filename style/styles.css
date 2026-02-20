@@ -1205,3 +1205,82 @@ h6 { font-size: 1rem; }
         background-color: white !important;
     }
 }
+
+
+
+
+/*Adding*/
+/* إخفاء جميع الصفحات بشكل افتراضي */
+.page {
+    display: none;
+}
+
+/* إظهار الصفحة النشطة فقط */
+.page.active {
+    display: block;
+}
+
+/* تحسين مظهر البطاقات */
+.form-card, .table-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+/* تحسين مظهر الجداول */
+.products-table, .invoices-table, .wholesale-table, .inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.products-table th, .invoices-table th, .wholesale-table th, .inventory-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.products-table td, .invoices-table td, .wholesale-table td, .inventory-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* تحسين مظهر شريط البحث */
+.search-box {
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* تحسين مظهر التخطيط */
+.content-area {
+    display: flex;
+    gap: 20px;
+}
+
+.transactions-sidebar {
+    width: 300px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.pages-container {
+    flex: 1;
+}
+
+.pos-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 20px;
+}
