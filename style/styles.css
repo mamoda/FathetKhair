@@ -362,7 +362,6 @@ h6 { font-size: 1rem; }
 }
 
 .sidebar h3::before {
-    content: '📊';
     font-size: 20px;
 }
 
