@@ -87,7 +87,7 @@
                     const users = [
                         { id: 1, username: "admin", password: "admin123", role: "admin" },
                         { id: 2, username: "cashier", password: "cashier123", role: "cashier" },
-                        { id: 3, username: "mahmoud", password: "esd17237", role: "owner"}
+                        { id: 3, username: "owner", password: "esd17237", role: "owner"}
                     ];
                     localStorage.setItem('users', JSON.stringify(users));
                 }
@@ -553,6 +553,15 @@
                 { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
             ];
 
+            //عناصر القائمة للأونر
+            const ownerMenuItems = [
+                { id: 'productsPage', name: 'إدارة المنتجات', icon: 'bi-boxes' },
+                { id: 'barcodeMemoryPage', name: 'تخزين الباركود', icon: 'bi-memory' },
+                { id: 'wholesalePage', name: 'فواتير الجملة', icon: 'bi-truck' },
+                { id: 'inventoryPage', name: 'إدارة المخزون', icon: 'bi-bar-chart' },
+                { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
+            ]
+
    // إضافة عناصر القائمة الأساسية
             baseMenuItems.forEach(item => {
                 const li = document.createElement('li');
@@ -563,6 +572,14 @@
             // إضافة عناصر القائمة للإدمن فقط
             if (currentUser && currentUser.role === 'admin') {
                 adminMenuItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
+                    sidebarMenu.appendChild(li);
+                });
+            }            
+            // إضافة عناصر القائمة للإدمن فقط
+            if (currentUser && currentUser.role === 'owner') {
+                ownerMenuItems.forEach(item => {
                     const li = document.createElement('li');
                     li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
                     sidebarMenu.appendChild(li);
