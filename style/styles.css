@@ -158,7 +158,6 @@ h6 { font-size: 1rem; }
     border-radius: 3px;
 }
 .login-form img{
-    flex-direction: column;
     width: 150px;
     height: 150px;
 }
