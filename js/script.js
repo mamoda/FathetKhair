@@ -603,11 +603,11 @@
                 { id: 'inventoryPage', name: 'إدارة المخزون', icon: 'bi-bar-chart' },
                 { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
             ];
-                        
-            // إضافة عناصر القائمة الأساسية
+
+   // إضافة عناصر القائمة الأساسية
             baseMenuItems.forEach(item => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a href="#" data-page="${item.id}">${item.icon} ${item.name}</a>`;
+                li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
                 sidebarMenu.appendChild(li);
             });
             
@@ -615,11 +615,10 @@
             if (currentUser && currentUser.role === 'admin') {
                 adminMenuItems.forEach(item => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a href="#" data-page="${item.id}">${item.icon} ${item.name}</a>`;
+                    li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
                     sidebarMenu.appendChild(li);
                 });
-            }
-            
+            }            
             // إضافة أحداث النقر لعناصر القائمة
             const menuLinks = sidebarMenu.querySelectorAll('a');
             menuLinks.forEach(link => {
