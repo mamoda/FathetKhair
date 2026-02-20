@@ -518,10 +518,6 @@ h6 { font-size: 1rem; }
     gap: 10px;
 }
 
-.barcode-section h3::before {
-    content: '📦';
-}
-
 .barcode-input {
     display: flex;
     gap: 12px;
@@ -585,9 +581,6 @@ h6 { font-size: 1rem; }
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.products-section h3::before {
 }
 
 .products-grid {
