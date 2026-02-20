@@ -158,7 +158,7 @@ h6 { font-size: 1rem; }
     border-radius: 3px;
 }
 .login-form img{
-    position: relative;
+    position: fixed;
     width: 150px;
     height: 150px;
 }
