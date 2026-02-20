@@ -131,6 +131,9 @@ h6 { font-size: 1rem; }
     position: relative;
     z-index: 1;
     transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
 }
 
 .login-form:hover {
@@ -160,6 +163,7 @@ h6 { font-size: 1rem; }
 .login-form img{
     width: 150px;
     height: 150px;
+    margin-bottom: 20px;      /* مسافة أسفل الصورة */
 }
 .form-group {
     margin-bottom: 24px;
