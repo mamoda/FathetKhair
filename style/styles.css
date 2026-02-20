@@ -588,7 +588,6 @@ h6 { font-size: 1rem; }
 }
 
 .products-section h3::before {
-    content: '🛍️';
 }
 
 .products-grid {
