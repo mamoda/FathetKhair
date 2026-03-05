@@ -926,7 +926,7 @@ h6 { font-size: 1rem; }
 
 .products-table th, .invoices-table th, .inventory-table th, .wholesale-table th {
     background-color: var(--primary-color);
-    color: white;
+    color: black;
     font-weight: 600;
     position: sticky;
     top: 0;
@@ -1213,6 +1213,8 @@ h6 { font-size: 1rem; }
 /* إخفاء جميع الصفحات بشكل افتراضي */
 .page {
     display: none;
+    color: var(--primary-color);
+
 }
 
 /* إظهار الصفحة النشطة فقط */

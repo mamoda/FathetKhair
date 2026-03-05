@@ -127,7 +127,7 @@
                 // صور حقيقية للمنتجات من Pexels (مجانية للاستخدام)
                 const productImages = [
                     // فواكه
-                    "https://images.pexels.com/photos/161559/background-bitter-breakfast-bright-161559.jpeg?auto=compress&cs=tinysrgb&w=300", // برتقال
+                    "shop-organic-products-supermarket_182089-263.avif", // برتقال
                 ];
 
                 // أسماء منتجات حقيقية
@@ -158,7 +158,7 @@
                         price: Math.floor(Math.random() * 100) + 1,
                         barcode: this.generateBarcode(),
                         category: category,
-                        image: randomImage,
+                        image: randomImage.avif,
                         stock: Math.floor(Math.random() * 100) + 10,
                         minStock: 5,
                         wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
@@ -663,7 +663,7 @@
             }
         });
 
-        barcodeInput.addEventListener('keyup', function(event) {
+        barcodeInput.addEventListener('focus', function(event) {
             if (event.key === 'Enter') {
                 const barcode = barcodeInput.value.trim();
                 if (barcode) {
@@ -697,7 +697,7 @@
                 const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
                 
                 productCard.innerHTML = `
-                    <img src="${product.image}" onerror="this.src='https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=300'" alt="${product.name}">
+                    <img src="${product.image}" onerror="this.src='shop-organic-products-supermarket_182089-263.avif'" alt="${product.name}">
                     <h4>${product.name}</h4>
                     <div class="price">${product.price} جنيه</div>
                     <div class="barcode">${product.barcode}</div>
