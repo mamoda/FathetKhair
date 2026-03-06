@@ -97,7 +97,7 @@ h6 { font-size: 1rem; }
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: url('assets/edarty_abstract_tech_bg.png');
+    background-image: url('assets/edarty_abstract_tech_bg.png');
     padding: 20px;
     position: relative;
     overflow: hidden;
