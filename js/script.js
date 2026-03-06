@@ -150,7 +150,7 @@
                     const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
                     
                     // اختيار صورة عشوائية من مجموعة الصور المتاحة
-                    const randomImage = productImages[Math.floor(Math.random() * productImages.length)];
+                    // const randomImage = productImages[Math.floor(Math.random() * productImages.length)];
                     
                     products.push({
                         id: i,
