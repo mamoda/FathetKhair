@@ -127,7 +127,7 @@
                 // صور حقيقية للمنتجات من Pexels (مجانية للاستخدام)
                 const productImages = [
                     // فواكه
-                    "shop-organic-products-supermarket_182089-263.avif", // برتقال
+                    "background.png", // برتقال
                 ];
 
                 // أسماء منتجات حقيقية
@@ -158,7 +158,7 @@
                         price: Math.floor(Math.random() * 100) + 1,
                         barcode: this.generateBarcode(),
                         category: category,
-                        image: randomImage.avif,
+                        image: productImages.png,
                         stock: Math.floor(Math.random() * 100) + 10,
                         minStock: 5,
                         wholesalePrice: Math.floor(Math.random() * 80) + 1 // سعر الجملة
