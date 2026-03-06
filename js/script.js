@@ -919,7 +919,7 @@
                 price: price,
                 barcode: barcode,
                 category: category,
-                image: `https://via.placeholder.com/80?text=${encodeURIComponent(name)}`,
+                image: `background.png`,
                 stock: stock,
                 minStock: 5,
                 wholesalePrice: price * 0.8 // سعر الجملة 80% من سعر التجزئة
