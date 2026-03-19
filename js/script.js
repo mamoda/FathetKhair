@@ -126,7 +126,7 @@ generateProducts() {
     ];
     
     // استخدام صورة واحدة من مجلد assets لجميع المنتجات
-    const defaultProductImage = './assets/background.png';
+    const defaultProductImage = '/assets/background.png';
 
     // أسماء منتجات حقيقية
     const productNames = {
