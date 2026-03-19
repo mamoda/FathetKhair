@@ -96,7 +96,7 @@ h6 { font-size: 1rem; }
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: url(asstets/background-pattern.png) no-repeat center/cover;
+    background: url(../assets/background-pattern.png) no-repeat center/cover;
     padding: 20px;
     position: relative;
     overflow: hidden;
