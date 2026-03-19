@@ -118,62 +118,49 @@ class Database {
         }
     }
 
-    generateProducts() {
-        const products = [];
-        const categories = [
-            "مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", 
-            "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"
-        ];
+generateProducts() {
+    const products = [];
+    const categories = [
+        "مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", 
+        "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"
+    ];
+    
+    // استخدام صورة واحدة من مجلد assets لجميع المنتجات
+    const defaultProductImage = 'assets/background.png';
+
+    // أسماء منتجات حقيقية
+    const productNames = {
+        "مأكولات": ["أرز مصرى", "سكر أبيض", "دقيق القمح", "زيت زيتون", "عسل نحل", "معكرونة", "عدس أصفر", "فول مدمس", "حمص شامي", "فاصوليا بيضاء"],
+        "مشروبات": ["شاي أحمد", "قهوة تركية", "نسكافيه", "عصير برتقال", "مياه معدنية", "بيبسي", "سفن أب", "شاي ليبتون", "قهوة نسكافيه", "عصير مانجو"],
+        "منتجات الألبان": ["حليب طازج", "جبنة رومي", "زبادي طبيعي", "قشطة", "لبنة", "جبنة فيتا", "حليب مجفف", "زبدة", "جبنة شيدر", "روب"],
+        "الفواكه": ["تفاح", "برتقال", "موز", "فراولة", "عنب", "مانجو", "بطيخ", "شمام", "كمثرى", "خوخ"],
+        "الخضروات": ["طماطم", "خيار", "جزر", "بصل", "ثوم", "فلفل رومي", "بطاطس", "باذنجان", "كوسة", "خس"],
+        "اللحوم": ["لحم بقري", "لحم ضأن", "دجاج طازج", "سمك بلطي", "جمبري", "كبدة", "لحم مفروم", "دجاج مجمد", "سجق", "همبرجر"],
+        "المخبوزات": ["خبز بلدي", "خبز توست", "كعك", "بسكويت", "كرواسون", "دونات", "كيك", "معمول", "بقلاوة", "كنافة"],
+        "الحلويات": ["شوكولاتة", "حلوى جيلي", "آيس كريم", "مهلبية", "أم علي", "بسبوسة", "قطايف", "لقيمات", "حلاوة طحينية", "ملبن"],
+        "الأدوات المنزلية": ["صابون أطباق", "منظف زجاج", "مطهر أرضيات", "منعم أقمشة", "كلور", "إسفنج", "مناديل ورقية", "أكياس قمامة", "شمع", "معطر جو"],
+        "العناية الشخصية": ["شامبو", "بلسم", "صابون", "معجون أسنان", "فرشاة أسنان", "مزيل عرق", "غسول وجه", "كريم ترطيب", "مستحضر حلاقة", "مناديل مبللة"]
+    };
+
+    for (let i = 1; i <= 100; i++) {
+        const category = categories[Math.floor(Math.random() * categories.length)];
+        const categoryProducts = productNames[category];
+        const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
         
-        // صور حقيقية للمنتجات من Pexels (مجانية للاستخدام)
-        const productImages = [
-            "https://images.pexels.com/photos/206959/pexels-photo-206959.jpeg?auto=compress&cs=tinysrgb&w=200", // برتقال
-            "https://images.pexels.com/photos/46174/strawberries-berries-fruit-freshness-46174.jpeg?auto=compress&cs=tinysrgb&w=200", // فراولة
-            "https://images.pexels.com/photos/225593/pexels-photo-225593.jpeg?auto=compress&cs=tinysrgb&w=200", // تفاح
-            "https://images.pexels.com/photos/4110257/pexels-photo-4110257.jpeg?auto=compress&cs=tinysrgb&w=200", // خضروات
-            "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200", // لحوم
-            "https://images.pexels.com/photos/699953/pexels-photo-699953.jpeg?auto=compress&cs=tinysrgb&w=200", // ألبان
-            "https://images.pexels.com/photos/461060/pexels-photo-461060.jpeg?auto=compress&cs=tinysrgb&w=200", // مخبوزات
-            "https://images.pexels.com/photos/65882/chocolate-dark-coffee-confiserie-65882.jpeg?auto=compress&cs=tinysrgb&w=200" // شوكولاتة
-        ];
-
-        // أسماء منتجات حقيقية
-        const productNames = {
-            "مأكولات": ["أرز مصرى", "سكر أبيض", "دقيق القمح", "زيت زيتون", "عسل نحل", "معكرونة", "عدس أصفر", "فول مدمس", "حمص شامي", "فاصوليا بيضاء"],
-            "مشروبات": ["شاي أحمد", "قهوة تركية", "نسكافيه", "عصير برتقال", "مياه معدنية", "بيبسي", "سفن أب", "شاي ليبتون", "قهوة نسكافيه", "عصير مانجو"],
-            "منتجات الألبان": ["حليب طازج", "جبنة رومي", "زبادي طبيعي", "قشطة", "لبنة", "جبنة فيتا", "حليب مجفف", "زبدة", "جبنة شيدر", "روب"],
-            "الفواكه": ["تفاح", "برتقال", "موز", "فراولة", "عنب", "مانجو", "بطيخ", "شمام", "كمثرى", "خوخ"],
-            "الخضروات": ["طماطم", "خيار", "جزر", "بصل", "ثوم", "فلفل رومي", "بطاطس", "باذنجان", "كوسة", "خس"],
-            "اللحوم": ["لحم بقري", "لحم ضأن", "دجاج طازج", "سمك بلطي", "جمبري", "كبدة", "لحم مفروم", "دجاج مجمد", "سجق", "همبرجر"],
-            "المخبوزات": ["خبز بلدي", "خبز توست", "كعك", "بسكويت", "كرواسون", "دونات", "كيك", "معمول", "بقلاوة", "كنافة"],
-            "الحلويات": ["شوكولاتة", "حلوى جيلي", "آيس كريم", "مهلبية", "أم علي", "بسبوسة", "قطايف", "لقيمات", "حلاوة طحينية", "ملبن"],
-            "الأدوات المنزلية": ["صابون أطباق", "منظف زجاج", "مطهر أرضيات", "منعم أقمشة", "كلور", "إسفنج", "مناديل ورقية", "أكياس قمامة", "شمع", "معطر جو"],
-            "العناية الشخصية": ["شامبو", "بلسم", "صابون", "معجون أسنان", "فرشاة أسنان", "مزيل عرق", "غسول وجه", "كريم ترطيب", "مستحضر حلاقة", "مناديل مبللة"]
-        };
-
-        for (let i = 1; i <= 100; i++) {
-            const category = categories[Math.floor(Math.random() * categories.length)];
-            const categoryProducts = productNames[category];
-            const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
-            
-            // اختيار صورة عشوائية من مجموعة الصور المتاحة
-            const randomImage = productImages[Math.floor(Math.random() * productImages.length)];
-            
-            products.push({
-                id: i,
-                name: productName,
-                price: Math.floor(Math.random() * 100) + 5,
-                barcode: this.generateBarcode(),
-                category: category,
-                image: randomImage,
-                stock: Math.floor(Math.random() * 100) + 10,
-                minStock: 5,
-                wholesalePrice: Math.floor(Math.random() * 80) + 3 // سعر الجملة
-            });
-        }
-        return products;
+        products.push({
+            id: i,
+            name: productName,
+            price: Math.floor(Math.random() * 100) + 5,
+            barcode: this.generateBarcode(),
+            category: category,
+            image: defaultProductImage, // استخدام نفس الصورة لجميع المنتجات
+            stock: Math.floor(Math.random() * 100) + 10,
+            minStock: 5,
+            wholesalePrice: Math.floor(Math.random() * 80) + 3 // سعر الجملة
+        });
     }
-
+    return products;
+}
     generateBarcode() {
         return 'EG' + Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
     }
