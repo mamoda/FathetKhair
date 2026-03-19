@@ -71,15 +71,174 @@
 
             <!-- المحتوى الرئيسي -->
             <div class="content-area">
-                <!-- القائمة الجانبية للمعاملات -->
+                <!-- القائمة الجانبية للمعاملات المحسنة -->
                 <aside class="transactions-sidebar" id="transactionsSidebar">
-                    <h3>                            
-                        <i class="bi bi-clock-history"></i>
-                        المعاملات الحديثة
-                    </h3>
-                    <ul class="transactions-list" id="transactionsList">
-                        <!-- سيتم ملء المعاملات ديناميكياً -->
-                    </ul>
+                    <div class="sidebar-header">
+                        <h3>
+                            <span>
+                                <i class="bi bi-clock-history"></i>
+                                لوحة التحكم
+                            </span>
+                            <button class="refresh-btn" id="refreshSidebar">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                        </h3>
+                        
+                        <!-- تبويبات القائمة الجانبية -->
+                        <div class="sidebar-tabs">
+                            <button class="tab-btn active" data-tab="transactions">
+                                <i class="bi bi-list-check"></i>
+                                المعاملات
+                            </button>
+                            <button class="tab-btn" data-tab="stats">
+                                <i class="bi bi-graph-up"></i>
+                                الإحصائيات
+                            </button>
+                            <button class="tab-btn" data-tab="alerts">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                التنبيهات
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- شريط البحث -->
+                    <div class="sidebar-search">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="sidebarSearch" placeholder="بحث في المعاملات...">
+                    </div>
+
+                    <!-- محتوى تبويب المعاملات -->
+                    <div class="tab-content active" id="transactionsTab">
+                        <!-- إحصائيات سريعة -->
+                        <div class="quick-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-cart"></i>
+                                </div>
+                                <div class="stat-value" id="todaySalesCount">0</div>
+                                <div class="stat-label">مبيعات اليوم</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                                <div class="stat-value" id="todayRevenue">0</div>
+                                <div class="stat-label">إيرادات اليوم</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="stat-value" id="activeCashiers">0</div>
+                                <div class="stat-label">كاشير نشط</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-box"></i>
+                                </div>
+                                <div class="stat-value" id="lowStock">0</div>
+                                <div class="stat-label">مخزون منخفض</div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin: 15px 0 10px; color: var(--gray-700);">
+                            <i class="bi bi-arrow-repeat"></i>
+                            آخر المعاملات
+                        </h4>
+                        <ul class="transactions-list" id="transactionsList">
+                            <!-- سيتم ملء المعاملات ديناميكياً -->
+                        </ul>
+
+                        <!-- المنتجات الأكثر مبيعاً -->
+                        <div class="top-products">
+                            <h4>
+                                <i class="bi bi-trophy"></i>
+                                الأكثر مبيعاً
+                            </h4>
+                            <div id="topProductsList">
+                                <!-- سيتم ملء القائمة ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- محتوى تبويب الإحصائيات -->
+                    <div class="tab-content" id="statsTab">
+                        <div class="performance-metrics">
+                            <div class="metric-item">
+                                <div class="metric-label">
+                                    <span>معدل المبيعات اليوم</span>
+                                    <span class="metric-value" id="dailySalesRate">85%</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="metric-progress" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-item">
+                                <div class="metric-label">
+                                    <span>دوران المخزون</span>
+                                    <span class="metric-value" id="inventoryTurnover">70%</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="metric-progress" style="width: 70%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-item">
+                                <div class="metric-label">
+                                    <span>رضا العملاء</span>
+                                    <span class="metric-value" id="customerSatisfaction">92%</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="metric-progress" style="width: 92%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الكاشير النشط -->
+                        <div class="active-cashiers">
+                            <h4>
+                                <i class="bi bi-person-badge"></i>
+                                الكاشير النشط
+                            </h4>
+                            <div id="activeCashiersList">
+                                <!-- سيتم ملء القائمة ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- محتوى تبويب التنبيهات -->
+                    <div class="tab-content" id="alertsTab">
+                        <div class="stock-alerts">
+                            <h4>
+                                <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning-color);"></i>
+                                تنبيهات المخزون
+                            </h4>
+                            <div id="stockAlertsList">
+                                <!-- سيتم ملء التنبيهات ديناميكياً -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- روابط سريعة -->
+                    <div class="quick-links">
+                        <a href="#" class="quick-link" onclick="showPage('productsPage')">
+                            <i class="bi bi-box"></i>
+                            المنتجات
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('invoicesPage')">
+                            <i class="bi bi-receipt"></i>
+                            الفواتير
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('inventoryPage')">
+                            <i class="bi bi-bar-chart"></i>
+                            المخزون
+                        </a>
+                        <a href="#" class="quick-link" onclick="showPage('reportsPage')">
+                            <i class="bi bi-pie-chart"></i>
+                            التقارير
+                        </a>
+                    </div>
                 </aside>
 
                 <!-- المحتوى الرئيسي للصفحات -->
