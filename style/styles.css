@@ -96,7 +96,7 @@ h6 { font-size: 1rem; }
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: url(background-pattern);
     padding: 20px;
     position: relative;
     overflow: hidden;
