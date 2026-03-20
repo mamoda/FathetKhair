@@ -1002,7 +1002,7 @@ function loadProducts() {
         const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
         
         productCard.innerHTML = `
-            <img src="${product.image}" onerror="this.src='https://via.placeholder.com/80'" alt="${product.name}">
+            <img src="${product.image}" onerror="this.src='/assets/background.png'" alt="${product.name}">
             <h4>${product.name}</h4>
             <div class="price">${product.price} جنيه</div>
             <div class="barcode">${product.barcode}</div>
