@@ -1089,6 +1089,7 @@ function showPage(pageId) {
 }
 
 // التعديل 2: تحسين وظيفة مسح الباركود لإضافة المنتج مباشرة
+// البحث بالباركود وإضافة المنتج مباشرة
 function searchByBarcode(barcode) {
     if (!barcode || barcode.trim() === '') {
         return;
@@ -1101,39 +1102,143 @@ function searchByBarcode(barcode) {
         
         // استمرار التركيز على حقل الباركود للمستخدم cashier
         if (currentUser && currentUser.role === 'cashier') {
-            barcodeInput.focus();
+            setTimeout(() => {
+                barcodeInput.focus();
+            }, 10);
         }
+        
+        // إضافة تأثير بصري عند إضافة المنتج بنجاح
+        barcodeInput.style.transition = 'all 0.2s';
+        barcodeInput.style.borderColor = '#28a745';
+        barcodeInput.style.boxShadow = '0 0 0 0.2rem rgba(40, 167, 69, 0.25)';
+        
+        setTimeout(() => {
+            barcodeInput.style.borderColor = '';
+            barcodeInput.style.boxShadow = '';
+        }, 300);
     } else {
-        // إذا كان المنتج غير موجود، نظهر رسالة ونستمر في التركيز
+        // إذا كان المنتج غير موجود
         alert('المنتج غير موجود!');
         barcodeInput.value = '';
+        
+        // تأثير للمنتج غير موجود
+        barcodeInput.style.transition = 'all 0.2s';
+        barcodeInput.style.borderColor = '#dc3545';
+        barcodeInput.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+        
+        setTimeout(() => {
+            barcodeInput.style.borderColor = '';
+            barcodeInput.style.boxShadow = '';
+        }, 300);
+        
         if (currentUser && currentUser.role === 'cashier') {
-            barcodeInput.focus();
+            setTimeout(() => {
+                barcodeInput.focus();
+            }, 10);
         }
     }
 }
 
-// مسح الباركود
-if (scanBarcodeBtn) {
-    scanBarcodeBtn.addEventListener('click', function() {
-        const barcode = barcodeInput.value.trim();
-        if (barcode) {
+// متغير لتتبع آخر قيمة تم معالجتها
+let lastProcessedBarcode = '';
+
+// مستمع الحدث لحقل الباركود - الإضافة المباشرة عند المسح
+if (barcodeInput) {
+    // إزالة أي مستمعات سابقة
+    const newBarcodeInput = barcodeInput.cloneNode(true);
+    barcodeInput.parentNode.replaceChild(newBarcodeInput, barcodeInput);
+    
+    // إعادة تعريف barcodeInput
+    window.barcodeInput = newBarcodeInput;
+    
+    // استخدام حدث input للإضافة المباشرة
+    newBarcodeInput.addEventListener('input', function(event) {
+        const barcode = newBarcodeInput.value.trim();
+        
+        // التأكد من أن الباركود ليس فارغاً ولم يتم معالجته مسبقاً
+        if (barcode && barcode !== lastProcessedBarcode) {
+            lastProcessedBarcode = barcode;
             searchByBarcode(barcode);
         }
     });
-}
-
-if (barcodeInput) {
-    barcodeInput.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {
-            const barcode = barcodeInput.value.trim();
-            if (barcode) {
-                searchByBarcode(barcode);
-            }
+    
+    // استخدام حدث change للتعامل مع الماسح الضوئي الذي قد لا يطلق حدث input
+    newBarcodeInput.addEventListener('change', function(event) {
+        const barcode = newBarcodeInput.value.trim();
+        
+        if (barcode && barcode !== lastProcessedBarcode) {
+            lastProcessedBarcode = barcode;
+            searchByBarcode(barcode);
         }
     });
+    
+    // إضافة خاصية تحديد النص عند التركيز لتسهيل المسح
+    newBarcodeInput.addEventListener('focus', function() {
+        this.select();
+        lastProcessedBarcode = ''; // إعادة تعيين القيمة الأخيرة عند التركيز
+    });
+    
+    // إضافة مستمع للصق (paste) للتعامل مع الماسح الضوئي الذي يلصق الباركود
+    newBarcodeInput.addEventListener('paste', function(event) {
+        // ننتظر قليلاً حتى يتم لصق النص بالكامل
+        setTimeout(() => {
+            const barcode = newBarcodeInput.value.trim();
+            if (barcode && barcode !== lastProcessedBarcode) {
+                lastProcessedBarcode = barcode;
+                searchByBarcode(barcode);
+            }
+        }, 50);
+    });
+    
+    // التركيز التلقائي عند تحميل الصفحة
+    if (currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            newBarcodeInput.focus();
+        }, 100);
+    }
 }
 
+// تحديث دالة showPage للتركيز على حقل الباركود
+function showPage(pageId) {
+    // إخفاء جميع الصفحات
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    // عرض الصفحة المحددة
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+        
+        // تحديث الفئة النشطة في الروابط السريعة
+        updateActiveQuickLink(pageId);
+    }
+    
+    // التركيز على حقل الباركود عند عرض صفحة الكاشير للمستخدم cashier
+    if (pageId === 'cashierPage' && currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            if (barcodeInput) {
+                barcodeInput.focus();
+                lastProcessedBarcode = ''; // إعادة تعيين القيمة الأخيرة
+            }
+        }, 100);
+    }
+    
+    // تحميل البيانات الخاصة بكل صفحة عند عرضها
+    if (pageId === 'productsPage') {
+        loadProductsTable();
+    } else if (pageId === 'barcodeMemoryPage') {
+        loadBarcodeMemoryPage();
+    } else if (pageId === 'invoicesPage') {
+        loadInvoicesPage();
+    } else if (pageId === 'wholesalePage') {
+        loadWholesalePage();
+    } else if (pageId === 'inventoryPage') {
+        loadInventoryPage();
+    } else if (pageId === 'reportsPage') {
+        loadReportsPage();
+    }
+}
 // تحميل المنتجات
 function loadProducts() {
     const products = db.getProducts();
