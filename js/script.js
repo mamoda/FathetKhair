@@ -153,7 +153,7 @@ generateProducts() {
             price: Math.floor(Math.random() * 100) + 5,
             barcode: this.generateBarcode(),
             category: category,
-            image: defaultProductImage, // استخدام نفس الصورة لجميع المنتجات
+            image: '/assets/background.png', // استخدام نفس الصورة لجميع المنتجات
             stock: Math.floor(Math.random() * 100) + 10,
             minStock: 5,
             wholesalePrice: Math.floor(Math.random() * 80) + 3 // سعر الجملة
