@@ -488,11 +488,11 @@ function addModalToHTML() {
                                     <th>الكمية</th>
                                     <th>السعر</th>
                                     <th>الإجمالي</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody id="modalInvoiceItems">
                             </tbody>
-                        </table>
+                         </table>
                     </div>
                     <div class="invoice-summary">
                         <div class="summary-row">
@@ -743,7 +743,19 @@ loginBtn.addEventListener('click', function() {
         loadProducts();
         loadRecentTransactions();
         updateSidebarData();
-        barcodeInput.focus();
+        
+        // التعديل 1: التركيز التلقائي على حقل الباركود للمستخدم cashier
+        if (currentUser.role === 'cashier') {
+            setTimeout(() => {
+                if (barcodeInput) {
+                    barcodeInput.focus();
+                }
+            }, 100);
+        } else {
+            if (barcodeInput) {
+                barcodeInput.focus();
+            }
+        }
     } else {
         alert('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
@@ -904,6 +916,15 @@ function showPage(pageId) {
     // عرض الصفحة المحددة
     document.getElementById(pageId).style.display = 'block';
     
+    // التعديل 1: التركيز التلقائي على حقل الباركود عند عرض صفحة الكاشير للمستخدم cashier
+    if (pageId === 'cashierPage' && currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            if (barcodeInput) {
+                barcodeInput.focus();
+            }
+        }, 100);
+    }
+    
     // تحميل البيانات الخاصة بكل صفحة عند عرضها
     if (pageId === 'productsPage') {
         loadProductsTable();
@@ -917,6 +938,31 @@ function showPage(pageId) {
         loadInventoryPage();
     } else if (pageId === 'reportsPage') {
         loadReportsPage();
+    }
+}
+
+// التعديل 2: تحسين وظيفة مسح الباركود لإضافة المنتج مباشرة
+function searchByBarcode(barcode) {
+    if (!barcode || barcode.trim() === '') {
+        return;
+    }
+    
+    const product = db.getProductByBarcode(barcode);
+    if (product) {
+        addToCart(product);
+        barcodeInput.value = '';
+        
+        // استمرار التركيز على حقل الباركود للمستخدم cashier
+        if (currentUser && currentUser.role === 'cashier') {
+            barcodeInput.focus();
+        }
+    } else {
+        // إذا كان المنتج غير موجود، نظهر رسالة ونستمر في التركيز
+        alert('المنتج غير موجود!');
+        barcodeInput.value = '';
+        if (currentUser && currentUser.role === 'cashier') {
+            barcodeInput.focus();
+        }
     }
 }
 
@@ -939,18 +985,6 @@ if (barcodeInput) {
             }
         }
     });
-}
-
-// البحث بالباركود
-function searchByBarcode(barcode) {
-    const product = db.getProductByBarcode(barcode);
-    if (product) {
-        addToCart(product);
-        barcodeInput.value = '';
-        barcodeInput.focus();
-    } else {
-        alert('المنتج غير موجود!');
-    }
 }
 
 // تحميل المنتجات
@@ -1145,10 +1179,10 @@ function loadProductsTable() {
             <td>${product.price} جنيه</td>
             <td>${product.stock}</td>
             <td>${product.category}</td>
-            <td>
+             <td>
                 <button class="action-btn edit-btn" data-id="${product.id}">تعديل</button>
                 <button class="action-btn delete-btn" data-id="${product.id}">حذف</button>
-            </td>
+             </td>
         `;
         productsTableBody.appendChild(row);
     });
@@ -1257,12 +1291,12 @@ function loadBarcodeMemoryPage() {
         const product = db.getProductById(item.productId);
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${item.barcode}</td>
-            <td>${product ? product.name : 'منتج غير معروف'}</td>
-            <td>${new Date(item.storedAt).toLocaleDateString('ar-EG')}</td>
-            <td>
+             <td>${item.barcode}</td>
+             <td>${product ? product.name : 'منتج غير معروف'}</td>
+             <td>${new Date(item.storedAt).toLocaleDateString('ar-EG')}</td>
+             <td>
                 <button class="action-btn delete-btn" data-id="${item.id}">حذف</button>
-            </td>
+             </td>
         `;
         barcodeMemoryTable.appendChild(row);
     });
@@ -1313,13 +1347,13 @@ function loadInvoicesPage() {
     sales.slice().reverse().forEach(sale => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${sale.id}</td>
-            <td>${new Date(sale.date).toLocaleDateString('ar-EG')}</td>
-            <td>${sale.cashier}</td>
-            <td>${sale.total.toFixed(2)} جنيه</td>
-            <td>
+             <td>${sale.id}</td>
+             <td>${new Date(sale.date).toLocaleDateString('ar-EG')}</td>
+             <td>${sale.cashier}</td>
+             <td>${sale.total.toFixed(2)} جنيه</td>
+             <td>
                 <button class="action-btn view-btn" data-id="${sale.id}">عرض التفاصيل</button>
-            </td>
+             </td>
         `;
         invoicesTableBody.appendChild(row);
     });
@@ -1367,14 +1401,14 @@ function loadWholesalePage() {
     wholesaleInvoices.slice().reverse().forEach(invoice => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${invoice.id}</td>
-            <td>${invoice.customer}</td>
-            <td>${new Date(invoice.date).toLocaleDateString('ar-EG')}</td>
-            <td>${invoice.discount}%</td>
-            <td>${invoice.total.toFixed(2)} جنيه</td>
-            <td>
+             <td>${invoice.id}</td>
+             <td>${invoice.customer}</td>
+             <td>${new Date(invoice.date).toLocaleDateString('ar-EG')}</td>
+             <td>${invoice.discount}%</td>
+             <td>${invoice.total.toFixed(2)} جنيه</td>
+             <td>
                 <button class="action-btn view-btn" data-id="${invoice.id}">عرض</button>
-            </td>
+             </td>
         `;
         wholesaleTableBody.appendChild(row);
     });
@@ -1630,14 +1664,14 @@ function loadInventoryPage() {
         
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${product.name}</td>
-            <td>${product.barcode}</td>
-            <td>${product.stock}</td>
-            <td>${lastUpdateDate}</td>
+             <td>${product.name}</td>
+             <td>${product.barcode}</td>
+             <td>${product.stock}</td>
+             <td>${lastUpdateDate}</td>
             <td class="${statusClass}">${status}</td>
-            <td>
+             <td>
                 <button class="action-btn edit-btn" data-id="${product.id}">تعديل المخزون</button>
-            </td>
+             </td>
         `;
         inventoryTableBody.appendChild(row);
     });
