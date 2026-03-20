@@ -1902,3 +1902,15 @@ h6 { font-size: 1rem; }
 .page.active {
     display: block;
 }
+
+/* تنسيق الرابط النشط في الروابط السريعة */
+.quick-link.active {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.quick-link.active i {
+    color: white;
+}

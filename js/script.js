@@ -721,6 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // وظيفة تسجيل الدخول
+// تحديث دالة تسجيل الدخول
 loginBtn.addEventListener('click', function() {
     const username = usernameInput.value;
     const password = passwordInput.value;
@@ -739,6 +740,7 @@ loginBtn.addEventListener('click', function() {
         dashboard.style.display = 'block';
         userDisplay.textContent = `مرحباً، ${username}`;
         loadSidebarMenu();
+        loadQuickLinks(); // إضافة هذه السطر لتحميل الروابط السريعة
         showPage('cashierPage');
         loadProducts();
         loadRecentTransactions();
@@ -761,6 +763,89 @@ loginBtn.addEventListener('click', function() {
     }
 });
 
+// تحديث دالة استعادة الجلسة
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionManager = new SessionManager();
+    const savedUser = sessionManager.getSession();
+    
+    if (savedUser) {
+        // استعادة الجلسة
+        currentUser = savedUser;
+        loginPage.style.display = 'none';
+        dashboard.style.display = 'block';
+        userDisplay.textContent = `مرحباً، ${savedUser.username}`;
+        loadSidebarMenu();
+        loadQuickLinks(); // إضافة هذه السطر لتحميل الروابط السريعة
+        showPage('cashierPage');
+        loadProducts();
+        loadRecentTransactions();
+        updateSidebarData();
+        
+        // تحديث وقت انتهاء الجلسة
+        sessionManager.refreshSession();
+        
+        if (barcodeInput) {
+            barcodeInput.focus();
+        }
+    } else {
+        loginPage.style.display = 'flex';
+        dashboard.style.display = 'none';
+    }
+});
+
+// تحديث دالة showPage لتحديث الروابط السريعة عند تغيير الصفحة (اختياري)
+function showPage(pageId) {
+    // إخفاء جميع الصفحات
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    // عرض الصفحة المحددة
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+        
+        // تحديث الفئة النشطة في الروابط السريعة
+        updateActiveQuickLink(pageId);
+    }
+    
+    // التعديل 1: التركيز التلقائي على حقل الباركود عند عرض صفحة الكاشير للمستخدم cashier
+    if (pageId === 'cashierPage' && currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            if (barcodeInput) {
+                barcodeInput.focus();
+            }
+        }, 100);
+    }
+    
+    // تحميل البيانات الخاصة بكل صفحة عند عرضها
+    if (pageId === 'productsPage') {
+        loadProductsTable();
+    } else if (pageId === 'barcodeMemoryPage') {
+        loadBarcodeMemoryPage();
+    } else if (pageId === 'invoicesPage') {
+        loadInvoicesPage();
+    } else if (pageId === 'wholesalePage') {
+        loadWholesalePage();
+    } else if (pageId === 'inventoryPage') {
+        loadInventoryPage();
+    } else if (pageId === 'reportsPage') {
+        loadReportsPage();
+    }
+}
+
+// دالة لتحديد الرابط النشط في الروابط السريعة
+function updateActiveQuickLink(activePage) {
+    const quickLinks = document.querySelectorAll('.quick-link');
+    quickLinks.forEach(link => {
+        const onclickAttr = link.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(activePage)) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
 // وظيفة تسجيل الخروج
 logoutBtn.addEventListener('click', function() {
     dashboard.style.display = 'none';
@@ -858,6 +943,68 @@ function loadSidebarMenu() {
     // تفعيل العنصر الأول في القائمة
     if (menuLinks.length > 0) {
         menuLinks[0].classList.add('active');
+    }
+}
+
+
+// دالة لتحميل الروابط السريعة حسب صلاحية المستخدم
+function loadQuickLinks() {
+    const quickLinksContainer = document.getElementById('quickLinks');
+    if (!quickLinksContainer) return;
+    
+    // مسح المحتوى الحالي
+    quickLinksContainer.innerHTML = '';
+    
+    // الروابط الأساسية المتاحة للجميع (الكاشير)
+    const baseQuickLinks = [
+        { page: 'cashierPage', icon: 'bi-cash-register', name: 'نقطة البيع', roles: ['cashier', 'admin', 'owner'] }
+    ];
+    
+    // الروابط المتاحة للإدمن والمالك فقط
+    const adminOwnerQuickLinks = [
+        { page: 'productsPage', icon: 'bi-box', name: 'المنتجات', roles: ['admin', 'owner'] },
+        { page: 'invoicesPage', icon: 'bi-receipt', name: 'الفواتير', roles: ['admin', 'owner', 'cashier'] },
+        { page: 'inventoryPage', icon: 'bi-bar-chart', name: 'المخزون', roles: ['admin', 'owner'] },
+        { page: 'reportsPage', icon: 'bi-pie-chart', name: 'التقارير', roles: ['admin', 'owner'] },
+        { page: 'barcodeMemoryPage', icon: 'bi-memory', name: 'ذاكرة الباركود', roles: ['admin', 'owner'] },
+        { page: 'wholesalePage', icon: 'bi-truck', name: 'الجملة', roles: ['admin', 'owner'] }
+    ];
+    
+    // دمج الروابط حسب دور المستخدم
+    let linksToShow = [];
+    
+    if (currentUser) {
+        // إضافة الروابط الأساسية المتاحة للجميع
+        baseQuickLinks.forEach(link => {
+            if (link.roles.includes(currentUser.role)) {
+                linksToShow.push(link);
+            }
+        });
+        
+        // إضافة روابط الإدمن والمالك
+        adminOwnerQuickLinks.forEach(link => {
+            if (link.roles.includes(currentUser.role)) {
+                linksToShow.push(link);
+            }
+        });
+    }
+    
+    // إنشاء عناصر الروابط السريعة
+    linksToShow.forEach(link => {
+        const quickLink = document.createElement('a');
+        quickLink.href = '#';
+        quickLink.className = 'quick-link';
+        quickLink.setAttribute('onclick', `showPage('${link.page}'); return false;`);
+        quickLink.innerHTML = `
+            <i class="bi ${link.icon}"></i>
+            ${link.name}
+        `;
+        quickLinksContainer.appendChild(quickLink);
+    });
+    
+    // إذا لم توجد روابط (لن يحدث هذا عادة)
+    if (linksToShow.length === 0) {
+        quickLinksContainer.innerHTML = '<p style="color: #666; text-align: center;">لا توجد روابط سريعة متاحة</p>';
     }
 }
 
