@@ -2351,3 +2351,90 @@ document.addEventListener('DOMContentLoaded', function() {
 window.showPage = showPage;
 window.updateSidebarData = updateSidebarData;
 window.expensesManager = expensesManager;
+
+// ==================== تهيئة الصفحة المحسنة ====================
+document.addEventListener('DOMContentLoaded', function() {
+    // محاولة استعادة الجلسة من localStorage أو sessionStorage
+    const sessionManager = new SessionManager();
+    const session = sessionManager.getSession();
+    
+    // التحقق من وجود مستخدم نشط
+    if (session && session.username) {
+        // استعادة المستخدم الحالي
+        currentUser = session;
+        
+        // تحديث واجهة المستخدم
+        loginPage.style.display = 'none';
+        dashboard.style.display = 'block';
+        userDisplay.textContent = 'مرحباً، ' + session.username;
+        
+        // تحميل جميع البيانات
+        loadSidebarMenu();
+        loadQuickLinks();
+        showPage('cashierPage');
+        loadProducts();
+        loadRecentTransactions();
+        updateSidebarData();
+        addBackupButton();
+        
+        // تفعيل التركيز على حقل الباركود
+        if (barcodeInput) barcodeInput.focus();
+        
+        // بدء النسخ الاحتياطي التلقائي
+        new BackupManager().setupAutoBackup();
+        
+        // تحديث الجلسة لمنع انتهائها
+        sessionManager.refreshSession();
+        
+        showNotification('تم استعادة الجلسة بنجاح', 'success');
+    } else {
+        // لا يوجد جلسة نشطة، عرض صفحة تسجيل الدخول
+        loginPage.style.display = 'flex';
+        dashboard.style.display = 'none';
+        
+        // تنظيف أي بيانات قديمة
+        cart = [];
+        wholesaleCart = [];
+        currentUser = null;
+    }
+    
+    // إعداد مستمعي الأحداث
+    setupEventListeners();
+    
+    // تحديث البيانات كل 30 ثانية
+    setInterval(updateSidebarData, 30000);
+    
+    // تحديث الجلسة كل 15 دقيقة
+    setInterval(() => {
+        if (currentUser) {
+            sessionManager.refreshSession();
+        }
+    }, 15 * 60 * 1000);
+});
+
+// دالة لتجميع جميع مستمعي الأحداث
+function setupEventListeners() {
+    // زر تقرير الأرباح
+    const generateBtn = document.getElementById('generateReportBtn');
+    if (generateBtn) generateBtn.addEventListener('click', generateAdvancedReport);
+    
+    // زر إضافة المصروف
+    const addExpense = document.getElementById('addExpenseBtn');
+    if (addExpense) {
+        addExpense.addEventListener('click', function() {
+            const name = document.getElementById('expenseName')?.value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount')?.value);
+            const category = document.getElementById('expenseCategory')?.value;
+            if (name && amount) {
+                expensesManager.addExpense({ name, amount, category });
+                document.getElementById('expenseName').value = '';
+                document.getElementById('expenseAmount').value = '';
+                loadExpensesTable();
+                updateSidebarData();
+                showNotification('تم إضافة المصروف', 'success');
+            } else {
+                alert('يرجى إدخال اسم المصروف والمبلغ');
+            }
+        });
+    }
+}
