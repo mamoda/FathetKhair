@@ -2390,7 +2390,7 @@ class LoadingScreen {
                             <div class="spinner-ring"></div>
                         </div>
                         <div style="margin-top: 30px; color: black; font-size: 18px; font-weight: bold;">
-                            جاري تحميل حسابات فتحة خير...
+                 جاري تحميل ...
                         </div>
                         <div style="margin-top: 10px; color: black; font-size: 14px;">
                             يرجى الانتظار
