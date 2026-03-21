@@ -3169,3 +3169,4 @@ document.addEventListener('DOMContentLoaded', function() {
     const backupManager = new BackupManager();
     backupManager.setupAutoBackup();
 });
+
