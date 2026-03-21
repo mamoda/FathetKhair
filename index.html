@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="assets/logo-new.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/logo-new.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta property="og:image"
+        content="https://scontent.fcai20-2.fna.fbcdn.net/v/t39.30808-6/646068811_879118491689701_6379108121376048601_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=2a1932&_nc_eui2=AeHGZ9LrKFUgRwT6iZLVapbaUlyWRTNW0hJSXJZFM1bSEvXbrCBU9RUzwH1vmtA3-kaD3B3Vi0DnI_DPm9WOnuxU&_nc_ohc=wGaVin82DaUQ7kNvwHP3JVd&_nc_oc=AdnoGEra8-GHriDO78S_9Emf6-EOtj4QlUIPcm08Y1EUjmr5eogVUN9St0cQuvQY72k&_nc_zt=23&_nc_ht=scontent.fcai20-2.fna&_nc_gid=zjNkq0RThUw44yJE2XZAEg&_nc_ss=8&oh=00_AfyXOGpSG7PB_4fSuI5sIpmhDH-CGZgn4i51eb9DZEoCyw&oe=69B0FDEC" />
+    <meta name="twitter:image"
+        content="https://scontent.fcai20-2.fna.fbcdn.net/v/t39.30808-6/646068811_879118491689701_6379108121376048601_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=2a1932&_nc_eui2=AeHGZ9LrKFUgRwT6iZLVapbaUlyWRTNW0hJSXJZFM1bSEvXbrCBU9RUzwH1vmtA3-kaD3B3Vi0DnI_DPm9WOnuxU&_nc_ohc=wGaVin82DaUQ7kNvwHP3JVd&_nc_oc=AdnoGEra8-GHriDO78S_9Emf6-EOtj4QlUIPcm08Y1EUjmr5eogVUN9St0cQuvQY72k&_nc_zt=23&_nc_ht=scontent.fcai20-2.fna&_nc_gid=zjNkq0RThUw44yJE2XZAEg&_nc_ss=8&oh=00_AfyXOGpSG7PB_4fSuI5sIpmhDH-CGZgn4i51eb9DZEoCyw&oe=69B0FDEC" />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="style/styles.css">
-    <title>إدارتــي | نظام إدارة الأعمال والشركات المتقدم</title>
+    <title>إدارتــي | نظام إدارة الأعمال والشركات</title>
 </head>
+
 <body>
     <!-- صفحة تسجيل الدخول -->
     <div class="login-container" id="loginPage">
-        <div class="login-form animate__animated animate__fadeIn">
-            <img src="assets/logo-new.png" alt="شعار" class="logo-login">
-            <h2>نظام إدارة الأعمال</h2>
+        <div class="login-form">
+            <img src="assets/logo-new.png" alt="شعار">
             <div class="form-group">
                 <label for="username">
                     <i class="bi bi-person"></i>
@@ -34,7 +38,9 @@
             </div>
             <div class="remember-me">
                 <input type="checkbox" id="rememberMe">
-                <label for="rememberMe">تذكرني</label>
+                <label for="rememberMe">
+                    تذكرني
+                </label>
             </div>
             <button class="btn" id="loginBtn">تسجيل الدخول</button>
         </div>
@@ -62,137 +68,515 @@
             <!-- القائمة الجانبية -->
             <aside class="sidebar">
                 <h3>القائمة الرئيسية</h3>
-                <ul class="sidebar-menu" id="sidebarMenu"></ul>
+                <ul class="sidebar-menu" id="sidebarMenu">
+                    <!-- سيتم ملء القائمة ديناميكياً حسب صلاحية المستخدم -->
+                </ul>
             </aside>
 
             <!-- المحتوى الرئيسي -->
             <div class="content-area">
+                <!-- القائمة الجانبية للمعاملات المحسنة -->
                 <aside class="transactions-sidebar" id="transactionsSidebar">
                     <div class="sidebar-header">
-                        <h3><span><i class="bi bi-clock-history"></i> لوحة التحكم</span>
-                            <button class="refresh-btn" id="refreshSidebar"><i class="bi bi-arrow-repeat"></i></button>
+                        <h3>
+                            <span>
+                                <i class="bi bi-clock-history"></i>
+                                لوحة التحكم
+                            </span>
+                            <button class="refresh-btn" id="refreshSidebar">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
                         </h3>
+
+                        <!-- تبويبات القائمة الجانبية -->
                         <div class="sidebar-tabs">
-                            <button class="tab-btn active" data-tab="transactions"><i class="bi bi-list-check"></i> المعاملات</button>
-                            <button class="tab-btn" data-tab="stats"><i class="bi bi-graph-up"></i> الإحصائيات</button>
-                            <button class="tab-btn" data-tab="alerts"><i class="bi bi-exclamation-triangle"></i> التنبيهات</button>
+                            <button class="tab-btn active" data-tab="transactions">
+                                <i class="bi bi-list-check"></i>
+                                المعاملات
+                            </button>
+                            <button class="tab-btn" data-tab="stats">
+                                <i class="bi bi-graph-up"></i>
+                                الإحصائيات
+                            </button>
+                            <button class="tab-btn" data-tab="alerts">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                التنبيهات
+                            </button>
                         </div>
                     </div>
+
+                    <!-- شريط البحث -->
                     <div class="sidebar-search">
                         <i class="bi bi-search"></i>
                         <input type="text" id="sidebarSearch" placeholder="بحث في المعاملات...">
                     </div>
+
+                    <!-- محتوى تبويب المعاملات -->
                     <div class="tab-content active" id="transactionsTab">
+                        <!-- إحصائيات سريعة -->
                         <div class="quick-stats">
-                            <div class="stat-card"><div class="stat-icon"><i class="bi bi-cart"></i></div><div class="stat-value" id="todaySalesCount">0</div><div class="stat-label">مبيعات اليوم</div></div>
-                            <div class="stat-card"><div class="stat-icon"><i class="bi bi-cash-stack"></i></div><div class="stat-value" id="todayRevenue">0</div><div class="stat-label">إيرادات اليوم</div></div>
-                            <div class="stat-card"><div class="stat-icon"><i class="bi bi-people"></i></div><div class="stat-value" id="activeCashiers">0</div><div class="stat-label">كاشير نشط</div></div>
-                            <div class="stat-card"><div class="stat-icon"><i class="bi bi-box"></i></div><div class="stat-value" id="lowStock">0</div><div class="stat-label">مخزون منخفض</div></div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-cart"></i>
+                                </div>
+                                <div class="stat-value" id="todaySalesCount">0</div>
+                                <div class="stat-label">مبيعات اليوم</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                                <div class="stat-value" id="todayRevenue">0</div>
+                                <div class="stat-label">إيرادات اليوم</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="stat-value" id="activeCashiers">0</div>
+                                <div class="stat-label">كاشير نشط</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-box"></i>
+                                </div>
+                                <div class="stat-value" id="lowStock">0</div>
+                                <div class="stat-label">مخزون منخفض</div>
+                            </div>
                         </div>
-                        <h4><i class="bi bi-arrow-repeat"></i> آخر المعاملات</h4>
-                        <ul class="transactions-list" id="transactionsList"></ul>
-                        <div class="top-products"><h4><i class="bi bi-trophy"></i> الأكثر مبيعاً</h4><div id="topProductsList"></div></div>
+
+                        <h4 style="margin: 15px 0 10px; color: var(--gray-700);">
+                            <i class="bi bi-arrow-repeat"></i>
+                            آخر المعاملات
+                        </h4>
+                        <ul class="transactions-list" id="transactionsList">
+                            <!-- سيتم ملء المعاملات ديناميكياً -->
+                        </ul>
+
+                        <!-- المنتجات الأكثر مبيعاً -->
+                        <div class="top-products">
+                            <h4>
+                                <i class="bi bi-trophy"></i>
+                                الأكثر مبيعاً
+                            </h4>
+                            <div id="topProductsList">
+                                <!-- سيتم ملء القائمة ديناميكياً -->
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- محتوى تبويب الإحصائيات -->
                     <div class="tab-content" id="statsTab">
                         <div class="performance-metrics">
-                            <div class="metric-item"><div class="metric-label"><span>معدل المبيعات اليوم</span><span class="metric-value" id="dailySalesRate">85%</span></div><div class="metric-bar"><div class="metric-progress" style="width: 85%"></div></div></div>
-                            <div class="metric-item"><div class="metric-label"><span>دوران المخزون</span><span class="metric-value" id="inventoryTurnover">70%</span></div><div class="metric-bar"><div class="metric-progress" style="width: 70%"></div></div></div>
-                            <div class="metric-item"><div class="metric-label"><span>رضا العملاء</span><span class="metric-value" id="customerSatisfaction">92%</span></div><div class="metric-bar"><div class="metric-progress" style="width: 92%"></div></div></div>
+                            <div class="metric-item">
+                                <div class="metric-label">
+                                    <span>معدل المبيعات اليوم</span>
+                                    <span class="metric-value" id="dailySalesRate">85%</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="metric-progress" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <div class="metric-item">
+                                <div class="metric-label">
+                                    <span>دوران المخزون</span>
+                                    <span class="metric-value" id="inventoryTurnover">70%</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="metric-progress" style="width: 70%"></div>
+                                </div>
+                            </div>
+
+                            <div class="metric-item">
+                                <div class="metric-label">
+                                    <span>رضا العملاء</span>
+                                    <span class="metric-value" id="customerSatisfaction">92%</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <div class="metric-progress" style="width: 92%"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="active-cashiers"><h4><i class="bi bi-person-badge"></i> الكاشير النشط</h4><div id="activeCashiersList"></div></div>
+
+                        <!-- الكاشير النشط -->
+                        <div class="active-cashiers">
+                            <h4>
+                                <i class="bi bi-person-badge"></i>
+                                الكاشير النشط
+                            </h4>
+                            <div id="activeCashiersList">
+                                <!-- سيتم ملء القائمة ديناميكياً -->
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- محتوى تبويب التنبيهات -->
                     <div class="tab-content" id="alertsTab">
-                        <div class="stock-alerts"><h4><i class="bi bi-exclamation-triangle-fill"></i> تنبيهات المخزون</h4><div id="stockAlertsList"></div></div>
-                    </div>
-                    <div class="quick-links" id="quickLinks"></div>
-                </aside>
-                <main class="pages-container">
-                    <!-- صفحة الكاشير -->
-                    <div class="page active" id="cashierPage">
-                        <h2><i class="bi bi-cash-register"></i> نقطة البيع</h2>
-                        <div class="pos-header">
-                            <div class="barcode-section"><h3>مسح الباركود</h3><div class="barcode-input"><input type="text" id="barcodeInput" placeholder="أدخل الباركود أو استخدم الماسح الضوئي"></div></div>
-                            <div class="customer-section"><h3>بيانات العميل</h3><div class="customer-input"><input type="text" id="customerPhone" placeholder="رقم الهاتف (لنقاط الولاء)"><button id="searchCustomerBtn" class="btn-sm"><i class="bi bi-search"></i> بحث</button></div></div>
+                        <div class="stock-alerts">
+                            <h4>
+                                <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning-color);"></i>
+                                تنبيهات المخزون
+                            </h4>
+                            <div id="stockAlertsList">
+                                <!-- سيتم ملء التنبيهات ديناميكياً -->
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- روابط سريعة -->
+                    <div class="quick-links" id="quickLinks">
+                        <!-- سيتم إضافة الروابط ديناميكياً حسب صلاحية المستخدم -->
+                    </div>
+                </aside>
+
+                <!-- المحتوى الرئيسي للصفحات -->
+                <main class="pages-container">
+                    <!-- صفحة الكاشير (للكاشير والأدمن) -->
+                    <div class="page active" id="cashierPage">
+                        <h2>
+                            <i class="bi bi-cash-register"></i>
+                            نقطة البيع
+                        </h2>
+                        <section class="barcode-section">
+                            <h3>مسح الباركود</h3>
+                            <div class="barcode-input">
+                                <input type="text" id="barcodeInput"
+                                    placeholder="أدخل الباركود أو استخدم الماسح الضوئي">
+                            </div>
+                        </section>
+
                         <div class="pos-container">
-                            <section class="products-section"><h3><i class="bi bi-grid-3x3-gap-fill"></i> المنتجات</h3><div class="products-grid" id="productsGrid"></div></section>
-                            <section class="cart-section"><h3><i class="bi bi-cart"></i> سلة المشتريات</h3><div class="cart-items" id="cartItems"></div>
-                                <div class="cart-summary"><div class="summary-row"><span>المجموع الفرعي:</span><span id="subtotal">0.00 جنيه</span></div>
-                                <div class="summary-row" id="discountRow" style="display:none;"><span>خصم الفاتورة:</span><span id="discountAmount">0.00 جنيه</span></div>
-                                <div class="summary-row"><span>الضريبة (14%):</span><span id="tax">0.00 جنيه</span></div>
-                                <div class="summary-row total"><span>الإجمالي:</span><span id="total">0.00 جنيه</span></div>
-                                <div class="summary-row"><span>نقاط الولاء:</span><span id="loyaltyPoints">0</span></div>
-                                <button class="checkout-btn" id="checkoutBtn"><i class="bi bi-check-circle"></i> إتمام الشراء</button></div>
+                            <section class="products-section">
+                                <h3>
+                                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                                    المنتجات
+                                </h3>
+                                <div class="products-grid" id="productsGrid">
+                                    <!-- سيتم ملء المنتجات ديناميكياً -->
+                                </div>
+                            </section>
+
+                            <section class="cart-section">
+                                <h3>
+                                    <i class="bi bi-cart"></i>
+                                    سلة المشتريات
+                                </h3>
+                                <div class="cart-items" id="cartItems">
+                                    <!-- سيتم ملء عناصر السلة ديناميكياً -->
+                                </div>
+                                <div class="cart-summary">
+                                    <div class="summary-row">
+                                        <span>المجموع الفرعي:</span>
+                                        <span id="subtotal">0.00 جنيه</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>الضريبة (14%):</span>
+                                        <span id="tax">0.00 جنيه</span>
+                                    </div>
+                                    <div class="summary-row total">
+                                        <span>الإجمالي:</span>
+                                        <span id="total">0.00 جنيه</span>
+                                    </div>
+                                    <button class="checkout-btn" id="checkoutBtn">
+                                        <i class="bi bi-check-circle"></i>
+                                        إتمام الشراء
+                                    </button>
+                                </div>
                             </section>
                         </div>
                     </div>
-                    <!-- صفحة إدارة المنتجات -->
-                    <div class="page" id="productsPage"><h2><i class="bi bi-boxes"></i> إدارة المنتجات</h2>
-                        <div class="form-card"><h3>إضافة منتج جديد</h3>
-                            <div class="form-row"><div class="form-group"><label>اسم المنتج</label><input type="text" id="productName" placeholder="اسم المنتج"></div>
-                            <div class="form-group"><label>سعر البيع</label><input type="number" id="productPrice" placeholder="سعر البيع"></div></div>
-                            <div class="form-row"><div class="form-group"><label>سعر التكلفة</label><input type="number" id="productCost" placeholder="سعر التكلفة"></div>
-                            <div class="form-group"><label>سعر الجملة</label><input type="number" id="productWholesale" placeholder="سعر الجملة"></div></div>
-                            <div class="form-row"><div class="form-group"><label>الباركود</label><input type="text" id="productBarcode" placeholder="الباركود"></div>
-                            <div class="form-group"><label>الفئة</label><select id="productCategory"></select></div></div>
-                            <div class="form-row"><div class="form-group"><label>المخزون</label><input type="number" id="productStock" placeholder="الكمية"></div>
-                            <div class="form-group"><button class="btn" id="addProductBtn"><i class="bi bi-plus-circle"></i> إضافة منتج</button></div></div>
+
+                    <!-- صفحة إدارة المنتجات (للأدمن فقط) -->
+                    <div class="page" id="productsPage">
+                        <h2>
+                            <i class="bi bi-boxes"></i>
+                            إدارة المنتجات
+                        </h2>
+                        <div class="form-card">
+                            <h3>إضافة منتج جديد</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="productName">اسم المنتج</label>
+                                    <input type="text" id="productName" placeholder="أدخل اسم المنتج">
+                                </div>
+                                <div class="form-group">
+                                    <label for="productPrice">السعر (جنيه)</label>
+                                    <input type="number" id="productPrice" placeholder="أدخل السعر">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="productBarcode">الباركود</label>
+                                    <input type="text" id="productBarcode" placeholder="أدخل الباركود">
+                                </div>
+                                <div class="form-group">
+                                    <label for="productCategory">الفئة</label>
+                                    <select id="productCategory">
+                                        <option value="مأكولات">مأكولات</option>
+                                        <option value="مشروبات">مشروبات</option>
+                                        <option value="منتجات الألبان">منتجات الألبان</option>
+                                        <option value="الفواكه">الفواكه</option>
+                                        <option value="الخضروات">الخضروات</option>
+                                        <option value="اللحوم">اللحوم</option>
+                                        <option value="المخبوزات">المخبوزات</option>
+                                        <option value="الحلويات">الحلويات</option>
+                                        <option value="الأدوات المنزلية">الأدوات المنزلية</option>
+                                        <option value="العناية الشخصية">العناية الشخصية</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="productStock">المخزون</label>
+                                    <input type="number" id="productStock" placeholder="أدخل كمية المخزون">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn" id="addProductBtn">
+                                        <i class="bi bi-plus-circle"></i>
+                                        إضافة منتج
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="table-card"><h3>قائمة المنتجات</h3><table class="products-table"><thead><tr><th>الباركود</th><th>اسم المنتج</th><th>سعر البيع</th><th>سعر التكلفة</th><th>الربح</th><th>المخزون</th><th>الفئة</th><th>الإجراءات</th></tr></thead><tbody id="productsTableBody"></tbody></table></div>
-                    </div>
-                    <!-- صفحة العروض والخصومات -->
-                    <div class="page" id="offersPage"><h2><i class="bi bi-tags"></i> إدارة العروض والخصومات</h2>
-                        <div class="form-card"><h3>إضافة عرض جديد</h3>
-                            <div class="form-row"><div class="form-group"><label>اسم العرض</label><input type="text" id="offerName" placeholder="مثال: عرض 2+1 مجاناً"></div>
-                            <div class="form-group"><label>نوع العرض</label><select id="offerType"><option value="percentage">نسبة مئوية</option><option value="buyXGetY">اشتر X واحصل على Y مجاناً</option><option value="fixed">خصم ثابت</option></select></div></div>
-                            <div class="form-row"><div class="form-group"><label>قيمة الخصم</label><input type="number" id="offerValue" placeholder="نسبة أو قيمة"></div>
-                            <div class="form-group"><label>المنتج المستهدف</label><select id="offerProduct"></select></div></div>
-                            <div class="form-row"><div class="form-group"><label>من تاريخ</label><input type="date" id="offerStartDate"></div>
-                            <div class="form-group"><label>إلى تاريخ</label><input type="date" id="offerEndDate"></div></div>
-                            <div class="form-row"><div class="form-group"><button class="btn" id="addOfferBtn"><i class="bi bi-plus-circle"></i> إضافة العرض</button></div></div>
+
+                        <div class="table-card">
+                            <h3>
+                                <i class="bi bi-list-ul"></i>
+                                قائمة المنتجات
+                            </h3>
+                            <table class="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>الباركود</th>
+                                        <th>اسم المنتج</th>
+                                        <th>السعر</th>
+                                        <th>المخزون</th>
+                                        <th>الفئة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTableBody">
+                                    <!-- سيتم ملء الجدول ديناميكياً -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="table-card"><h3>العروض النشطة</h3><table class="offers-table"><thead><tr><th>اسم العرض</th><th>النوع</th><th>القيمة</th><th>المنتج</th><th>المدة</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="offersTableBody"></tbody></table></div>
                     </div>
-                    <!-- صفحة العملاء ونقاط الولاء -->
-                    <div class="page" id="customersPage"><h2><i class="bi bi-people"></i> إدارة العملاء ونقاط الولاء</h2>
-                        <div class="form-card"><h3>إضافة عميل جديد</h3>
-                            <div class="form-row"><div class="form-group"><label>اسم العميل</label><input type="text" id="customerName" placeholder="الاسم الكامل"></div>
-                            <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="customerPhoneReg" placeholder="رقم الهاتف"></div></div>
-                            <div class="form-row"><div class="form-group"><button class="btn" id="addCustomerBtn"><i class="bi bi-person-plus"></i> إضافة عميل</button></div></div>
+
+                    <!-- صفحة تخزين الباركود في الذاكرة (للأدمن فقط) -->
+                    <div class="page" id="barcodeMemoryPage">
+                        <h2>
+                            <i class="bi bi-memory"></i>
+                            تخزين الباركود في الذاكرة
+                        </h2>
+                        <div class="form-card">
+                            <h3>
+                                <i class="bi bi-save"></i>
+                                حفظ باركود جديد
+                            </h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="memoryBarcode">الباركود</label>
+                                    <input type="text" id="memoryBarcode" placeholder="أدخل الباركود">
+                                </div>
+                                <div class="form-group">
+                                    <label for="memoryProduct">المنتج المرتبط</label>
+                                    <select id="memoryProduct">
+                                        <!-- سيتم ملء الخيارات ديناميكياً -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <button class="btn" id="saveBarcodeBtn">
+                                        <i class="bi bi-save"></i>
+                                        حفظ الباركود
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="table-card"><h3>قائمة العملاء</h3><table class="customers-table"><thead><tr><th>الاسم</th><th>الهاتف</th><th>نقاط الولاء</th><th>إجمالي المشتريات</th><th>آخر شراء</th><th>الإجراءات</th></tr></thead><tbody id="customersTableBody"></tbody></table></div>
-                        <div class="form-card"><h3>تحويل النقاط إلى خصم</h3><div class="form-row"><div class="form-group"><label>اختر العميل</label><select id="redeemCustomer"></select></div><div class="form-group"><label>عدد النقاط للاستبدال</label><input type="number" id="redeemPoints" placeholder="100 نقطة = 10 جنيه"></div><div class="form-group"><button class="btn" id="redeemPointsBtn"><i class="bi bi-gift"></i> استبدال النقاط</button></div></div></div>
-                    </div>
-                    <!-- صفحة التقارير المتقدمة -->
-                    <div class="page" id="reportsPage"><h2><i class="bi bi-pie-chart"></i> التقارير والإحصائيات المتقدمة</h2>
-                        <div class="form-card"><div class="form-row"><div class="form-group"><label>من تاريخ</label><input type="date" id="reportDateFrom"></div><div class="form-group"><label>إلى تاريخ</label><input type="date" id="reportDateTo"></div><div class="form-group"><label>نوع التقرير</label><select id="reportType"><option value="sales">تقرير المبيعات</option><option value="profit">تقرير الأرباح</option><option value="products">أكثر المنتجات مبيعاً</option><option value="customers">أفضل العملاء</option></select></div><div class="form-group"><button class="btn" id="generateReportBtn">إنشاء التقرير</button><button class="btn" id="exportReportBtn"><i class="bi bi-download"></i> تصدير Excel</button></div></div></div>
-                        <div id="reportResults" class="table-card"></div>
-                        <div class="form-card"><h3>إحصائيات الربحية</h3><div id="profitStats" class="profit-stats"></div></div>
-                    </div>
-                    <!-- صفحة المصروفات -->
-                    <div class="page" id="expensesPage"><h2><i class="bi bi-receipt"></i> إدارة المصروفات</h2>
-                        <div class="form-card"><h3>تسجيل مصروف جديد</h3>
-                            <div class="form-row"><div class="form-group"><label>نوع المصروف</label><select id="expenseType"><option value="rent">إيجار</option><option value="salary">رواتب</option><option value="utilities">فواتير</option><option value="maintenance">صيانة</option><option value="other">أخرى</option></select></div>
-                            <div class="form-group"><label>المبلغ</label><input type="number" id="expenseAmount" placeholder="المبلغ"></div></div>
-                            <div class="form-row"><div class="form-group"><label>الوصف</label><input type="text" id="expenseDesc" placeholder="وصف المصروف"></div>
-                            <div class="form-group"><button class="btn" id="addExpenseBtn"><i class="bi bi-plus-circle"></i> إضافة مصروف</button></div></div>
+
+                        <div class="table-card">
+                            <h3>
+                                <i class="bi bi-database"></i>
+                                الباركود المخزن
+                            </h3>
+                            <table class="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>الباركود</th>
+                                        <th>اسم المنتج</th>
+                                        <th>تاريخ التخزين</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="barcodeMemoryTable">
+                                    <!-- سيتم ملء الجدول ديناميكياً -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="table-card"><h3>سجل المصروفات</h3><table class="expenses-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>الوصف</th><th>المبلغ</th><th>الإجراءات</th></tr></thead><tbody id="expensesTableBody"></tbody></table></div>
-                        <div class="profit-stats"><h3>ملخص الربحية</h3><div id="profitSummary"></div></div>
                     </div>
-                    <!-- باقي الصفحات -->
-                    <div class="page" id="barcodeMemoryPage"><h2><i class="bi bi-memory"></i> تخزين الباركود</h2><div class="form-card"><div class="form-row"><div class="form-group"><label>الباركود</label><input type="text" id="memoryBarcode"></div><div class="form-group"><label>المنتج</label><select id="memoryProduct"></select></div><div class="form-group"><button class="btn" id="saveBarcodeBtn">حفظ</button></div></div></div><div class="table-card"><table class="products-table"><thead><tr><th>الباركود</th><th>المنتج</th><th>التاريخ</th><th>إجراءات</th></tr></thead><tbody id="barcodeMemoryTable"></tbody></table></div></div>
-                    <div class="page" id="invoicesPage"><h2><i class="bi bi-receipt"></i> الفواتير</h2><div class="search-box"><input type="text" id="invoiceSearch" placeholder="بحث..."></div><div class="table-card"><table class="invoices-table"><thead><tr><th>رقم</th><th>التاريخ</th><th>الكاشير</th><th>العميل</th><th>المجموع</th><th>الإجراءات</th></tr></thead><tbody id="invoicesTableBody"></tbody></table></div></div>
-                    <div class="page" id="wholesalePage"><h2><i class="bi bi-truck"></i> فواتير الجملة</h2><div class="form-card"><div class="form-row"><div class="form-group"><label>اسم العميل</label><input type="text" id="wholesaleCustomer"></div><div class="form-group"><label>خصم الجملة %</label><input type="number" id="wholesaleDiscount" value="10"></div></div><div class="barcode-input"><input type="text" id="wholesaleBarcode" placeholder="باركود المنتج"><button id="addWholesaleProductBtn">إضافة</button></div><div class="cart-items" id="wholesaleCartItems"></div><div class="cart-summary"><div class="summary-row"><span>المجموع الفرعي:</span><span id="wholesaleSubtotal">0</span></div><div class="summary-row"><span>خصم الجملة:</span><span id="wholesaleDiscountAmount">0</span></div><div class="summary-row"><span>الضريبة:</span><span id="wholesaleTax">0</span></div><div class="summary-row total"><span>الإجمالي:</span><span id="wholesaleTotal">0</span></div><button class="checkout-btn" id="wholesaleCheckoutBtn">إتمام الفاتورة</button></div></div><div class="table-card"><table class="wholesale-table"><thead><tr><th>رقم</th><th>العميل</th><th>التاريخ</th><th>الخصم</th><th>المجموع</th><th>إجراءات</th></tr></thead><tbody id="wholesaleTableBody"></tbody></table></div></div>
-                    <div class="page" id="inventoryPage"><h2><i class="bi bi-bar-chart"></i> إدارة المخزون</h2><div class="search-box"><input type="text" id="inventorySearch" placeholder="بحث..."></div><div class="table-card"><table class="inventory-table"><thead><tr><th>المنتج</th><th>الباركود</th><th>المخزون</th><th>الحد الأدنى</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="inventoryTableBody"></tbody></table></div></div>
+
+                    <!-- صفحة الفواتير (للأدمن فقط) -->
+                    <div class="page" id="invoicesPage">
+                        <h2>
+                            <i class="bi bi-receipt"></i>
+                            تخزين وإدارة الفواتير
+                        </h2>
+                        <div class="search-box">
+                            <input type="text" id="invoiceSearch" placeholder="ابحث برقم الفاتورة أو اسم الكاشير...">
+                        </div>
+                        <div class="table-card">
+                            <table class="invoices-table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم الفاتورة</th>
+                                        <th>التاريخ</th>
+                                        <th>الكاشير</th>
+                                        <th>المجموع</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoicesTableBody">
+                                    <!-- سيتم ملء الجدول ديناميكياً -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- صفحة فواتير الجملة (للأدمن فقط) -->
+                    <div class="page" id="wholesalePage">
+                        <h2>
+                            <i class="bi bi-truck"></i>
+                            فواتير الجملة
+                        </h2>
+                        <div class="form-card">
+                            <h3>فاتورة جملة جديدة</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="wholesaleCustomer">اسم العميل</label>
+                                    <input type="text" id="wholesaleCustomer" placeholder="أدخل اسم العميل">
+                                </div>
+                                <div class="form-group">
+                                    <label for="wholesaleDiscount">خصم الجملة (%)</label>
+                                    <input type="number" id="wholesaleDiscount" value="10" min="0" max="100">
+                                </div>
+                            </div>
+
+                            <div class="barcode-input" style="margin-bottom: 15px;">
+                                <input type="text" id="wholesaleBarcode" placeholder="أدخل باركود المنتج">
+                                <button id="addWholesaleProductBtn">إضافة</button>
+                            </div>
+
+                            <div class="cart-items" id="wholesaleCartItems"
+                                style="max-height: 300px; margin-bottom: 20px;">
+                                <!-- سيتم ملء عناصر سلة الجملة هنا -->
+                            </div>
+
+                            <div class="cart-summary">
+                                <div class="summary-row">
+                                    <span>المجموع الفرعي:</span>
+                                    <span id="wholesaleSubtotal">0.00 جنيه</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>خصم الجملة:</span>
+                                    <span id="wholesaleDiscountAmount">0.00 جنيه</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>الضريبة (14%):</span>
+                                    <span id="wholesaleTax">0.00 جنيه</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>الإجمالي بعد الخصم:</span>
+                                    <span id="wholesaleTotal">0.00 جنيه</span>
+                                </div>
+                                <button class="checkout-btn" id="wholesaleCheckoutBtn">
+                                    <i class="bi bi-check-circle"></i>
+                                    إتمام فاتورة الجملة
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-card">
+                            <h4>فواتير الجملة السابقة</h4>
+                            <table class="wholesale-table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم الفاتورة</th>
+                                        <th>العميل</th>
+                                        <th>التاريخ</th>
+                                        <th>الخصم</th>
+                                        <th>المجموع</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wholesaleTableBody">
+                                    <!-- سيتم ملء الجدول ديناميكياً -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- صفحة إدارة المخزون (للأدمن فقط) -->
+                    <div class="page" id="inventoryPage">
+                        <h2>
+                            <i class="bi bi-bar-chart"></i>
+                            إدارة المخزون
+                        </h2>
+                        <div class="search-box">
+                            <input type="text" id="inventorySearch" placeholder="ابحث باسم المنتج أو الباركود...">
+                        </div>
+                        <div class="table-card">
+                            <table class="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم المنتج</th>
+                                        <th>الباركود</th>
+                                        <th>المخزون الحالي</th>
+                                        <th>آخر تحديث</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryTableBody">
+                                    <!-- سيتم ملء الجدول ديناميكياً -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- صفحة التقارير (للأدمن فقط) -->
+                    <div class="page" id="reportsPage">
+                        <h2>
+                            <i class="bi bi-pie-chart"></i>
+                            التقارير والإحصائيات
+                        </h2>
+                        <div class="form-card">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="reportDateFrom">من تاريخ</label>
+                                    <input type="date" id="reportDateFrom">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reportDateTo">إلى تاريخ</label>
+                                    <input type="date" id="reportDateTo">
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn" id="generateReportBtn">إنشاء التقرير</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="reportResults" class="table-card">
+                            <!-- سيتم عرض نتائج التقرير هنا -->
+                        </div>
+                    </div>
                 </main>
             </div>
         </div>
     </div>
 
-    <!-- نافذة عرض الفاتورة -->
-    <div id="invoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h2>تفاصيل الفاتورة</h2><span class="close-modal">&times;</span></div><div class="modal-body"><div class="invoice-header"><div class="invoice-info"><p><strong>رقم الفاتورة:</strong> <span id="modalInvoiceNumber"></span></p><p><strong>التاريخ:</strong> <span id="modalInvoiceDate"></span></p><p><strong>الكاشير:</strong> <span id="modalCashier"></span></p><p id="customerInfo" style="display:none;"><strong>العميل:</strong> <span id="modalCustomer"></span></p><p><strong>نقاط الولاء:</strong> <span id="modalPoints"></span></p></div></div><div class="invoice-items"><table class="items-table"><thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody id="modalInvoiceItems"></tbody></table></div><div class="invoice-summary"><div class="summary-row"><span>المجموع الفرعي:</span><span id="modalSubtotal"></span></div><div class="summary-row" id="discountRowModal" style="display:none;"><span>الخصم:</span><span id="modalDiscount"></span></div><div class="summary-row"><span>الضريبة:</span><span id="modalTax"></span></div><div class="summary-row total"><span>الإجمالي:</span><span id="modalTotal"></span></div></div></div><div class="modal-footer"><button id="printInvoiceBtn" class="action-btn"><i class="bi bi-printer"></i> طباعة</button><button id="sendWhatsAppBtn" class="action-btn"><i class="bi bi-whatsapp"></i> WhatsApp</button><button id="closeModalBtn" class="action-btn">إغلاق</button></div></div></div>
-
     <script src="js/script.js"></script>
 </body>
+
 </html>

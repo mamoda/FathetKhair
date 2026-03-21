@@ -1,30 +1,29 @@
-// ==================== إعدادات النظام المتقدمة ====================
-const TAX_RATE = 0.14; // 14% ضريبة القيمة المضافة
-const POINTS_RATE = 0.01; // كل 100 جنيه = 1 نقطة (1 نقطة = 0.1 جنيه)
-const POINTS_VALUE = 0.1; // قيمة النقطة الواحدة بالجنيه
-const LOW_STOCK_THRESHOLD = 10; // حد التنبيه للمخزون المنخفض
-
-// ==================== إدارة الجلسات ====================
+// نظام إدارة الجلسات
 class SessionManager {
     constructor() {
         this.currentSessionKey = 'currentSession';
     }
 
+    // حفظ جلسة المستخدم
     saveSession(user, rememberMe = false) {
         const sessionData = {
             user: user,
             loginTime: new Date().toISOString(),
-            expiresAt: new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000).toISOString()
+            expiresAt: new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000).toISOString() // 30 يوم إذا تم التذكر، يوم واحد إذا لم يتم
         };
         
         if (rememberMe) {
+            // استخدام localStorage للتذكر الدائم
             localStorage.setItem(this.currentSessionKey, JSON.stringify(sessionData));
         } else {
+            // استخدام sessionStorage للجلسة المؤقتة
             sessionStorage.setItem(this.currentSessionKey, JSON.stringify(sessionData));
         }
     }
 
+    // استعادة جلسة المستخدم
     getSession() {
+        // البحث في localStorage أولاً ثم sessionStorage
         let sessionData = localStorage.getItem(this.currentSessionKey);
         let storageType = 'localStorage';
         
@@ -37,6 +36,7 @@ class SessionManager {
 
         const session = JSON.parse(sessionData);
         
+        // التحقق من انتهاء صلاحية الجلسة
         if (new Date() > new Date(session.expiresAt)) {
             this.clearSession();
             return null;
@@ -45,12 +45,15 @@ class SessionManager {
         return session.user;
     }
 
+    // مسح جلسة المستخدم
     clearSession() {
         localStorage.removeItem(this.currentSessionKey);
         sessionStorage.removeItem(this.currentSessionKey);
     }
 
+    // تحديث وقت انتهاء الجلسة
     refreshSession() {
+        // البحث في localStorage أولاً ثم sessionStorage
         let sessionData = localStorage.getItem(this.currentSessionKey);
         let storageType = 'localStorage';
         
@@ -72,127 +75,102 @@ class SessionManager {
     }
 }
 
-// ==================== قاعدة البيانات المتقدمة ====================
+// قاعدة بيانات محلية باستخدام localStorage
 class Database {
     constructor() {
         this.initializeDatabase();
     }
 
     initializeDatabase() {
-        // المستخدمين
+        // التحقق من وجود البيانات في localStorage
         if (!localStorage.getItem('users')) {
             const users = [
-                { id: 1, username: "admin", password: "admin123", role: "admin", name: "مدير النظام" },
-                { id: 2, username: "cashier", password: "cashier123", role: "cashier", name: "محمد الكاشير" },
-                { id: 3, username: "owner", password: "esd17237", role: "owner", name: "صاحب العمل" }
+                { id: 1, username: "admin", password: "admin123", role: "admin" },
+                { id: 2, username: "cashier", password: "cashier123", role: "cashier" },
+                { id: 3, username: "owner", password: "esd17237", role: "owner"}
             ];
             localStorage.setItem('users', JSON.stringify(users));
         }
 
-        // المنتجات
         if (!localStorage.getItem('products')) {
             const products = this.generateProducts();
             localStorage.setItem('products', JSON.stringify(products));
         }
 
-        // المبيعات
         if (!localStorage.getItem('sales')) {
             localStorage.setItem('sales', JSON.stringify([]));
         }
 
-        // العملاء
-        if (!localStorage.getItem('customers')) {
-            localStorage.setItem('customers', JSON.stringify([]));
-        }
-
-        // العروض
-        if (!localStorage.getItem('offers')) {
-            localStorage.setItem('offers', JSON.stringify([]));
-        }
-
-        // المصروفات
-        if (!localStorage.getItem('expenses')) {
-            localStorage.setItem('expenses', JSON.stringify([]));
-        }
-
-        // ذاكرة الباركود
         if (!localStorage.getItem('barcodeMemory')) {
             localStorage.setItem('barcodeMemory', JSON.stringify([]));
         }
 
-        // فواتير الجملة
-        if (!localStorage.getItem('wholesaleInvoices')) {
-            localStorage.setItem('wholesaleInvoices', JSON.stringify([]));
-        }
-
-        // سجل المخزون
         if (!localStorage.getItem('inventoryLog')) {
             localStorage.setItem('inventoryLog', JSON.stringify([]));
         }
 
-        // المعاملات الحديثة
+        if (!localStorage.getItem('wholesaleInvoices')) {
+            localStorage.setItem('wholesaleInvoices', JSON.stringify([]));
+        }
+
         if (!localStorage.getItem('recentTransactions')) {
             localStorage.setItem('recentTransactions', JSON.stringify([]));
         }
-
-        // سجل نقاط الولاء
-        if (!localStorage.getItem('pointsHistory')) {
-            localStorage.setItem('pointsHistory', JSON.stringify([]));
-        }
     }
 
-    generateProducts() {
-        const products = [];
-        const categories = ["مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"];
-        const defaultImage = '/assets/background.png';
+generateProducts() {
+    const products = [];
+    const categories = [
+        "مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", 
+        "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"
+    ];
+    
+    // استخدام صورة واحدة من مجلد assets لجميع المنتجات
+    const defaultProductImage = '/assets/background.png';
 
-        const productNames = {
-            "مأكولات": ["أرز مصرى", "سكر أبيض", "دقيق القمح", "زيت زيتون", "عسل نحل", "معكرونة", "عدس أصفر", "فول مدمس", "حمص شامي", "فاصوليا بيضاء"],
-            "مشروبات": ["شاي أحمد", "قهوة تركية", "نسكافيه", "عصير برتقال", "مياه معدنية", "بيبسي", "سفن أب", "شاي ليبتون", "قهوة نسكافيه", "عصير مانجو"],
-            "منتجات الألبان": ["حليب طازج", "جبنة رومي", "زبادي طبيعي", "قشطة", "لبنة", "جبنة فيتا", "حليب مجفف", "زبدة", "جبنة شيدر", "روب"],
-            "الفواكه": ["تفاح", "برتقال", "موز", "فراولة", "عنب", "مانجو", "بطيخ", "شمام", "كمثرى", "خوخ"],
-            "الخضروات": ["طماطم", "خيار", "جزر", "بصل", "ثوم", "فلفل رومي", "بطاطس", "باذنجان", "كوسة", "خس"],
-            "اللحوم": ["لحم بقري", "لحم ضأن", "دجاج طازج", "سمك بلطي", "جمبري", "كبدة", "لحم مفروم", "دجاج مجمد", "سجق", "همبرجر"],
-            "المخبوزات": ["خبز بلدي", "خبز توست", "كعك", "بسكويت", "كرواسون", "دونات", "كيك", "معمول", "بقلاوة", "كنافة"],
-            "الحلويات": ["شوكولاتة", "حلوى جيلي", "آيس كريم", "مهلبية", "أم علي", "بسبوسة", "قطايف", "لقيمات", "حلاوة طحينية", "ملبن"],
-            "الأدوات المنزلية": ["صابون أطباق", "منظف زجاج", "مطهر أرضيات", "منعم أقمشة", "كلور", "إسفنج", "مناديل ورقية", "أكياس قمامة", "شمع", "معطر جو"],
-            "العناية الشخصية": ["شامبو", "بلسم", "صابون", "معجون أسنان", "فرشاة أسنان", "مزيل عرق", "غسول وجه", "كريم ترطيب", "مستحضر حلاقة", "مناديل مبللة"]
-        };
+    // أسماء منتجات حقيقية
+    const productNames = {
+        "مأكولات": ["أرز مصرى", "سكر أبيض", "دقيق القمح", "زيت زيتون", "عسل نحل", "معكرونة", "عدس أصفر", "فول مدمس", "حمص شامي", "فاصوليا بيضاء"],
+        "مشروبات": ["شاي أحمد", "قهوة تركية", "نسكافيه", "عصير برتقال", "مياه معدنية", "بيبسي", "سفن أب", "شاي ليبتون", "قهوة نسكافيه", "عصير مانجو"],
+        "منتجات الألبان": ["حليب طازج", "جبنة رومي", "زبادي طبيعي", "قشطة", "لبنة", "جبنة فيتا", "حليب مجفف", "زبدة", "جبنة شيدر", "روب"],
+        "الفواكه": ["تفاح", "برتقال", "موز", "فراولة", "عنب", "مانجو", "بطيخ", "شمام", "كمثرى", "خوخ"],
+        "الخضروات": ["طماطم", "خيار", "جزر", "بصل", "ثوم", "فلفل رومي", "بطاطس", "باذنجان", "كوسة", "خس"],
+        "اللحوم": ["لحم بقري", "لحم ضأن", "دجاج طازج", "سمك بلطي", "جمبري", "كبدة", "لحم مفروم", "دجاج مجمد", "سجق", "همبرجر"],
+        "المخبوزات": ["خبز بلدي", "خبز توست", "كعك", "بسكويت", "كرواسون", "دونات", "كيك", "معمول", "بقلاوة", "كنافة"],
+        "الحلويات": ["شوكولاتة", "حلوى جيلي", "آيس كريم", "مهلبية", "أم علي", "بسبوسة", "قطايف", "لقيمات", "حلاوة طحينية", "ملبن"],
+        "الأدوات المنزلية": ["صابون أطباق", "منظف زجاج", "مطهر أرضيات", "منعم أقمشة", "كلور", "إسفنج", "مناديل ورقية", "أكياس قمامة", "شمع", "معطر جو"],
+        "العناية الشخصية": ["شامبو", "بلسم", "صابون", "معجون أسنان", "فرشاة أسنان", "مزيل عرق", "غسول وجه", "كريم ترطيب", "مستحضر حلاقة", "مناديل مبللة"]
+    };
 
-        for (let i = 1; i <= 100; i++) {
-            const category = categories[Math.floor(Math.random() * categories.length)];
-            const categoryProducts = productNames[category];
-            const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
-            const costPrice = Math.floor(Math.random() * 50) + 5;
-            const sellingPrice = costPrice + Math.floor(Math.random() * 30) + 10;
-            
-            products.push({
-                id: i,
-                name: productName,
-                price: sellingPrice,
-                cost: costPrice,
-                wholesalePrice: sellingPrice * 0.8,
-                barcode: this.generateBarcode(),
-                category: category,
-                image: defaultImage,
-                stock: Math.floor(Math.random() * 100) + 10,
-                minStock: LOW_STOCK_THRESHOLD,
-                salesCount: Math.floor(Math.random() * 200)
-            });
-        }
-        return products;
+    for (let i = 1; i <= 100; i++) {
+        const category = categories[Math.floor(Math.random() * categories.length)];
+        const categoryProducts = productNames[category];
+        const productName = categoryProducts[Math.floor(Math.random() * categoryProducts.length)];
+        
+        products.push({
+            id: i,
+            name: productName,
+            price: Math.floor(Math.random() * 100) + 5,
+            barcode: this.generateBarcode(),
+            category: category,
+            image: '/assets/background.png', // استخدام نفس الصورة لجميع المنتجات
+            stock: Math.floor(Math.random() * 100) + 10,
+            minStock: 5,
+            wholesalePrice: Math.floor(Math.random() * 80) + 3 // سعر الجملة
+        });
     }
-
+    return products;
+}
     generateBarcode() {
         return 'EG' + Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
     }
 
-    // ==================== دوال المستخدمين ====================
+    // وظائف المستخدمين
     getUsers() {
         return JSON.parse(localStorage.getItem('users')) || [];
     }
 
-    // ==================== دوال المنتجات ====================
+    // وظائف المنتجات
     getProducts() {
         return JSON.parse(localStorage.getItem('products')) || [];
     }
@@ -210,10 +188,10 @@ class Database {
     addProduct(product) {
         const products = this.getProducts();
         product.id = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-        product.salesCount = 0;
         products.push(product);
         localStorage.setItem('products', JSON.stringify(products));
         
+        // تسجيل في سجل المخزون
         this.addInventoryLog({
             productId: product.id,
             productName: product.name,
@@ -234,6 +212,7 @@ class Database {
             products[productIndex] = { ...products[productIndex], ...updatedData };
             localStorage.setItem('products', JSON.stringify(products));
             
+            // تسجيل في سجل المخزون إذا تغير المخزون
             if (oldStock !== updatedData.stock) {
                 this.addInventoryLog({
                     productId: productId,
@@ -244,6 +223,7 @@ class Database {
                     date: new Date().toISOString()
                 });
             }
+            
             return true;
         }
         return false;
@@ -256,6 +236,7 @@ class Database {
         localStorage.setItem('products', JSON.stringify(filteredProducts));
         
         if (product) {
+            // تسجيل في سجل المخزون
             this.addInventoryLog({
                 productId: productId,
                 productName: product.name,
@@ -265,10 +246,11 @@ class Database {
                 date: new Date().toISOString()
             });
         }
+        
         return true;
     }
 
-    updateProductStock(productId, quantity, reason = 'بيع') {
+    updateProductStock(productId, quantity) {
         const products = this.getProducts();
         const productIndex = products.findIndex(p => p.id === productId);
         if (productIndex !== -1) {
@@ -276,24 +258,19 @@ class Database {
             products[productIndex].stock -= quantity;
             localStorage.setItem('products', JSON.stringify(products));
             
+            // تسجيل في سجل المخزون
             this.addInventoryLog({
                 productId: productId,
                 productName: products[productIndex].name,
                 change: -quantity,
                 type: 'subtract',
-                reason: reason,
+                reason: 'بيع منتج',
                 date: new Date().toISOString()
             });
-            
-            // تحديث عدد المبيعات للمنتج
-            if (reason === 'بيع') {
-                products[productIndex].salesCount = (products[productIndex].salesCount || 0) + quantity;
-                localStorage.setItem('products', JSON.stringify(products));
-            }
         }
     }
 
-    // ==================== دوال المبيعات ====================
+    // وظائف المبيعات
     getSales() {
         return JSON.parse(localStorage.getItem('sales')) || [];
     }
@@ -305,175 +282,19 @@ class Database {
         sales.push(saleData);
         localStorage.setItem('sales', JSON.stringify(sales));
 
+        // إضافة إلى المعاملات الحديثة
         this.addRecentTransaction({
             type: 'بيع',
             amount: saleData.total,
             details: `${saleData.items.length} منتج`,
             cashier: saleData.cashier,
-            customer: saleData.customer || 'عميل عادي',
-            points: saleData.pointsEarned || 0,
             time: new Date().toISOString()
         });
         
         return saleData.id;
     }
 
-    // ==================== دوال العملاء ====================
-    getCustomers() {
-        return JSON.parse(localStorage.getItem('customers')) || [];
-    }
-
-    getCustomerByPhone(phone) {
-        const customers = this.getCustomers();
-        return customers.find(c => c.phone === phone);
-    }
-
-    addCustomer(customerData) {
-        const customers = this.getCustomers();
-        customerData.id = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
-        customerData.points = customerData.points || 0;
-        customerData.totalSpent = customerData.totalSpent || 0;
-        customerData.lastPurchase = null;
-        customerData.createdAt = new Date().toISOString();
-        customers.push(customerData);
-        localStorage.setItem('customers', JSON.stringify(customers));
-        return customerData.id;
-    }
-
-    updateCustomerPoints(customerId, points, reason) {
-        const customers = this.getCustomers();
-        const customerIndex = customers.findIndex(c => c.id === customerId);
-        if (customerIndex !== -1) {
-            customers[customerIndex].points += points;
-            localStorage.setItem('customers', JSON.stringify(customers));
-            
-            // تسجيل تاريخ النقاط
-            const pointsHistory = this.getPointsHistory();
-            pointsHistory.push({
-                customerId: customerId,
-                customerName: customers[customerIndex].name,
-                points: points,
-                reason: reason,
-                date: new Date().toISOString()
-            });
-            localStorage.setItem('pointsHistory', JSON.stringify(pointsHistory));
-            return true;
-        }
-        return false;
-    }
-
-    updateCustomerSpending(customerId, amount) {
-        const customers = this.getCustomers();
-        const customerIndex = customers.findIndex(c => c.id === customerId);
-        if (customerIndex !== -1) {
-            customers[customerIndex].totalSpent += amount;
-            customers[customerIndex].lastPurchase = new Date().toISOString();
-            localStorage.setItem('customers', JSON.stringify(customers));
-            return true;
-        }
-        return false;
-    }
-
-    getPointsHistory() {
-        return JSON.parse(localStorage.getItem('pointsHistory')) || [];
-    }
-
-    // ==================== دوال العروض ====================
-    getOffers() {
-        return JSON.parse(localStorage.getItem('offers')) || [];
-    }
-
-    addOffer(offerData) {
-        const offers = this.getOffers();
-        offerData.id = offers.length > 0 ? Math.max(...offers.map(o => o.id)) + 1 : 1;
-        offerData.createdAt = new Date().toISOString();
-        offerData.active = true;
-        offers.push(offerData);
-        localStorage.setItem('offers', JSON.stringify(offers));
-        return offerData.id;
-    }
-
-    getActiveOffers() {
-        const offers = this.getOffers();
-        const now = new Date();
-        return offers.filter(offer => {
-            if (!offer.active) return false;
-            if (offer.startDate && new Date(offer.startDate) > now) return false;
-            if (offer.endDate && new Date(offer.endDate) < now) return false;
-            return true;
-        });
-    }
-
-    applyOffersToCart(cartItems, subtotal) {
-        const activeOffers = this.getActiveOffers();
-        let discount = 0;
-        let appliedOffers = [];
-        
-        for (const offer of activeOffers) {
-            if (offer.type === 'percentage') {
-                // خصم نسبة مئوية
-                if (offer.productId) {
-                    const productItem = cartItems.find(item => item.id === offer.productId);
-                    if (productItem) {
-                        const itemTotal = productItem.price * productItem.quantity;
-                        discount += itemTotal * (offer.value / 100);
-                        appliedOffers.push(offer.name);
-                    }
-                } else {
-                    discount += subtotal * (offer.value / 100);
-                    appliedOffers.push(offer.name);
-                }
-            } 
-            else if (offer.type === 'fixed') {
-                // خصم ثابت
-                if (offer.productId) {
-                    const productItem = cartItems.find(item => item.id === offer.productId);
-                    if (productItem && productItem.quantity >= (offer.minQuantity || 1)) {
-                        discount += offer.value;
-                        appliedOffers.push(offer.name);
-                    }
-                } else {
-                    discount += offer.value;
-                    appliedOffers.push(offer.name);
-                }
-            }
-            else if (offer.type === 'buyXGetY') {
-                // اشتر X واحصل على Y مجاناً
-                const productItem = cartItems.find(item => item.id === offer.productId);
-                if (productItem && productItem.quantity >= offer.buyQuantity) {
-                    const freeItems = Math.floor(productItem.quantity / offer.buyQuantity) * offer.freeQuantity;
-                    const freeAmount = freeItems * productItem.price;
-                    discount += freeAmount;
-                    appliedOffers.push(offer.name);
-                }
-            }
-        }
-        
-        return { discount, appliedOffers };
-    }
-
-    // ==================== دوال المصروفات ====================
-    getExpenses() {
-        return JSON.parse(localStorage.getItem('expenses')) || [];
-    }
-
-    addExpense(expenseData) {
-        const expenses = this.getExpenses();
-        expenseData.id = expenses.length > 0 ? Math.max(...expenses.map(e => e.id)) + 1 : 1;
-        expenseData.date = new Date().toISOString();
-        expenses.push(expenseData);
-        localStorage.setItem('expenses', JSON.stringify(expenses));
-        return expenseData.id;
-    }
-
-    deleteExpense(expenseId) {
-        const expenses = this.getExpenses();
-        const filteredExpenses = expenses.filter(e => e.id !== expenseId);
-        localStorage.setItem('expenses', JSON.stringify(filteredExpenses));
-        return true;
-    }
-
-    // ==================== دوال فواتير الجملة ====================
+    // وظائف فواتير الجملة
     getWholesaleInvoices() {
         return JSON.parse(localStorage.getItem('wholesaleInvoices')) || [];
     }
@@ -485,6 +306,7 @@ class Database {
         invoices.push(invoiceData);
         localStorage.setItem('wholesaleInvoices', JSON.stringify(invoices));
 
+        // إضافة إلى المعاملات الحديثة
         this.addRecentTransaction({
             type: 'جملة',
             amount: invoiceData.total,
@@ -496,7 +318,7 @@ class Database {
         return invoiceData.id;
     }
 
-    // ==================== دوال المعاملات الحديثة ====================
+    // وظائف المعاملات الحديثة
     getRecentTransactions() {
         return JSON.parse(localStorage.getItem('recentTransactions')) || [];
     }
@@ -504,12 +326,15 @@ class Database {
     addRecentTransaction(transaction) {
         const transactions = this.getRecentTransactions();
         transactions.unshift(transaction);
-        if (transactions.length > 100) transactions.pop();
+        // الاحتفاظ فقط بآخر 100 معاملة
+        if (transactions.length > 100) {
+            transactions.pop();
+        }
         localStorage.setItem('recentTransactions', JSON.stringify(transactions));
         return transaction;
     }
 
-    // ==================== دوال ذاكرة الباركود ====================
+    // وظائف ذاكرة الباركود
     getBarcodeMemory() {
         return JSON.parse(localStorage.getItem('barcodeMemory')) || [];
     }
@@ -530,7 +355,7 @@ class Database {
         return true;
     }
 
-    // ==================== دوال سجل المخزون ====================
+    // وظائف سجل المخزون
     getInventoryLog() {
         return JSON.parse(localStorage.getItem('inventoryLog')) || [];
     }
@@ -542,79 +367,20 @@ class Database {
         localStorage.setItem('inventoryLog', JSON.stringify(inventoryLog));
         return logData.id;
     }
-
-    // ==================== دوال الإحصائيات ====================
-    getProfitStats(startDate, endDate) {
-        const sales = this.getSales();
-        const expenses = this.getExpenses();
-        const products = this.getProducts();
-        
-        let filteredSales = sales;
-        let filteredExpenses = expenses;
-        
-        if (startDate) {
-            filteredSales = sales.filter(s => new Date(s.date) >= new Date(startDate));
-            filteredExpenses = expenses.filter(e => new Date(e.date) >= new Date(startDate));
-        }
-        if (endDate) {
-            filteredSales = filteredSales.filter(s => new Date(s.date) <= new Date(endDate));
-            filteredExpenses = filteredExpenses.filter(e => new Date(e.date) <= new Date(endDate));
-        }
-        
-        const totalRevenue = filteredSales.reduce((sum, s) => sum + s.total, 0);
-        
-        // حساب تكلفة المبيعات
-        let totalCost = 0;
-        filteredSales.forEach(sale => {
-            sale.items.forEach(item => {
-                const product = products.find(p => p.id === item.id);
-                if (product) {
-                    totalCost += (product.cost || product.price * 0.7) * item.quantity;
-                }
-            });
-        });
-        
-        const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-        const grossProfit = totalRevenue - totalCost;
-        const netProfit = grossProfit - totalExpenses;
-        const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-        
-        return {
-            totalRevenue,
-            totalCost,
-            totalExpenses,
-            grossProfit,
-            netProfit,
-            profitMargin
-        };
-    }
-
-    getTopProducts(limit = 10) {
-        const products = this.getProducts();
-        return products
-            .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
-            .slice(0, limit);
-    }
-
-    getTopCustomers(limit = 10) {
-        const customers = this.getCustomers();
-        return customers
-            .sort((a, b) => b.totalSpent - a.totalSpent)
-            .slice(0, limit);
-    }
 }
 
-// ==================== تهيئة قاعدة البيانات ====================
+// إنشاء كائن قاعدة البيانات
 const db = new Database();
 
-// ==================== المتغيرات العامة ====================
+// بيانات المستخدمين المسموح لهم بالدخول
+const users = db.getUsers();
+
+// سلة المشتريات
 let cart = [];
 let wholesaleCart = [];
 let currentUser = null;
-let currentCustomer = null;
-let lastProcessedBarcode = '';
 
-// ==================== عناصر DOM ====================
+// عناصر DOM
 const loginPage = document.getElementById('loginPage');
 const dashboard = document.getElementById('dashboard');
 const loginBtn = document.getElementById('loginBtn');
@@ -629,83 +395,42 @@ const transactionsList = document.getElementById('transactionsList');
 // صفحات النظام
 const cashierPage = document.getElementById('cashierPage');
 const productsPage = document.getElementById('productsPage');
-const offersPage = document.getElementById('offersPage');
-const customersPage = document.getElementById('customersPage');
-const reportsPage = document.getElementById('reportsPage');
-const expensesPage = document.getElementById('expensesPage');
 const barcodeMemoryPage = document.getElementById('barcodeMemoryPage');
 const invoicesPage = document.getElementById('invoicesPage');
 const wholesalePage = document.getElementById('wholesalePage');
 const inventoryPage = document.getElementById('inventoryPage');
+const reportsPage = document.getElementById('reportsPage');
 
 // عناصر صفحة الكاشير
 const barcodeInput = document.getElementById('barcodeInput');
-const customerPhone = document.getElementById('customerPhone');
-const searchCustomerBtn = document.getElementById('searchCustomerBtn');
+const scanBarcodeBtn = document.getElementById('scanBarcodeBtn');
 const productsGrid = document.getElementById('productsGrid');
 const cartItems = document.getElementById('cartItems');
 const subtotalElement = document.getElementById('subtotal');
-const discountRow = document.getElementById('discountRow');
-const discountAmountElement = document.getElementById('discountAmount');
 const taxElement = document.getElementById('tax');
 const totalElement = document.getElementById('total');
-const loyaltyPointsElement = document.getElementById('loyaltyPoints');
 const checkoutBtn = document.getElementById('checkoutBtn');
 
 // عناصر صفحة إدارة المنتجات
 const productNameInput = document.getElementById('productName');
 const productPriceInput = document.getElementById('productPrice');
-const productCostInput = document.getElementById('productCost');
-const productWholesaleInput = document.getElementById('productWholesale');
 const productBarcodeInput = document.getElementById('productBarcode');
-const productCategorySelect = document.getElementById('productCategory');
+const productCategoryInput = document.getElementById('productCategory');
 const productStockInput = document.getElementById('productStock');
 const addProductBtn = document.getElementById('addProductBtn');
 const productsTableBody = document.getElementById('productsTableBody');
 
-// عناصر صفحة العروض
-const offerNameInput = document.getElementById('offerName');
-const offerTypeSelect = document.getElementById('offerType');
-const offerValueInput = document.getElementById('offerValue');
-const offerProductSelect = document.getElementById('offerProduct');
-const offerStartDate = document.getElementById('offerStartDate');
-const offerEndDate = document.getElementById('offerEndDate');
-const addOfferBtn = document.getElementById('addOfferBtn');
-const offersTableBody = document.getElementById('offersTableBody');
-
-// عناصر صفحة العملاء
-const customerNameInput = document.getElementById('customerName');
-const customerPhoneReg = document.getElementById('customerPhoneReg');
-const addCustomerBtn = document.getElementById('addCustomerBtn');
-const customersTableBody = document.getElementById('customersTableBody');
-const redeemCustomerSelect = document.getElementById('redeemCustomer');
-const redeemPointsInput = document.getElementById('redeemPoints');
-const redeemPointsBtn = document.getElementById('redeemPointsBtn');
-
-// عناصر صفحة المصروفات
-const expenseTypeSelect = document.getElementById('expenseType');
-const expenseAmountInput = document.getElementById('expenseAmount');
-const expenseDescInput = document.getElementById('expenseDesc');
-const addExpenseBtn = document.getElementById('addExpenseBtn');
-const expensesTableBody = document.getElementById('expensesTableBody');
-const profitSummaryDiv = document.getElementById('profitSummary');
-
-// عناصر صفحة التقارير
-const reportDateFrom = document.getElementById('reportDateFrom');
-const reportDateTo = document.getElementById('reportDateTo');
-const reportTypeSelect = document.getElementById('reportType');
-const generateReportBtn = document.getElementById('generateReportBtn');
-const exportReportBtn = document.getElementById('exportReportBtn');
-const reportResults = document.getElementById('reportResults');
-const profitStatsDiv = document.getElementById('profitStats');
-
-// عناصر باقي الصفحات
+// عناصر صفحة تخزين الباركود
 const memoryBarcodeInput = document.getElementById('memoryBarcode');
 const memoryProductSelect = document.getElementById('memoryProduct');
 const saveBarcodeBtn = document.getElementById('saveBarcodeBtn');
 const barcodeMemoryTable = document.getElementById('barcodeMemoryTable');
+
+// عناصر صفحة الفواتير
 const invoiceSearch = document.getElementById('invoiceSearch');
 const invoicesTableBody = document.getElementById('invoicesTableBody');
+
+// عناصر صفحة فواتير الجملة
 const wholesaleCustomer = document.getElementById('wholesaleCustomer');
 const wholesaleDiscount = document.getElementById('wholesaleDiscount');
 const wholesaleBarcode = document.getElementById('wholesaleBarcode');
@@ -717,1027 +442,1894 @@ const wholesaleTax = document.getElementById('wholesaleTax');
 const wholesaleTotal = document.getElementById('wholesaleTotal');
 const wholesaleCheckoutBtn = document.getElementById('wholesaleCheckoutBtn');
 const wholesaleTableBody = document.getElementById('wholesaleTableBody');
+
+// عناصر صفحة المخزون
 const inventorySearch = document.getElementById('inventorySearch');
 const inventoryTableBody = document.getElementById('inventoryTableBody');
 
-// عناصر النافذة المنبثقة
+// عناصر النافذة المنبثقة للفاتورة
 const invoiceModal = document.getElementById('invoiceModal');
 const closeModal = document.querySelector('.close-modal');
 const modalInvoiceNumber = document.getElementById('modalInvoiceNumber');
 const modalInvoiceDate = document.getElementById('modalInvoiceDate');
 const modalCashier = document.getElementById('modalCashier');
 const modalCustomer = document.getElementById('modalCustomer');
-const modalPoints = document.getElementById('modalPoints');
 const modalInvoiceItems = document.getElementById('modalInvoiceItems');
 const modalSubtotal = document.getElementById('modalSubtotal');
 const modalDiscount = document.getElementById('modalDiscount');
 const modalTax = document.getElementById('modalTax');
 const modalTotal = document.getElementById('modalTotal');
 const printInvoiceBtn = document.getElementById('printInvoiceBtn');
-const sendWhatsAppBtn = document.getElementById('sendWhatsAppBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
-const discountRowModal = document.getElementById('discountRowModal');
+
+// إضافة عناصر النافذة المنبثقة إلى HTML
+function addModalToHTML() {
+    const modalHTML = `
+        <div id="invoiceModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>تفاصيل الفاتورة</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="invoice-header">
+                        <div class="invoice-info">
+                            <p><strong>رقم الفاتورة:</strong> <span id="modalInvoiceNumber"></span></p>
+                            <p><strong>التاريخ:</strong> <span id="modalInvoiceDate"></span></p>
+                            <p><strong>الكاشير:</strong> <span id="modalCashier"></span></p>
+                            <p id="customerInfo" style="display: none;"><strong>العميل:</strong> <span id="modalCustomer"></span></p>
+                        </div>
+                    </div>
+                    <div class="invoice-items">
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>الكمية</th>
+                                    <th>السعر</th>
+                                    <th>الإجمالي</th>
+                                 </tr>
+                            </thead>
+                            <tbody id="modalInvoiceItems">
+                            </tbody>
+                         </table>
+                    </div>
+                    <div class="invoice-summary">
+                        <div class="summary-row">
+                            <span>المجموع الفرعي:</span>
+                            <span id="modalSubtotal">0.00 جنيه</span>
+                        </div>
+                        <div class="summary-row" id="discountRow" style="display: none;">
+                            <span>الخصم:</span>
+                            <span id="modalDiscount">0.00 جنيه</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>الضريبة (14%):</span>
+                            <span id="modalTax">0.00 جنيه</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>الإجمالي:</span>
+                            <span id="modalTotal">0.00 جنيه</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="printInvoiceBtn" class="action-btn print-btn">
+                        <i class="bi bi-printer"></i> طباعة الفاتورة
+                    </button>
+                    <button id="closeModalBtn" class="action-btn close-btn">
+                        <i class="bi bi-x-lg"></i> إغلاق
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// استدعاء الدالة لإضافة النافذة المنبثقة
+addModalToHTML();
+
+// إعادة تعريف عناصر النافذة المنبثقة بعد إضافتها
+const invoiceModalNew = document.getElementById('invoiceModal');
+const closeModalNew = document.querySelector('.close-modal');
+const modalInvoiceNumberNew = document.getElementById('modalInvoiceNumber');
+const modalInvoiceDateNew = document.getElementById('modalInvoiceDate');
+const modalCashierNew = document.getElementById('modalCashier');
+const modalCustomerNew = document.getElementById('modalCustomer');
+const modalInvoiceItemsNew = document.getElementById('modalInvoiceItems');
+const modalSubtotalNew = document.getElementById('modalSubtotal');
+const modalDiscountNew = document.getElementById('modalDiscount');
+const modalTaxNew = document.getElementById('modalTax');
+const modalTotalNew = document.getElementById('modalTotal');
+const printInvoiceBtnNew = document.getElementById('printInvoiceBtn');
+const closeModalBtnNew = document.getElementById('closeModalBtn');
+const discountRow = document.getElementById('discountRow');
 const customerInfo = document.getElementById('customerInfo');
 
-// ==================== دوال مساعدة ====================
-function formatCurrency(amount) {
-    return `${amount.toFixed(2)} جنيه`;
-}
+// وظيفة عرض تفاصيل الفاتورة في النافذة المنبثقة
+function showInvoiceModal(invoiceData, isWholesale = false) {
+    // تعيين معلومات الفاتورة
+    modalInvoiceNumberNew.textContent = invoiceData.id;
+    modalInvoiceDateNew.textContent = new Date(invoiceData.date).toLocaleString('ar-EG', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    modalCashierNew.textContent = invoiceData.cashier;
 
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i> ${message}`;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => notification.classList.add('show'), 100);
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-function loadCategories() {
-    const categories = ["مأكولات", "مشروبات", "منتجات الألبان", "الفواكه", "الخضروات", "اللحوم", "المخبوزات", "الحلويات", "الأدوات المنزلية", "العناية الشخصية"];
-    if (productCategorySelect) {
-        productCategorySelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    // إظهار/إخفاء معلومات العميل
+    if (isWholesale && invoiceData.customer) {
+        customerInfo.style.display = 'block';
+        modalCustomerNew.textContent = invoiceData.customer;
+    } else {
+        customerInfo.style.display = 'none';
     }
+
+    // عرض منتجات الفاتورة
+    modalInvoiceItemsNew.innerHTML = '';
+    invoiceData.items.forEach(item => {
+        const row = document.createElement('tr');
+        const itemTotal = item.price * item.quantity;
+        row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.price.toFixed(2)} جنيه</td>
+            <td>${itemTotal.toFixed(2)} جنيه</td>
+        `;
+        modalInvoiceItemsNew.appendChild(row);
+    });
+
+    // عرض المجاميع
+    modalSubtotalNew.textContent = `${invoiceData.subtotal.toFixed(2)} جنيه`;
+    
+    if (isWholesale && invoiceData.discountAmount) {
+        discountRow.style.display = 'flex';
+        modalDiscountNew.textContent = `${invoiceData.discountAmount.toFixed(2)} جنيه (${invoiceData.discount}%)`;
+    } else {
+        discountRow.style.display = 'none';
+    }
+    
+    modalTaxNew.textContent = `${invoiceData.tax.toFixed(2)} جنيه`;
+    modalTotalNew.textContent = `${invoiceData.total.toFixed(2)} جنيه`;
+
+    // إظهار النافذة المنبثقة
+    invoiceModalNew.style.display = 'flex';
 }
 
-// ==================== إدارة الجلسة وتسجيل الدخول ====================
+// وظيفة طباعة الفاتورة
+function printInvoice() {
+    const printContent = document.querySelector('.modal-content').cloneNode(true);
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+        <html dir="rtl">
+        <head>
+            <title>فاتورة</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    padding: 20px;
+                    direction: rtl;
+                }
+                .invoice-header {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+                .invoice-info {
+                    margin-bottom: 20px;
+                }
+                .items-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                .items-table th,
+                .items-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: right;
+                }
+                .items-table th {
+                    background-color: #f8f9fa;
+                }
+                .invoice-summary {
+                    margin-top: 20px;
+                    text-align: left;
+                }
+                .summary-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 5px 0;
+                }
+                .summary-row.total {
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                    border-top: 2px solid #333;
+                }
+                .modal-footer {
+                    display: none;
+                }
+            </style>
+        </head>
+        <body>
+            ${printContent.innerHTML}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+
+// إضافة أحداث للنافذة المنبثقة
+if (closeModalNew) {
+    closeModalNew.addEventListener('click', () => {
+        invoiceModalNew.style.display = 'none';
+    });
+}
+
+if (closeModalBtnNew) {
+    closeModalBtnNew.addEventListener('click', () => {
+        invoiceModalNew.style.display = 'none';
+    });
+}
+
+if (printInvoiceBtnNew) {
+    printInvoiceBtnNew.addEventListener('click', printInvoice);
+}
+
+// إغلاق النافذة عند النقر خارجها
+window.addEventListener('click', (event) => {
+    if (event.target === invoiceModalNew) {
+        invoiceModalNew.style.display = 'none';
+    }
+});
+
+// التحقق من وجود جلسة سابقة عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', function() {
     const sessionManager = new SessionManager();
     const savedUser = sessionManager.getSession();
     
     if (savedUser) {
+        // استعادة الجلسة
         currentUser = savedUser;
         loginPage.style.display = 'none';
         dashboard.style.display = 'block';
-        userDisplay.textContent = `مرحباً، ${savedUser.name || savedUser.username}`;
+        userDisplay.textContent = `مرحباً، ${savedUser.username}`;
         loadSidebarMenu();
-        loadQuickLinks();
         showPage('cashierPage');
         loadProducts();
         loadRecentTransactions();
         updateSidebarData();
-        loadCategories();
+        
+        // تحديث وقت انتهاء الجلسة
         sessionManager.refreshSession();
         
-        if (barcodeInput) barcodeInput.focus();
+        if (barcodeInput) {
+            barcodeInput.focus();
+        }
     } else {
         loginPage.style.display = 'flex';
         dashboard.style.display = 'none';
     }
 });
 
+// وظيفة تسجيل الدخول
+// تحديث دالة تسجيل الدخول
 loginBtn.addEventListener('click', function() {
     const username = usernameInput.value;
     const password = passwordInput.value;
-    const rememberMe = rememberMeCheckbox?.checked || false;
-    const users = db.getUsers();
+    const rememberMe = rememberMeCheckbox ? rememberMeCheckbox.checked : false;
+    
     const user = users.find(u => u.username === username && u.password === password);
     
     if (user) {
         currentUser = user;
+        
+        // حفظ الجلسة مع خاصية تذكرني
         const sessionManager = new SessionManager();
         sessionManager.saveSession(user, rememberMe);
         
         loginPage.style.display = 'none';
         dashboard.style.display = 'block';
-        userDisplay.textContent = `مرحباً، ${user.name || user.username}`;
+        userDisplay.textContent = `مرحباً، ${username}`;
         loadSidebarMenu();
-        loadQuickLinks();
+        loadQuickLinks(); // إضافة هذه السطر لتحميل الروابط السريعة
         showPage('cashierPage');
         loadProducts();
         loadRecentTransactions();
         updateSidebarData();
         
-        if (barcodeInput) barcodeInput.focus();
+        // التعديل 1: التركيز التلقائي على حقل الباركود للمستخدم cashier
+        if (currentUser.role === 'cashier') {
+            setTimeout(() => {
+                if (barcodeInput) {
+                    barcodeInput.focus();
+                }
+            }, 100);
+        } else {
+            if (barcodeInput) {
+                barcodeInput.focus();
+            }
+        }
     } else {
-        showNotification('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+        alert('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 });
 
+// تحديث دالة استعادة الجلسة
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionManager = new SessionManager();
+    const savedUser = sessionManager.getSession();
+    
+    if (savedUser) {
+        // استعادة الجلسة
+        currentUser = savedUser;
+        loginPage.style.display = 'none';
+        dashboard.style.display = 'block';
+        userDisplay.textContent = `مرحباً، ${savedUser.username}`;
+        loadSidebarMenu();
+        loadQuickLinks(); // إضافة هذه السطر لتحميل الروابط السريعة
+        showPage('cashierPage');
+        loadProducts();
+        loadRecentTransactions();
+        updateSidebarData();
+        
+        // تحديث وقت انتهاء الجلسة
+        sessionManager.refreshSession();
+        
+        if (barcodeInput) {
+            barcodeInput.focus();
+        }
+    } else {
+        loginPage.style.display = 'flex';
+        dashboard.style.display = 'none';
+    }
+});
+
+// تحديث دالة showPage لتحديث الروابط السريعة عند تغيير الصفحة (اختياري)
+function showPage(pageId) {
+    // إخفاء جميع الصفحات
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    // عرض الصفحة المحددة
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+        
+        // تحديث الفئة النشطة في الروابط السريعة
+        updateActiveQuickLink(pageId);
+    }
+    
+    // التعديل 1: التركيز التلقائي على حقل الباركود عند عرض صفحة الكاشير للمستخدم cashier
+    if (pageId === 'cashierPage' && currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            if (barcodeInput) {
+                barcodeInput.focus();
+            }
+        }, 100);
+    }
+    
+    // تحميل البيانات الخاصة بكل صفحة عند عرضها
+    if (pageId === 'productsPage') {
+        loadProductsTable();
+    } else if (pageId === 'barcodeMemoryPage') {
+        loadBarcodeMemoryPage();
+    } else if (pageId === 'invoicesPage') {
+        loadInvoicesPage();
+    } else if (pageId === 'wholesalePage') {
+        loadWholesalePage();
+    } else if (pageId === 'inventoryPage') {
+        loadInventoryPage();
+    } else if (pageId === 'reportsPage') {
+        loadReportsPage();
+    }
+}
+
+// دالة لتحديد الرابط النشط في الروابط السريعة
+function updateActiveQuickLink(activePage) {
+    const quickLinks = document.querySelectorAll('.quick-link');
+    quickLinks.forEach(link => {
+        const onclickAttr = link.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(activePage)) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+// وظيفة تسجيل الخروج
 logoutBtn.addEventListener('click', function() {
     dashboard.style.display = 'none';
     loginPage.style.display = 'flex';
     usernameInput.value = '';
     passwordInput.value = '';
-    if (rememberMeCheckbox) rememberMeCheckbox.checked = false;
+    if (rememberMeCheckbox) {
+        rememberMeCheckbox.checked = false;
+    }
     cart = [];
     wholesaleCart = [];
-    currentUser = null;
-    currentCustomer = null;
     updateCart();
     updateWholesaleCart();
+    currentUser = null;
+    
+    // مسح الجلسة من SessionManager
     const sessionManager = new SessionManager();
     sessionManager.clearSession();
 });
 
-passwordInput?.addEventListener('keyup', function(event) {
-    if (event.key === 'Enter') loginBtn.click();
-});
+// السماح بالدخول باستخدام زر Enter
+if (passwordInput) {
+    passwordInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            loginBtn.click();
+        }
+    });
+}
 
-// ==================== القائمة الجانبية ====================
+// تحميل القائمة الجانبية حسب صلاحية المستخدم
 function loadSidebarMenu() {
     sidebarMenu.innerHTML = '';
     
-    const menuItems = [
-        { id: 'cashierPage', name: 'نقطة البيع', icon: 'bi-cash-register', roles: ['cashier', 'admin', 'owner'] },
-        { id: 'productsPage', name: 'المنتجات', icon: 'bi-boxes', roles: ['admin', 'owner'] },
-        { id: 'offersPage', name: 'العروض', icon: 'bi-tags', roles: ['admin', 'owner'] },
-        { id: 'customersPage', name: 'العملاء', icon: 'bi-people', roles: ['admin', 'owner'] },
-        { id: 'expensesPage', name: 'المصروفات', icon: 'bi-receipt', roles: ['admin', 'owner'] },
-        { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart', roles: ['admin', 'owner'] },
-        { id: 'invoicesPage', name: 'الفواتير', icon: 'bi-receipt', roles: ['cashier', 'admin', 'owner'] },
-        { id: 'wholesalePage', name: 'الجملة', icon: 'bi-truck', roles: ['admin', 'owner'] },
-        { id: 'inventoryPage', name: 'المخزون', icon: 'bi-bar-chart', roles: ['admin', 'owner'] },
-        { id: 'barcodeMemoryPage', name: 'ذاكرة الباركود', icon: 'bi-memory', roles: ['admin', 'owner'] }
+    // عناصر القائمة الأساسية للجميع
+    const baseMenuItems = [
+        { id: 'cashierPage', name: 'نقطة البيع', icon: 'bi-cash-register' },
+        { id: 'invoicesPage', name: 'الفواتير', icon: 'bi-receipt' }
     ];
     
-    const filteredItems = menuItems.filter(item => item.roles.includes(currentUser?.role));
-    
-    filteredItems.forEach(item => {
+    // عناصر القائمة للإدمن فقط
+    const adminMenuItems = [
+        { id: 'productsPage', name: 'إدارة المنتجات', icon: 'bi-boxes' },
+        { id: 'barcodeMemoryPage', name: 'تخزين الباركود', icon: 'bi-memory' },
+        { id: 'wholesalePage', name: 'فواتير الجملة', icon: 'bi-truck' },
+        { id: 'inventoryPage', name: 'إدارة المخزون', icon: 'bi-bar-chart' },
+        { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
+    ];
+
+    // عناصر القائمة للمالك
+    const ownerMenuItems = [
+        { id: 'productsPage', name: 'إدارة المنتجات', icon: 'bi-boxes' },
+        { id: 'barcodeMemoryPage', name: 'تخزين الباركود', icon: 'bi-memory' },
+        { id: 'wholesalePage', name: 'فواتير الجملة', icon: 'bi-truck' },
+        { id: 'inventoryPage', name: 'إدارة المخزون', icon: 'bi-bar-chart' },
+        { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
+    ];
+
+    // إضافة عناصر القائمة الأساسية
+    baseMenuItems.forEach(item => {
         const li = document.createElement('li');
         li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
         sidebarMenu.appendChild(li);
     });
     
+    // إضافة عناصر القائمة للإدمن فقط
+    if (currentUser && currentUser.role === 'admin') {
+        adminMenuItems.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
+            sidebarMenu.appendChild(li);
+        });
+    }            
+    // إضافة عناصر القائمة للمالك فقط
+    if (currentUser && currentUser.role === 'owner') {
+        ownerMenuItems.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
+            sidebarMenu.appendChild(li);
+        });
+    }            
+    // إضافة أحداث النقر لعناصر القائمة
     const menuLinks = sidebarMenu.querySelectorAll('a');
     menuLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const pageId = this.getAttribute('data-page');
             showPage(pageId);
+            
+            // تحديث العنصر النشط في القائمة
             menuLinks.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
         });
     });
     
-    if (menuLinks.length > 0) menuLinks[0].classList.add('active');
+    // تفعيل العنصر الأول في القائمة
+    if (menuLinks.length > 0) {
+        menuLinks[0].classList.add('active');
+    }
 }
 
+
+// دالة لتحميل الروابط السريعة حسب صلاحية المستخدم
 function loadQuickLinks() {
     const quickLinksContainer = document.getElementById('quickLinks');
     if (!quickLinksContainer) return;
+    
+    // مسح المحتوى الحالي
     quickLinksContainer.innerHTML = '';
     
-    const quickLinks = [
-        { page: 'cashierPage', icon: 'bi-cash-register', name: 'البيع', roles: ['cashier', 'admin', 'owner'] },
-        { page: 'productsPage', icon: 'bi-box', name: 'المنتجات', roles: ['admin', 'owner'] },
-        { page: 'offersPage', icon: 'bi-tags', name: 'العروض', roles: ['admin', 'owner'] },
-        { page: 'customersPage', icon: 'bi-people', name: 'العملاء', roles: ['admin', 'owner'] },
-        { page: 'reportsPage', icon: 'bi-pie-chart', name: 'التقارير', roles: ['admin', 'owner'] },
-        { page: 'invoicesPage', icon: 'bi-receipt', name: 'الفواتير', roles: ['cashier', 'admin', 'owner'] }
+    // الروابط الأساسية المتاحة للجميع (الكاشير)
+    const baseQuickLinks = [
+        { page: 'cashierPage', icon: 'bi-cash-register', name: 'نقطة البيع', roles: ['cashier', 'admin', 'owner'] }
     ];
     
-    const filteredLinks = quickLinks.filter(link => link.roles.includes(currentUser?.role));
+    // الروابط المتاحة للإدمن والمالك فقط
+    const adminOwnerQuickLinks = [
+        { page: 'productsPage', icon: 'bi-box', name: 'المنتجات', roles: ['admin', 'owner'] },
+        { page: 'invoicesPage', icon: 'bi-receipt', name: 'الفواتير', roles: ['admin', 'owner', 'cashier'] },
+        { page: 'inventoryPage', icon: 'bi-bar-chart', name: 'المخزون', roles: ['admin', 'owner'] },
+        { page: 'reportsPage', icon: 'bi-pie-chart', name: 'التقارير', roles: ['admin', 'owner'] },
+        { page: 'barcodeMemoryPage', icon: 'bi-memory', name: 'ذاكرة الباركود', roles: ['admin', 'owner'] },
+        { page: 'wholesalePage', icon: 'bi-truck', name: 'الجملة', roles: ['admin', 'owner'] }
+    ];
     
-    filteredLinks.forEach(link => {
-        const a = document.createElement('a');
-        a.href = '#';
-        a.className = 'quick-link';
-        a.onclick = () => { showPage(link.page); return false; };
-        a.innerHTML = `<i class="bi ${link.icon}"></i> ${link.name}`;
-        quickLinksContainer.appendChild(a);
-    });
-}
-
-// ==================== عرض الصفحات ====================
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) targetPage.style.display = 'block';
+    // دمج الروابط حسب دور المستخدم
+    let linksToShow = [];
     
-    if (pageId === 'cashierPage' && currentUser?.role === 'cashier') {
-        setTimeout(() => barcodeInput?.focus(), 100);
+    if (currentUser) {
+        // إضافة الروابط الأساسية المتاحة للجميع
+        baseQuickLinks.forEach(link => {
+            if (link.roles.includes(currentUser.role)) {
+                linksToShow.push(link);
+            }
+        });
+        
+        // إضافة روابط الإدمن والمالك
+        adminOwnerQuickLinks.forEach(link => {
+            if (link.roles.includes(currentUser.role)) {
+                linksToShow.push(link);
+            }
+        });
     }
     
-    // تحميل بيانات الصفحة
-    if (pageId === 'productsPage') loadProductsTable();
-    else if (pageId === 'offersPage') loadOffersPage();
-    else if (pageId === 'customersPage') loadCustomersPage();
-    else if (pageId === 'expensesPage') loadExpensesPage();
-    else if (pageId === 'reportsPage') loadReportsPage();
-    else if (pageId === 'invoicesPage') loadInvoicesPage();
-    else if (pageId === 'wholesalePage') loadWholesalePage();
-    else if (pageId === 'inventoryPage') loadInventoryPage();
-    else if (pageId === 'barcodeMemoryPage') loadBarcodeMemoryPage();
+    // إنشاء عناصر الروابط السريعة
+    linksToShow.forEach(link => {
+        const quickLink = document.createElement('a');
+        quickLink.href = '#';
+        quickLink.className = 'quick-link';
+        quickLink.setAttribute('onclick', `showPage('${link.page}'); return false;`);
+        quickLink.innerHTML = `
+            <i class="bi ${link.icon}"></i>
+            ${link.name}
+        `;
+        quickLinksContainer.appendChild(quickLink);
+    });
+    
+    // إذا لم توجد روابط (لن يحدث هذا عادة)
+    if (linksToShow.length === 0) {
+        quickLinksContainer.innerHTML = '<p style="color: #666; text-align: center;">لا توجد روابط سريعة متاحة</p>';
+    }
 }
 
-// ==================== المعاملات الحديثة ====================
+// تحميل المعاملات الحديثة
 function loadRecentTransactions() {
-    if (!transactionsList) return;
     const transactions = db.getRecentTransactions();
-    transactionsList.innerHTML = transactions.slice(0, 5).map(t => `
-        <li class="transaction-item">
-            <div class="transaction-icon"><i class="bi ${t.type === 'بيع' ? 'bi-cart' : 'bi-truck'}"></i></div>
+    if (!transactionsList) return;
+    
+    transactionsList.innerHTML = '';
+    
+    transactions.slice(0, 5).forEach(transaction => {
+        const li = document.createElement('li');
+        li.className = 'transaction-item';
+        li.innerHTML = `
+            <div class="transaction-icon">
+                <i class="bi ${transaction.type === 'بيع' ? 'bi-cart' : 'bi-truck'}"></i>
+            </div>
             <div class="transaction-info">
                 <div class="transaction-header">
-                    <span class="transaction-title">${t.type} - ${t.details}</span>
+                    <span class="transaction-title">${transaction.type} - ${transaction.details}</span>
                     <span class="transaction-badge completed">مكتملة</span>
                 </div>
                 <div class="transaction-details">
-                    <span class="transaction-customer"><i class="bi bi-person"></i> ${t.cashier}</span>
-                    <span class="transaction-amount">${t.amount.toFixed(2)} ج</span>
+                    <span class="transaction-customer">
+                        <i class="bi bi-person"></i>
+                        ${transaction.cashier}
+                    </span>
+                    <span class="transaction-amount">${transaction.amount.toFixed(2)} ج</span>
                 </div>
-                <div class="transaction-time"><i class="bi bi-clock"></i> ${new Date(t.time).toLocaleTimeString('ar-EG')}</div>
+                <div class="transaction-time">
+                    <i class="bi bi-clock"></i>
+                    ${new Date(transaction.time).toLocaleTimeString('ar-EG')}
+                </div>
             </div>
-        </li>
-    `).join('');
+        `;
+        transactionsList.appendChild(li);
+    });
     
     if (transactions.length === 0) {
-        transactionsList.innerHTML = `<li class="transaction-item" style="justify-content:center;text-align:center;"><i class="bi bi-inbox" style="font-size:2rem;"></i><p>لا توجد معاملات حديثة</p></li>`;
+        transactionsList.innerHTML = `
+            <li class="transaction-item" style="justify-content: center; text-align: center; color: var(--gray-500);">
+                <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>لا توجد معاملات حديثة</p>
+            </li>
+        `;
     }
 }
 
-// ==================== تحديث القائمة الجانبية ====================
-function updateSidebarData() {
-    updateQuickStats();
-    updateTransactionsList();
-    updateTopProducts();
-    updateActiveCashiers();
-    updateStockAlerts();
-    updatePerformanceMetrics();
-}
-
-function updateQuickStats() {
-    const today = new Date().toDateString();
-    const sales = db.getSales();
-    const todayInvoices = sales.filter(inv => new Date(inv.date).toDateString() === today);
-    const todayRevenue = todayInvoices.reduce((sum, inv) => sum + inv.total, 0);
-    const products = db.getProducts();
-    const lowStockCount = products.filter(p => p.stock < LOW_STOCK_THRESHOLD).length;
+// عرض الصفحة المحددة
+function showPage(pageId) {
+    // إخفاء جميع الصفحات
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
     
-    document.getElementById('todaySalesCount') && (document.getElementById('todaySalesCount').textContent = todayInvoices.length);
-    document.getElementById('todayRevenue') && (document.getElementById('todayRevenue').textContent = todayRevenue.toFixed(2) + ' ج');
-    document.getElementById('activeCashiers') && (document.getElementById('activeCashiers').textContent = '3');
-    document.getElementById('lowStock') && (document.getElementById('lowStock').textContent = lowStockCount);
-}
-
-function updateTransactionsList() {
-    const list = document.getElementById('transactionsList');
-    if (!list) return;
-    const sales = db.getSales();
-    const recent = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+    // عرض الصفحة المحددة
+    document.getElementById(pageId).style.display = 'block';
     
-    list.innerHTML = recent.map(inv => `
-        <li class="transaction-item" onclick="viewInvoiceDetails(${inv.id})">
-            <div class="transaction-icon"><i class="bi bi-receipt"></i></div>
-            <div class="transaction-info">
-                <div class="transaction-header"><span class="transaction-title">فاتورة #${inv.id}</span><span class="transaction-badge completed">مكتملة</span></div>
-                <div class="transaction-details"><span class="transaction-customer"><i class="bi bi-person"></i> ${inv.cashier}</span><span class="transaction-amount">${inv.total.toFixed(2)} ج</span></div>
-                <div class="transaction-time"><i class="bi bi-clock"></i> ${new Date(inv.date).toLocaleTimeString('ar-EG')}</div>
-            </div>
-        </li>
-    `).join('');
+    // التعديل 1: التركيز التلقائي على حقل الباركود عند عرض صفحة الكاشير للمستخدم cashier
+    if (pageId === 'cashierPage' && currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            if (barcodeInput) {
+                barcodeInput.focus();
+            }
+        }, 100);
+    }
     
-    if (recent.length === 0) list.innerHTML = `<li class="transaction-item" style="justify-content:center;">لا توجد معاملات</li>`;
+    // تحميل البيانات الخاصة بكل صفحة عند عرضها
+    if (pageId === 'productsPage') {
+        loadProductsTable();
+    } else if (pageId === 'barcodeMemoryPage') {
+        loadBarcodeMemoryPage();
+    } else if (pageId === 'invoicesPage') {
+        loadInvoicesPage();
+    } else if (pageId === 'wholesalePage') {
+        loadWholesalePage();
+    } else if (pageId === 'inventoryPage') {
+        loadInventoryPage();
+    } else if (pageId === 'reportsPage') {
+        loadReportsPage();
+    }
 }
 
-function updateTopProducts() {
-    const container = document.getElementById('topProductsList');
-    if (!container) return;
-    const topProducts = db.getTopProducts(5);
-    container.innerHTML = topProducts.map((p, i) => `
-        <div class="top-product-item"><span class="product-rank">${i + 1}</span>
-            <div class="product-info"><div class="product-name">${p.name}</div>
-            <div class="product-stats"><span>${p.salesCount || 0} مبيعات</span><span class="product-sales">${(p.price * (p.salesCount || 0)).toFixed(2)} ج</span></div></div>
-        </div>
-    `).join('');
-}
-
-function updateActiveCashiers() {
-    const container = document.getElementById('activeCashiersList');
-    if (!container) return;
-    const cashiers = [{ name: 'أحمد علي', shift: 'صباحي', sales: 25 }, { name: 'محمد حسن', shift: 'صباحي', sales: 18 }, { name: 'سارة أحمد', shift: 'مسائي', sales: 15 }];
-    container.innerHTML = cashiers.map(c => `
-        <div class="cashier-item"><div class="cashier-avatar">${c.name.charAt(0)}</div>
-            <div class="cashier-info"><div class="cashier-name">${c.name}</div>
-            <div class="cashier-status"><span class="status-dot"></span> ${c.shift} - ${c.sales} فاتورة</div></div>
-        </div>
-    `).join('');
-}
-
-function updateStockAlerts() {
-    const container = document.getElementById('stockAlertsList');
-    if (!container) return;
-    const products = db.getProducts();
-    const lowStock = products.filter(p => p.stock < LOW_STOCK_THRESHOLD);
-    
-    container.innerHTML = lowStock.map(p => `
-        <div class="alert-item ${p.stock < 5 ? 'danger' : ''}">
-            <div class="alert-icon"><i class="bi ${p.stock < 5 ? 'bi-exclamation-circle-fill' : 'bi-exclamation-triangle-fill'}"></i></div>
-            <div class="alert-content"><div class="alert-title">${p.name}</div><div class="alert-desc">المتبقي: ${p.stock} وحدة</div></div>
-            <a href="#" class="alert-action" onclick="showPage('inventoryPage')"><i class="bi bi-arrow-left"></i></a>
-        </div>
-    `).join('');
-    
-    if (lowStock.length === 0) container.innerHTML = `<div style="text-align:center;padding:20px;"><i class="bi bi-check-circle" style="font-size:2rem;color:var(--success-color);"></i><p>المخزون جيد</p></div>`;
-}
-
-function updatePerformanceMetrics() {
-    const sales = db.getSales();
-    const today = new Date().toDateString();
-    const todaySales = sales.filter(s => new Date(s.date).toDateString() === today).length;
-    const dailyRate = Math.min(100, (todaySales / 50) * 100);
-    
-    document.getElementById('dailySalesRate') && (document.getElementById('dailySalesRate').textContent = dailyRate.toFixed(0) + '%');
-    const progressBars = document.querySelectorAll('#statsTab .metric-progress');
-    progressBars[0] && (progressBars[0].style.width = dailyRate + '%');
-}
-
-// ==================== البحث بالباركود ====================
+// التعديل 2: تحسين وظيفة مسح الباركود لإضافة المنتج مباشرة
+// البحث بالباركود وإضافة المنتج مباشرة
 function searchByBarcode(barcode) {
-    if (!barcode?.trim()) return;
+    if (!barcode || barcode.trim() === '') {
+        return;
+    }
+    
     const product = db.getProductByBarcode(barcode);
     if (product) {
         addToCart(product);
         barcodeInput.value = '';
+        
+        // استمرار التركيز على حقل الباركود للمستخدم cashier
+        if (currentUser && currentUser.role === 'cashier') {
+            setTimeout(() => {
+                barcodeInput.focus();
+            }, 10);
+        }
+        
+        // إضافة تأثير بصري عند إضافة المنتج بنجاح
+        barcodeInput.style.transition = 'all 0.2s';
         barcodeInput.style.borderColor = '#28a745';
-        setTimeout(() => barcodeInput.style.borderColor = '', 300);
-        if (currentUser?.role === 'cashier') setTimeout(() => barcodeInput.focus(), 10);
+        barcodeInput.style.boxShadow = '0 0 0 0.2rem rgba(40, 167, 69, 0.25)';
+        
+        setTimeout(() => {
+            barcodeInput.style.borderColor = '';
+            barcodeInput.style.boxShadow = '';
+        }, 300);
     } else {
-        showNotification('المنتج غير موجود!', 'error');
+        // إذا كان المنتج غير موجود
+        alert('المنتج غير موجود!');
         barcodeInput.value = '';
+        
+        // تأثير للمنتج غير موجود
+        barcodeInput.style.transition = 'all 0.2s';
         barcodeInput.style.borderColor = '#dc3545';
-        setTimeout(() => barcodeInput.style.borderColor = '', 300);
-        if (currentUser?.role === 'cashier') setTimeout(() => barcodeInput.focus(), 10);
+        barcodeInput.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+        
+        setTimeout(() => {
+            barcodeInput.style.borderColor = '';
+            barcodeInput.style.boxShadow = '';
+        }, 300);
+        
+        if (currentUser && currentUser.role === 'cashier') {
+            setTimeout(() => {
+                barcodeInput.focus();
+            }, 10);
+        }
     }
 }
 
+// متغير لتتبع آخر قيمة تم معالجتها
+let lastProcessedBarcode = '';
+
+// مستمع الحدث لحقل الباركود - الإضافة المباشرة عند المسح
 if (barcodeInput) {
-    barcodeInput.addEventListener('input', function() {
-        const barcode = this.value.trim();
+    // إزالة أي مستمعات سابقة
+    const newBarcodeInput = barcodeInput.cloneNode(true);
+    barcodeInput.parentNode.replaceChild(newBarcodeInput, barcodeInput);
+    
+    // إعادة تعريف barcodeInput
+    window.barcodeInput = newBarcodeInput;
+    
+    // استخدام حدث input للإضافة المباشرة
+    newBarcodeInput.addEventListener('input', function(event) {
+        const barcode = newBarcodeInput.value.trim();
+        
+        // التأكد من أن الباركود ليس فارغاً ولم يتم معالجته مسبقاً
         if (barcode && barcode !== lastProcessedBarcode) {
             lastProcessedBarcode = barcode;
             searchByBarcode(barcode);
         }
     });
-    barcodeInput.addEventListener('focus', () => { lastProcessedBarcode = ''; this.select(); });
+    
+    // استخدام حدث change للتعامل مع الماسح الضوئي الذي قد لا يطلق حدث input
+    newBarcodeInput.addEventListener('change', function(event) {
+        const barcode = newBarcodeInput.value.trim();
+        
+        if (barcode && barcode !== lastProcessedBarcode) {
+            lastProcessedBarcode = barcode;
+            searchByBarcode(barcode);
+        }
+    });
+    
+    // إضافة خاصية تحديد النص عند التركيز لتسهيل المسح
+    newBarcodeInput.addEventListener('focus', function() {
+        this.select();
+        lastProcessedBarcode = ''; // إعادة تعيين القيمة الأخيرة عند التركيز
+    });
+    
+    // إضافة مستمع للصق (paste) للتعامل مع الماسح الضوئي الذي يلصق الباركود
+    newBarcodeInput.addEventListener('paste', function(event) {
+        // ننتظر قليلاً حتى يتم لصق النص بالكامل
+        setTimeout(() => {
+            const barcode = newBarcodeInput.value.trim();
+            if (barcode && barcode !== lastProcessedBarcode) {
+                lastProcessedBarcode = barcode;
+                searchByBarcode(barcode);
+            }
+        }, 50);
+    });
+    
+    // التركيز التلقائي عند تحميل الصفحة
+    if (currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            newBarcodeInput.focus();
+        }, 100);
+    }
 }
 
-// ==================== المنتجات والسلة ====================
+// تحديث دالة showPage للتركيز على حقل الباركود
+function showPage(pageId) {
+    // إخفاء جميع الصفحات
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    // عرض الصفحة المحددة
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.style.display = 'block';
+        
+        // تحديث الفئة النشطة في الروابط السريعة
+        updateActiveQuickLink(pageId);
+    }
+    
+    // التركيز على حقل الباركود عند عرض صفحة الكاشير للمستخدم cashier
+    if (pageId === 'cashierPage' && currentUser && currentUser.role === 'cashier') {
+        setTimeout(() => {
+            if (barcodeInput) {
+                barcodeInput.focus();
+                lastProcessedBarcode = ''; // إعادة تعيين القيمة الأخيرة
+            }
+        }, 100);
+    }
+    
+    // تحميل البيانات الخاصة بكل صفحة عند عرضها
+    if (pageId === 'productsPage') {
+        loadProductsTable();
+    } else if (pageId === 'barcodeMemoryPage') {
+        loadBarcodeMemoryPage();
+    } else if (pageId === 'invoicesPage') {
+        loadInvoicesPage();
+    } else if (pageId === 'wholesalePage') {
+        loadWholesalePage();
+    } else if (pageId === 'inventoryPage') {
+        loadInventoryPage();
+    } else if (pageId === 'reportsPage') {
+        loadReportsPage();
+    }
+}
+// تحميل المنتجات
 function loadProducts() {
-    if (!productsGrid) return;
     const products = db.getProducts();
-    productsGrid.innerHTML = products.map(p => `
-        <div class="product-card" onclick="addToCart(${JSON.stringify(p).replace(/"/g, '&quot;')})">
-            <img src="${p.image}" onerror="this.src='/assets/background.png'" alt="${p.name}">
-            <h4>${p.name}</h4>
-            <div class="price">${p.price} جنيه</div>
-            <div class="barcode">${p.barcode}</div>
-            ${p.stock <= p.minStock ? `<div class="stock-low">منخفض (${p.stock})</div>` : ''}
-        </div>
-    `).join('');
+    if (!productsGrid) return;
+    
+    productsGrid.innerHTML = '';
+    
+    products.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        
+        // إضافة تحذير إذا كان المخزون منخفضاً
+        const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
+        
+        productCard.innerHTML = `
+            <img src="${product.image}" onerror="this.src='/assets/background.png'" alt="${product.name}">
+            <h4>${product.name}</h4>
+            <div class="price">${product.price} جنيه</div>
+            <div class="barcode">${product.barcode}</div>
+            ${stockWarning}
+        `;
+        
+        productCard.addEventListener('click', () => addToCart(product));
+        
+        productsGrid.appendChild(productCard);
+    });
 }
 
+// إضافة منتج إلى السلة
 function addToCart(product) {
     const existingItem = cart.find(item => item.id === product.id);
+    
     if (existingItem) {
-        if (existingItem.quantity < product.stock) existingItem.quantity++;
-        else { showNotification('لا يوجد مخزون كافي!', 'error'); return; }
+        if (existingItem.quantity < product.stock) {
+            existingItem.quantity += 1;
+        } else {
+            alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+            return;
+        }
     } else {
-        if (product.stock > 0) cart.push({ ...product, quantity: 1 });
-        else { showNotification('المنتج غير متوفر!', 'error'); return; }
+        if (product.stock > 0) {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                barcode: product.barcode,
+                quantity: 1,
+                stock: product.stock
+            });
+        } else {
+            alert('المنتج غير متوفر في المخزون!');
+            return;
+        }
     }
+    
     updateCart();
 }
 
+// تحديث السلة
 function updateCart() {
     if (!cartItems) return;
+    
+    cartItems.innerHTML = '';
+    
     let subtotal = 0;
-    cartItems.innerHTML = cart.map(item => {
+    
+    cart.forEach(item => {
         const itemTotal = item.price * item.quantity;
         subtotal += itemTotal;
-        return `
-            <div class="cart-item">
-                <div class="cart-item-info"><img src="${item.image}" onerror="this.src='/assets/background.png'"><div class="cart-item-details"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">${item.price} جنيه</div></div></div>
-                <div class="quantity-controls"><button class="decrease-btn" data-id="${item.id}">-</button><span>${item.quantity}</span><button class="increase-btn" data-id="${item.id}">+</button></div>
-                <div>${itemTotal.toFixed(2)} جنيه</div>
-                <button class="remove-item" data-id="${item.id}">×</button>
+        
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+            <div class="cart-item-info">
+                <img src="${item.image}" alt="${item.name}">
+                <div class="cart-item-details">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${item.price} جنيه</div>
+                </div>
             </div>
+            <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span>${item.quantity}</span>
+                <button class="increase-btn">+</button>
+            </div>
+            <div>${itemTotal.toFixed(2)} جنيه</div>
+            <button class="remove-item">×</button>
         `;
-    }).join('');
-    
-    // تطبيق العروض
-    const { discount, appliedOffers } = db.applyOffersToCart(cart, subtotal);
-    const afterDiscount = subtotal - discount;
-    const tax = afterDiscount * TAX_RATE;
-    const total = afterDiscount + tax;
-    
-    discountRow.style.display = discount > 0 ? 'flex' : 'none';
-    discountAmountElement && (discountAmountElement.textContent = formatCurrency(discount));
-    subtotalElement && (subtotalElement.textContent = formatCurrency(subtotal));
-    taxElement && (taxElement.textContent = formatCurrency(tax));
-    totalElement && (totalElement.textContent = formatCurrency(total));
-    
-    // نقاط الولاء
-    const pointsEarned = Math.floor(total / 100);
-    loyaltyPointsElement && (loyaltyPointsElement.textContent = pointsEarned);
-    
-    // إضافة أحداث الأزرار
-    document.querySelectorAll('.decrease-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const item = cart.find(i => i.id == btn.dataset.id);
-            if (item && item.quantity > 1) { item.quantity--; updateCart(); }
-            else if (item) { cart = cart.filter(i => i.id != item.id); updateCart(); }
+        
+        // إضافة أحداث للأزرار
+        const decreaseBtn = cartItem.querySelector('.decrease-btn');
+        const increaseBtn = cartItem.querySelector('.increase-btn');
+        const removeBtn = cartItem.querySelector('.remove-item');
+        
+        decreaseBtn.addEventListener('click', () => {
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+                updateCart();
+            }
         });
-    });
-    document.querySelectorAll('.increase-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const item = cart.find(i => i.id == btn.dataset.id);
+        
+        increaseBtn.addEventListener('click', () => {
             const product = db.getProductById(item.id);
-            if (item && item.quantity < product.stock) { item.quantity++; updateCart(); }
-            else showNotification('لا يوجد مخزون كافي!', 'error');
+            if (item.quantity < product.stock) {
+                item.quantity += 1;
+                updateCart();
+            } else {
+                alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+            }
         });
-    });
-    document.querySelectorAll('.remove-item').forEach(btn => {
-        btn.addEventListener('click', () => {
-            cart = cart.filter(i => i.id != btn.dataset.id);
+        
+        removeBtn.addEventListener('click', () => {
+            cart = cart.filter(cartItem => cartItem.id !== item.id);
             updateCart();
         });
+        
+        cartItems.appendChild(cartItem);
     });
+    
+    // حساب الضريبة والإجمالي
+    const tax = subtotal * 0.14;
+    const total = subtotal + tax;
+    
+    if (subtotalElement) subtotalElement.textContent = `${subtotal.toFixed(2)} جنيه`;
+    if (taxElement) taxElement.textContent = `${tax.toFixed(2)} جنيه`;
+    if (totalElement) totalElement.textContent = `${total.toFixed(2)} جنيه`;
 }
 
-// ==================== إتمام الشراء ====================
-checkoutBtn?.addEventListener('click', function() {
-    if (cart.length === 0) { showNotification('السلة فارغة!', 'error'); return; }
-    
-    const subtotal = parseFloat(subtotalElement.textContent) || 0;
-    const tax = parseFloat(taxElement.textContent) || 0;
-    const total = parseFloat(totalElement.textContent) || 0;
-    const discount = parseFloat(discountAmountElement?.textContent) || 0;
-    const pointsEarned = Math.floor(total / 100);
-    
-    // تحديث نقاط العميل
-    let customerId = null;
-    if (currentCustomer) {
-        db.updateCustomerPoints(currentCustomer.id, pointsEarned, `شراء بقيمة ${total.toFixed(2)} جنيه`);
-        db.updateCustomerSpending(currentCustomer.id, total);
-        customerId = currentCustomer.id;
-    }
-    
-    const saleId = db.addSale({
-        items: [...cart],
-        subtotal: subtotal + discount,
-        discount: discount,
-        tax: tax,
-        total: total,
-        cashier: currentUser.username,
-        customer: currentCustomer?.name || null,
-        customerId: customerId,
-        pointsEarned: pointsEarned
-    });
-    
-    cart.forEach(item => db.updateProductStock(item.id, item.quantity));
-    
-    showInvoiceModal({
-        id: saleId,
-        date: new Date().toISOString(),
-        cashier: currentUser.username,
-        customer: currentCustomer?.name,
-        items: [...cart],
-        subtotal: subtotal + discount,
-        discount: discount,
-        tax: tax,
-        total: total,
-        pointsEarned: pointsEarned
-    }, false);
-    
-    cart = [];
-    currentCustomer = null;
-    if (customerPhone) customerPhone.value = '';
-    updateCart();
-    loadProducts();
-    loadRecentTransactions();
-    updateSidebarData();
-    showNotification('تم إتمام الشراء بنجاح!', 'success');
-});
-
-// ==================== البحث عن العميل ====================
-searchCustomerBtn?.addEventListener('click', function() {
-    const phone = customerPhone.value.trim();
-    if (!phone) { showNotification('أدخل رقم الهاتف', 'warning'); return; }
-    const customer = db.getCustomerByPhone(phone);
-    if (customer) {
-        currentCustomer = customer;
-        showNotification(`مرحباً ${customer.name} - لديك ${customer.points} نقطة ولاء`, 'success');
-        loyaltyPointsElement && (loyaltyPointsElement.textContent = `${customer.points} نقطة متاحة`);
-    } else {
-        const name = prompt('العميل غير مسجل. أدخل الاسم للتسجيل:');
-        if (name) {
-            const newCustomer = { name, phone, points: 0, totalSpent: 0 };
-            db.addCustomer(newCustomer);
-            currentCustomer = db.getCustomerByPhone(phone);
-            showNotification(`تم تسجيل ${name} بنجاح!`, 'success');
+// إتمام عملية الشراء
+if (checkoutBtn) {
+    checkoutBtn.addEventListener('click', function() {
+        if (cart.length === 0) {
+            alert('السلة فارغة. أضف منتجات قبل إتمام الشراء.');
+            return;
         }
-    }
-});
-
-// ==================== إدارة المنتجات ====================
-function loadProductsTable() {
-    if (!productsTableBody) return;
-    const products = db.getProducts();
-    productsTableBody.innerHTML = products.map(p => {
-        const profit = p.price - (p.cost || p.price * 0.7);
-        return `
-            <tr>
-                <td>${p.barcode}</td>
-                <td>${p.name}</td>
-                <td>${p.price} ج</td>
-                <td>${p.cost || (p.price * 0.7).toFixed(2)} ج</td>
-                <td class="${profit > 0 ? 'text-success' : 'text-danger'}">${profit.toFixed(2)} ج</td>
-                <td><span class="status-badge ${p.stock > p.minStock ? 'in-stock' : p.stock > 0 ? 'low-stock' : 'out-of-stock'}">${p.stock}</span></td>
-                <td>${p.category}</td>
-                <td><button class="action-btn edit-btn" data-id="${p.id}"><i class="bi bi-pencil"></i></button><button class="action-btn delete-btn" data-id="${p.id}"><i class="bi bi-trash"></i></button></td>
-            </tr>
-        `;
-    }).join('');
-    
-    document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => editProduct(btn.dataset.id)));
-    document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => { if (confirm('حذف المنتج؟')) db.deleteProduct(parseInt(btn.dataset.id)) && loadProductsTable() && loadProducts(); }));
+        
+        const subtotal = parseFloat(subtotalElement.textContent);
+        const tax = parseFloat(taxElement.textContent);
+        const total = parseFloat(totalElement.textContent);
+        
+        // حفظ عملية البيع في قاعدة البيانات
+        const saleId = db.addSale({
+            items: [...cart],
+            subtotal: subtotal,
+            tax: tax,
+            total: total,
+            cashier: currentUser.username
+        });
+        
+        // تحديث المخزون
+        cart.forEach(item => {
+            db.updateProductStock(item.id, item.quantity);
+        });
+        
+        // عرض تفاصيل الفاتورة في النافذة المنبثقة
+        const saleData = {
+            id: saleId,
+            date: new Date().toISOString(),
+            cashier: currentUser.username,
+            items: [...cart],
+            subtotal: subtotal,
+            tax: tax,
+            total: total
+        };
+        
+        showInvoiceModal(saleData, false);
+        
+        // تفريغ السلة بعد إتمام الشراء
+        cart = [];
+        updateCart();
+        loadProducts(); // إعادة تحميل المنتجات لتحديث المخزون
+        loadRecentTransactions(); // تحديث المعاملات الحديثة
+        updateSidebarData(); // تحديث القائمة الجانبية
+    });
 }
 
+// تحميل جدول المنتجات في صفحة الإدارة
+function loadProductsTable() {
+    const products = db.getProducts();
+    if (!productsTableBody) return;
+    
+    productsTableBody.innerHTML = '';
+    
+    products.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.barcode}</td>
+            <td>${product.name}</td>
+            <td>${product.price} جنيه</td>
+            <td>${product.stock}</td>
+            <td>${product.category}</td>
+             <td>
+                <button class="action-btn edit-btn" data-id="${product.id}">تعديل</button>
+                <button class="action-btn delete-btn" data-id="${product.id}">حذف</button>
+             </td>
+        `;
+        productsTableBody.appendChild(row);
+    });
+    
+    // إضافة أحداث لأزرار التعديل والحذف
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = parseInt(this.getAttribute('data-id'));
+            editProduct(productId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = parseInt(this.getAttribute('data-id'));
+            if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                db.deleteProduct(productId);
+                loadProductsTable();
+                loadProducts(); // تحديث قائمة المنتجات في صفحة الكاشير
+                updateSidebarData(); // تحديث القائمة الجانبية
+            }
+        });
+    });
+}
+
+// تعديل منتج
 function editProduct(productId) {
     const product = db.getProductById(productId);
-    const newName = prompt('اسم المنتج:', product.name);
+    const newName = prompt('تعديل اسم المنتج:', product.name);
     if (newName) {
-        const newPrice = prompt('سعر البيع:', product.price);
+        const newPrice = prompt('تعديل السعر:', product.price);
         if (newPrice) {
-            db.updateProduct(productId, { name: newName, price: parseFloat(newPrice) });
+            db.updateProduct(productId, { 
+                name: newName, 
+                price: parseFloat(newPrice) 
+            });
             loadProductsTable();
             loadProducts();
+            updateSidebarData();
         }
     }
 }
 
-addProductBtn?.addEventListener('click', function() {
-    const name = productNameInput.value.trim();
-    const price = parseFloat(productPriceInput.value);
-    const cost = parseFloat(productCostInput.value);
-    const wholesale = parseFloat(productWholesaleInput.value);
-    const barcode = productBarcodeInput.value.trim();
-    const category = productCategorySelect.value;
-    const stock = parseInt(productStockInput.value);
-    
-    if (!name || !price || !barcode) { showNotification('يرجى ملء جميع الحقول المطلوبة', 'error'); return; }
-    
-    db.addProduct({ name, price, cost: cost || price * 0.7, wholesalePrice: wholesale || price * 0.8, barcode, category, stock, minStock: LOW_STOCK_THRESHOLD, image: '/assets/background.png' });
-    loadProductsTable();
-    loadProducts();
-    productNameInput.value = productPriceInput.value = productCostInput.value = productWholesaleInput.value = productBarcodeInput.value = productStockInput.value = '';
-    showNotification('تم إضافة المنتج بنجاح!', 'success');
-});
-
-// ==================== إدارة العروض ====================
-function loadOffersPage() {
-    if (!offersTableBody) return;
-    const products = db.getProducts();
-    offerProductSelect.innerHTML = '<option value="">جميع المنتجات</option>' + products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    
-    const offers = db.getOffers();
-    const now = new Date();
-    offersTableBody.innerHTML = offers.map(o => `
-        <tr>
-            <td>${o.name}</td>
-            <td>${o.type === 'percentage' ? 'نسبة مئوية' : o.type === 'fixed' ? 'خصم ثابت' : 'اشتر واحصل على مجاناً'}</td>
-            <td>${o.value}${o.type === 'percentage' ? '%' : ' ج'}</td>
-            <td>${o.productId ? db.getProductById(o.productId)?.name || 'الكل' : 'الكل'}</td>
-            <td>${o.startDate ? new Date(o.startDate).toLocaleDateString() : 'بدون'} - ${o.endDate ? new Date(o.endDate).toLocaleDateString() : 'بدون'}</td>
-            <td><span class="status-badge ${o.active && (!o.endDate || new Date(o.endDate) >= now) ? 'in-stock' : 'out-of-stock'}">${o.active && (!o.endDate || new Date(o.endDate) >= now) ? 'نشط' : 'منتهي'}</span></td>
-            <td><button class="action-btn delete-btn" data-id="${o.id}"><i class="bi bi-trash"></i></button></td>
-        </tr>
-    `).join('');
-    
-    document.querySelectorAll('#offersTableBody .delete-btn').forEach(btn => btn.addEventListener('click', () => {
-        if (confirm('حذف العرض؟')) {
-            const offers = db.getOffers();
-            localStorage.setItem('offers', JSON.stringify(offers.filter(o => o.id != btn.dataset.id)));
-            loadOffersPage();
-            showNotification('تم حذف العرض', 'success');
+// إضافة منتج جديد
+if (addProductBtn) {
+    addProductBtn.addEventListener('click', function() {
+        const name = productNameInput.value.trim();
+        const price = parseFloat(productPriceInput.value);
+        const barcode = productBarcodeInput.value.trim();
+        const category = productCategoryInput.value;
+        const stock = parseInt(productStockInput.value);
+        
+        if (!name || !price || !barcode || !stock) {
+            alert('يرجى ملء جميع الحقول المطلوبة');
+            return;
         }
-    }));
-}
-
-addOfferBtn?.addEventListener('click', function() {
-    const name = offerNameInput.value.trim();
-    const type = offerTypeSelect.value;
-    const value = parseFloat(offerValueInput.value);
-    const productId = offerProductSelect.value ? parseInt(offerProductSelect.value) : null;
-    const startDate = offerStartDate.value;
-    const endDate = offerEndDate.value;
-    
-    if (!name || !value) { showNotification('يرجى ملء البيانات', 'error'); return; }
-    
-    db.addOffer({ name, type, value, productId, startDate, endDate, active: true });
-    loadOffersPage();
-    offerNameInput.value = offerValueInput.value = '';
-    showNotification('تم إضافة العرض بنجاح!', 'success');
-});
-
-// ==================== إدارة العملاء ====================
-function loadCustomersPage() {
-    if (!customersTableBody) return;
-    const customers = db.getCustomers();
-    customersTableBody.innerHTML = customers.map(c => `
-        <tr>
-            <td>${c.name}</td>
-            <td>${c.phone}</td>
-            <td>${c.points} نقطة</td>
-            <td>${c.totalSpent.toFixed(2)} ج</td>
-            <td>${c.lastPurchase ? new Date(c.lastPurchase).toLocaleDateString() : 'لا يوجد'}</td>
-            <td><button class="action-btn" onclick="selectCustomer(${c.id})">اختيار</button></td>
-        </tr>
-    `).join('');
-    
-    redeemCustomerSelect.innerHTML = customers.map(c => `<option value="${c.id}">${c.name} (${c.points} نقطة)</option>`).join('');
-}
-
-addCustomerBtn?.addEventListener('click', function() {
-    const name = customerNameInput.value.trim();
-    const phone = customerPhoneReg.value.trim();
-    if (!name || !phone) { showNotification('يرجى إدخال الاسم والهاتف', 'error'); return; }
-    if (db.getCustomerByPhone(phone)) { showNotification('رقم الهاتف موجود مسبقاً', 'error'); return; }
-    db.addCustomer({ name, phone, points: 0, totalSpent: 0 });
-    loadCustomersPage();
-    customerNameInput.value = customerPhoneReg.value = '';
-    showNotification('تم إضافة العميل بنجاح!', 'success');
-});
-
-redeemPointsBtn?.addEventListener('click', function() {
-    const customerId = parseInt(redeemCustomerSelect.value);
-    const points = parseInt(redeemPointsInput.value);
-    if (!customerId || !points) { showNotification('اختر العميل وأدخل النقاط', 'error'); return; }
-    const customer = db.getCustomers().find(c => c.id === customerId);
-    if (!customer || customer.points < points) { showNotification('نقاط غير كافية', 'error'); return; }
-    const discountValue = points * POINTS_VALUE;
-    db.updateCustomerPoints(customerId, -points, `استبدال ${points} نقطة بقيمة ${discountValue} جنيه`);
-    showNotification(`تم استبدال ${points} نقطة بقيمة ${discountValue.toFixed(2)} جنيه`, 'success');
-    loadCustomersPage();
-    redeemPointsInput.value = '';
-});
-
-window.selectCustomer = function(customerId) {
-    const customer = db.getCustomers().find(c => c.id === customerId);
-    if (customer) {
-        currentCustomer = customer;
-        showPage('cashierPage');
-        if (customerPhone) customerPhone.value = customer.phone;
-        showNotification(`تم اختيار العميل ${customer.name}`, 'success');
-    }
-};
-
-// ==================== إدارة المصروفات ====================
-function loadExpensesPage() {
-    if (!expensesTableBody) return;
-    const expenses = db.getExpenses();
-    expensesTableBody.innerHTML = expenses.sort((a, b) => new Date(b.date) - new Date(a.date)).map(e => `
-        <tr>
-            <td>${new Date(e.date).toLocaleDateString()}</td>
-            <td>${e.type === 'rent' ? 'إيجار' : e.type === 'salary' ? 'رواتب' : e.type === 'utilities' ? 'فواتير' : e.type === 'maintenance' ? 'صيانة' : 'أخرى'}</td>
-            <td>${e.description || '-'}</td>
-            <td>${e.amount.toFixed(2)} ج</td>
-            <td><button class="action-btn delete-btn" data-id="${e.id}"><i class="bi bi-trash"></i></button></td>
-        </tr>
-    `).join('');
-    
-    document.querySelectorAll('#expensesTableBody .delete-btn').forEach(btn => btn.addEventListener('click', () => {
-        if (confirm('حذف المصروف؟')) db.deleteExpense(parseInt(btn.dataset.id)) && loadExpensesPage() && updateProfitSummary();
-    }));
-    
-    updateProfitSummary();
-}
-
-function updateProfitSummary() {
-    if (!profitSummaryDiv) return;
-    const stats = db.getProfitStats();
-    profitSummaryDiv.innerHTML = `
-        <div class="profit-stats">
-            <div class="profit-card"><h4>إجمالي الإيرادات</h4><div class="value positive">${stats.totalRevenue.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>تكلفة المبيعات</h4><div class="value">${stats.totalCost.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>إجمالي المصروفات</h4><div class="value">${stats.totalExpenses.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>صافي الربح</h4><div class="value ${stats.netProfit >= 0 ? 'positive' : 'negative'}">${stats.netProfit.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>هامش الربح</h4><div class="value positive">${stats.profitMargin.toFixed(2)}%</div></div>
-        </div>
-    `;
-}
-
-addExpenseBtn?.addEventListener('click', function() {
-    const type = expenseTypeSelect.value;
-    const amount = parseFloat(expenseAmountInput.value);
-    const description = expenseDescInput.value.trim();
-    if (!amount) { showNotification('أدخل المبلغ', 'error'); return; }
-    db.addExpense({ type, amount, description });
-    loadExpensesPage();
-    expenseAmountInput.value = expenseDescInput.value = '';
-    showNotification('تم إضافة المصروف', 'success');
-});
-
-// ==================== التقارير ====================
-function loadReportsPage() {
-    const today = new Date();
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    reportDateFrom.value = firstDay.toISOString().split('T')[0];
-    reportDateTo.value = today.toISOString().split('T')[0];
-    updateProfitStats();
-}
-
-function updateProfitStats() {
-    if (!profitStatsDiv) return;
-    const stats = db.getProfitStats(reportDateFrom.value, reportDateTo.value);
-    profitStatsDiv.innerHTML = `
-        <div class="profit-stats">
-            <div class="profit-card"><h4>الإيرادات</h4><div class="value positive">${stats.totalRevenue.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>تكلفة المبيعات</h4><div class="value">${stats.totalCost.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>المصروفات</h4><div class="value">${stats.totalExpenses.toFixed(2)} ج</div></div>
-            <div class="profit-card"><h4>صافي الربح</h4><div class="value ${stats.netProfit >= 0 ? 'positive' : 'negative'}">${stats.netProfit.toFixed(2)} ج</div></div>
-        </div>
-    `;
-}
-
-generateReportBtn?.addEventListener('click', function() {
-    const from = reportDateFrom.value;
-    const to = reportDateTo.value;
-    const type = reportTypeSelect.value;
-    const sales = db.getSales();
-    const filteredSales = sales.filter(s => (!from || new Date(s.date) >= new Date(from)) && (!to || new Date(s.date) <= new Date(to)));
-    
-    if (type === 'sales') {
-        const total = filteredSales.reduce((sum, s) => sum + s.total, 0);
-        reportResults.innerHTML = `
-            <h4>تقرير المبيعات (${from || 'البداية'} - ${to || 'النهاية'})</h4>
-            <table><thead><tr><th>رقم</th><th>التاريخ</th><th>الكاشير</th><th>العميل</th><th>الإجمالي</th></tr></thead><tbody>
-                ${filteredSales.map(s => `<tr><td>${s.id}</td><td>${new Date(s.date).toLocaleDateString()}</td><td>${s.cashier}</td><td>${s.customer || 'عادي'}</td><td>${s.total.toFixed(2)} ج</td></tr>`).join('')}
-            </tbody></table>
-            <div class="profit-stats"><div class="profit-card"><h4>إجمالي المبيعات</h4><div class="value">${total.toFixed(2)} ج</div></div><div class="profit-card"><h4>عدد الفواتير</h4><div class="value">${filteredSales.length}</div></div></div>
-        `;
-    } else if (type === 'profit') {
-        const stats = db.getProfitStats(from, to);
-        reportResults.innerHTML = `
-            <h4>تقرير الأرباح</h4>
-            <div class="profit-stats">
-                <div class="profit-card"><h4>إجمالي الإيرادات</h4><div class="value positive">${stats.totalRevenue.toFixed(2)} ج</div></div>
-                <div class="profit-card"><h4>تكلفة المبيعات</h4><div class="value">${stats.totalCost.toFixed(2)} ج</div></div>
-                <div class="profit-card"><h4>إجمالي المصروفات</h4><div class="value">${stats.totalExpenses.toFixed(2)} ج</div></div>
-                <div class="profit-card"><h4>صافي الربح</h4><div class="value ${stats.netProfit >= 0 ? 'positive' : 'negative'}">${stats.netProfit.toFixed(2)} ج</div></div>
-                <div class="profit-card"><h4>هامش الربح</h4><div class="value positive">${stats.profitMargin.toFixed(2)}%</div></div>
-            </div>
-        `;
-    } else if (type === 'products') {
-        const topProducts = db.getTopProducts(20);
-        reportResults.innerHTML = `
-            <h4>أكثر المنتجات مبيعاً</h4>
-            <table><thead><tr><th>#</th><th>المنتج</th><th>السعر</th><th>عدد المبيعات</th><th>الإيرادات</th></tr></thead><tbody>
-                ${topProducts.map((p, i) => `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.price} ج</td><td>${p.salesCount || 0}</td><td>${(p.price * (p.salesCount || 0)).toFixed(2)} ج</td></tr>`).join('')}
-            </tbody></table>
-        `;
-    } else if (type === 'customers') {
-        const topCustomers = db.getTopCustomers(20);
-        reportResults.innerHTML = `
-            <h4>أفضل العملاء</h4>
-            <table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>نقاط الولاء</th><th>إجمالي المشتريات</th></tr></thead><tbody>
-                ${topCustomers.map((c, i) => `<tr><td>${i+1}</td><td>${c.name}</td><td>${c.phone}</td><td>${c.points}</td><td>${c.totalSpent.toFixed(2)} ج</td></tr>`).join('')}
-            </tbody></table>
-        `;
-    }
-});
-
-exportReportBtn?.addEventListener('click', function() {
-    const content = reportResults.innerText;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `تقرير_${new Date().toISOString()}.txt`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    showNotification('تم تصدير التقرير', 'success');
-});
-
-// ==================== باقي الصفحات ====================
-function loadBarcodeMemoryPage() {
-    if (!memoryProductSelect) return;
-    const products = db.getProducts();
-    memoryProductSelect.innerHTML = products.map(p => `<option value="${p.id}">${p.name} - ${p.barcode}</option>`).join('');
-    
-    const barcodeMemory = db.getBarcodeMemory();
-    barcodeMemoryTable.innerHTML = barcodeMemory.map(b => `
-        <tr><td>${b.barcode}</td><td>${db.getProductById(b.productId)?.name || 'غير معروف'}</td><td>${new Date(b.storedAt).toLocaleDateString()}</td>
-        <td><button class="action-btn delete-btn" data-id="${b.id}"><i class="bi bi-trash"></i></button></td></tr>
-    `).join('');
-    
-    document.querySelectorAll('#barcodeMemoryTable .delete-btn').forEach(btn => btn.addEventListener('click', () => {
-        if (confirm('حذف الباركود؟')) db.removeBarcodeFromMemory(parseInt(btn.dataset.id)) && loadBarcodeMemoryPage();
-    }));
-}
-
-saveBarcodeBtn?.addEventListener('click', function() {
-    const barcode = memoryBarcodeInput.value.trim();
-    const productId = parseInt(memoryProductSelect.value);
-    if (!barcode || !productId) { showNotification('أدخل الباركود واختر المنتج', 'error'); return; }
-    db.addBarcodeToMemory({ barcode, productId });
-    loadBarcodeMemoryPage();
-    memoryBarcodeInput.value = '';
-    showNotification('تم حفظ الباركود', 'success');
-});
-
-function loadInvoicesPage() {
-    if (!invoicesTableBody) return;
-    const sales = db.getSales();
-    invoicesTableBody.innerHTML = sales.slice().reverse().map(s => `
-        <tr><td>${s.id}</td><td>${new Date(s.date).toLocaleDateString()}</td><td>${s.cashier}</td><td>${s.customer || 'عادي'}</td><td>${s.total.toFixed(2)} ج</td>
-        <td><button class="action-btn" onclick="viewInvoiceDetails(${s.id})">عرض</button></td></tr>
-    `).join('');
-    
-    invoiceSearch?.addEventListener('input', function() {
-        const term = this.value.toLowerCase();
-        document.querySelectorAll('#invoicesTableBody tr').forEach(row => row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none');
+        
+        const newProduct = {
+            name: name,
+            price: price,
+            barcode: barcode,
+            category: category,
+            image: `https://images.pexels.com/photos/206959/pexels-photo-206959.jpeg?auto=compress&cs=tinysrgb&w=200`,
+            stock: stock,
+            minStock: 5,
+            wholesalePrice: price * 0.8 // سعر الجملة 80% من سعر التجزئة
+        };
+        
+        db.addProduct(newProduct);
+        loadProductsTable();
+        loadProducts(); // تحديث قائمة المنتجات في صفحة الكاشير
+        updateSidebarData(); // تحديث القائمة الجانبية
+        
+        // تفريغ الحقول
+        productNameInput.value = '';
+        productPriceInput.value = '';
+        productBarcodeInput.value = '';
+        productStockInput.value = '';
+        
+        alert('تم إضافة المنتج بنجاح!');
     });
 }
 
+// تحميل صفحة تخزين الباركود
+function loadBarcodeMemoryPage() {
+    // تحميل قائمة المنتجات في القائمة المنسدلة
+    const products = db.getProducts();
+    if (!memoryProductSelect) return;
+    
+    memoryProductSelect.innerHTML = '';
+    
+    products.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = `${product.name} - ${product.barcode}`;
+        memoryProductSelect.appendChild(option);
+    });
+    
+    // تحميل جدول الباركود المخزن
+    const barcodeMemory = db.getBarcodeMemory();
+    if (!barcodeMemoryTable) return;
+    
+    barcodeMemoryTable.innerHTML = '';
+    
+    barcodeMemory.forEach(item => {
+        const product = db.getProductById(item.productId);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+             <td>${item.barcode}</td>
+             <td>${product ? product.name : 'منتج غير معروف'}</td>
+             <td>${new Date(item.storedAt).toLocaleDateString('ar-EG')}</td>
+             <td>
+                <button class="action-btn delete-btn" data-id="${item.id}">حذف</button>
+             </td>
+        `;
+        barcodeMemoryTable.appendChild(row);
+    });
+    
+    // إضافة أحداث لأزرار الحذف
+    document.querySelectorAll('#barcodeMemoryTable .delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const barcodeId = parseInt(this.getAttribute('data-id'));
+            if (confirm('هل أنت متأكد من حذف هذا الباركود من الذاكرة؟')) {
+                db.removeBarcodeFromMemory(barcodeId);
+                loadBarcodeMemoryPage();
+            }
+        });
+    });
+}
+
+// حفظ الباركود في الذاكرة
+if (saveBarcodeBtn) {
+    saveBarcodeBtn.addEventListener('click', function() {
+        const barcode = memoryBarcodeInput.value.trim();
+        const productId = parseInt(memoryProductSelect.value);
+        
+        if (!barcode || !productId) {
+            alert('يرجى إدخال الباركود واختيار المنتج');
+            return;
+        }
+        
+        const barcodeData = {
+            barcode: barcode,
+            productId: productId
+        };
+        
+        db.addBarcodeToMemory(barcodeData);
+        loadBarcodeMemoryPage();
+        
+        memoryBarcodeInput.value = '';
+        alert('تم حفظ الباركود في الذاكرة بنجاح!');
+    });
+}
+
+// تحميل صفحة الفواتير
+function loadInvoicesPage() {
+    const sales = db.getSales();
+    if (!invoicesTableBody) return;
+    
+    invoicesTableBody.innerHTML = '';
+    
+    sales.slice().reverse().forEach(sale => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+             <td>${sale.id}</td>
+             <td>${new Date(sale.date).toLocaleDateString('ar-EG')}</td>
+             <td>${sale.cashier}</td>
+             <td>${sale.total.toFixed(2)} جنيه</td>
+             <td>
+                <button class="action-btn view-btn" data-id="${sale.id}">عرض التفاصيل</button>
+             </td>
+        `;
+        invoicesTableBody.appendChild(row);
+    });
+    
+    // إضافة أحداث لأزرار العرض
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const saleId = parseInt(this.getAttribute('data-id'));
+            viewInvoiceDetails(saleId);
+        });
+    });
+    
+    // إضافة حدث البحث
+    if (invoiceSearch) {
+        invoiceSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = invoicesTableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+}
+
+// عرض تفاصيل الفاتورة
 function viewInvoiceDetails(saleId) {
     const sales = db.getSales();
     const sale = sales.find(s => s.id === saleId);
-    if (sale) showInvoiceModal(sale, false);
+    
+    if (sale) {
+        showInvoiceModal(sale, false);
+    }
 }
 
+// تحميل صفحة فواتير الجملة
 function loadWholesalePage() {
-    const invoices = db.getWholesaleInvoices();
-    wholesaleTableBody.innerHTML = invoices.slice().reverse().map(i => `
-        <tr><td>${i.id}</td><td>${i.customer}</td><td>${new Date(i.date).toLocaleDateString()}</td><td>${i.discount}%</td><td>${i.total.toFixed(2)} ج</td>
-        <td><button class="action-btn" onclick="viewWholesaleInvoice(${i.id})">عرض</button></td></tr>
-    `).join('');
-}
-
-function addProductToWholesaleCart(barcode) {
-    const product = db.getProductByBarcode(barcode);
-    if (!product) { showNotification('المنتج غير موجود!', 'error'); return; }
-    const existing = wholesaleCart.find(i => i.id === product.id);
-    if (existing) existing.quantity++;
-    else wholesaleCart.push({ ...product, quantity: 1, price: product.wholesalePrice || product.price * 0.8 });
-    updateWholesaleCart();
-}
-
-function updateWholesaleCart() {
-    if (!wholesaleCartItems) return;
-    let subtotal = 0;
-    wholesaleCartItems.innerHTML = wholesaleCart.map(item => {
-        const total = item.price * item.quantity;
-        subtotal += total;
-        return `
-            <div class="cart-item"><div class="cart-item-info"><img src="${item.image}"><div><div>${item.name}</div><div>${item.price} ج (جملة)</div></div></div>
-            <div class="quantity-controls"><button class="decrease-btn" data-id="${item.id}">-</button><span>${item.quantity}</span><button class="increase-btn" data-id="${item.id}">+</button></div>
-            <div>${total.toFixed(2)} ج</div><button class="remove-item" data-id="${item.id}">×</button></div>
+    // تحميل فواتير الجملة السابقة
+    const wholesaleInvoices = db.getWholesaleInvoices();
+    if (!wholesaleTableBody) return;
+    
+    wholesaleTableBody.innerHTML = '';
+    
+    wholesaleInvoices.slice().reverse().forEach(invoice => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+             <td>${invoice.id}</td>
+             <td>${invoice.customer}</td>
+             <td>${new Date(invoice.date).toLocaleDateString('ar-EG')}</td>
+             <td>${invoice.discount}%</td>
+             <td>${invoice.total.toFixed(2)} جنيه</td>
+             <td>
+                <button class="action-btn view-btn" data-id="${invoice.id}">عرض</button>
+             </td>
         `;
-    }).join('');
+        wholesaleTableBody.appendChild(row);
+    });
     
-    const discountRate = parseFloat(wholesaleDiscount.value) / 100;
-    const discountAmount = subtotal * discountRate;
-    const afterDiscount = subtotal - discountAmount;
-    const tax = afterDiscount * TAX_RATE;
-    const total = afterDiscount + tax;
-    
-    wholesaleSubtotal.textContent = formatCurrency(subtotal);
-    wholesaleDiscountAmount.textContent = formatCurrency(discountAmount);
-    wholesaleTax.textContent = formatCurrency(tax);
-    wholesaleTotal.textContent = formatCurrency(total);
-    
-    document.querySelectorAll('#wholesaleCartItems .decrease-btn').forEach(btn => btn.addEventListener('click', () => {
-        const item = wholesaleCart.find(i => i.id == btn.dataset.id);
-        if (item && item.quantity > 1) item.quantity--;
-        else if (item) wholesaleCart = wholesaleCart.filter(i => i.id != item.id);
-        updateWholesaleCart();
-    }));
-    document.querySelectorAll('#wholesaleCartItems .increase-btn').forEach(btn => btn.addEventListener('click', () => {
-        const item = wholesaleCart.find(i => i.id == btn.dataset.id);
-        if (item) item.quantity++;
-        updateWholesaleCart();
-    }));
-    document.querySelectorAll('#wholesaleCartItems .remove-item').forEach(btn => btn.addEventListener('click', () => {
-        wholesaleCart = wholesaleCart.filter(i => i.id != btn.dataset.id);
-        updateWholesaleCart();
-    }));
-}
-
-addWholesaleProductBtn?.addEventListener('click', () => {
-    const barcode = wholesaleBarcode.value.trim();
-    if (barcode) { addProductToWholesaleCart(barcode); wholesaleBarcode.value = ''; wholesaleBarcode.focus(); }
-});
-wholesaleBarcode?.addEventListener('keyup', e => { if (e.key === 'Enter') addWholesaleProductBtn.click(); });
-wholesaleDiscount?.addEventListener('input', updateWholesaleCart);
-
-wholesaleCheckoutBtn?.addEventListener('click', function() {
-    if (wholesaleCart.length === 0) { showNotification('السلة فارغة!', 'error'); return; }
-    const customer = wholesaleCustomer.value.trim();
-    if (!customer) { showNotification('أدخل اسم العميل', 'error'); return; }
-    
-    const subtotal = parseFloat(wholesaleSubtotal.textContent) || 0;
-    const discountAmount = parseFloat(wholesaleDiscountAmount.textContent) || 0;
-    const tax = parseFloat(wholesaleTax.textContent) || 0;
-    const total = parseFloat(wholesaleTotal.textContent) || 0;
-    const discountRate = parseFloat(wholesaleDiscount.value);
-    
-    db.addWholesaleInvoice({ customer, items: [...wholesaleCart], subtotal: subtotal + discountAmount, discount: discountRate, discountAmount, tax, total, cashier: currentUser.username });
-    wholesaleCart.forEach(item => db.updateProductStock(item.id, item.quantity, 'بيع جملة'));
-    
-    showInvoiceModal({ id: Date.now(), customer, date: new Date().toISOString(), cashier: currentUser.username, items: [...wholesaleCart], subtotal: subtotal + discountAmount, discount: discountAmount, tax, total }, true);
-    
-    wholesaleCart = [];
-    wholesaleCustomer.value = '';
-    updateWholesaleCart();
-    loadWholesalePage();
-    showNotification('تم إتمام فاتورة الجملة', 'success');
-});
-
-function viewWholesaleInvoice(invoiceId) {
-    const invoices = db.getWholesaleInvoices();
-    const invoice = invoices.find(i => i.id === invoiceId);
-    if (invoice) showInvoiceModal(invoice, true);
-}
-
-function loadInventoryPage() {
-    if (!inventoryTableBody) return;
-    const products = db.getProducts();
-    inventoryTableBody.innerHTML = products.map(p => `
-        <tr><td>${p.name}</td><td>${p.barcode}</td><td><span class="status-badge ${p.stock > p.minStock ? 'in-stock' : p.stock > 0 ? 'low-stock' : 'out-of-stock'}">${p.stock}</span></td>
-        <td>${p.minStock}</td><td>${p.stock === 0 ? 'نفذ' : p.stock <= p.minStock ? 'منخفض' : 'جيد'}</td>
-        <td><button class="action-btn edit-stock" data-id="${p.id}"><i class="bi bi-pencil"></i> تعديل</button></td></tr>
-    `).join('');
-    
-    document.querySelectorAll('.edit-stock').forEach(btn => btn.addEventListener('click', () => {
-        const product = db.getProductById(btn.dataset.id);
-        const newStock = prompt(`تعديل مخزون ${product.name}\nالمخزون الحالي: ${product.stock}`, product.stock);
-        if (newStock !== null && !isNaN(newStock) && newStock >= 0) {
-            db.updateProduct(product.id, { stock: parseInt(newStock) });
-            loadInventoryPage();
-            loadProducts();
-            updateSidebarData();
-            showNotification('تم تحديث المخزون', 'success');
-        }
-    }));
-    
-    inventorySearch?.addEventListener('input', function() {
-        const term = this.value.toLowerCase();
-        document.querySelectorAll('#inventoryTableBody tr').forEach(row => row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none');
+    // إضافة أحداث لأزرار العرض
+    document.querySelectorAll('#wholesaleTableBody .view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const invoiceId = parseInt(this.getAttribute('data-id'));
+            viewWholesaleInvoice(invoiceId);
+        });
     });
 }
 
-// ==================== نافذة الفاتورة ====================
-function showInvoiceModal(invoice, isWholesale = false) {
-    modalInvoiceNumber.textContent = invoice.id;
-    modalInvoiceDate.textContent = new Date(invoice.date).toLocaleString('ar-EG');
-    modalCashier.textContent = invoice.cashier;
-    if (isWholesale && invoice.customer) {
-        customerInfo.style.display = 'block';
-        modalCustomer.textContent = invoice.customer;
-    } else customerInfo.style.display = 'none';
-    
-    modalPoints && (modalPoints.textContent = invoice.pointsEarned || 0);
-    
-    modalInvoiceItems.innerHTML = invoice.items.map(item => `
-        <tr><td>${item.name}</td><td>${item.quantity}</td><td>${item.price.toFixed(2)} ج</td><td>${(item.price * item.quantity).toFixed(2)} ج</td></tr>
-    `).join('');
-    
-    modalSubtotal.textContent = formatCurrency(invoice.subtotal);
-    if (invoice.discount && invoice.discount > 0) {
-        discountRowModal.style.display = 'flex';
-        modalDiscount.textContent = formatCurrency(invoice.discount);
-    } else discountRowModal.style.display = 'none';
-    modalTax.textContent = formatCurrency(invoice.tax);
-    modalTotal.textContent = formatCurrency(invoice.total);
-    
-    invoiceModal.style.display = 'flex';
+// إضافة منتج إلى سلة الجملة
+function addProductToWholesaleCart(barcode) {
+    const product = db.getProductByBarcode(barcode);
+    if (product) {
+        const existingItem = wholesaleCart.find(item => item.id === product.id);
+        
+        if (existingItem) {
+            if (existingItem.quantity < product.stock) {
+                existingItem.quantity += 1;
+            } else {
+                alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+                return;
+            }
+        } else {
+            if (product.stock > 0) {
+                wholesaleCart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.wholesalePrice || product.price * 0.8, // استخدام سعر الجملة إذا موجود
+                    image: product.image,
+                    barcode: product.barcode,
+                    quantity: 1,
+                    stock: product.stock
+                });
+            } else {
+                alert('المنتج غير متوفر في المخزون!');
+                return;
+            }
+        }
+        
+        updateWholesaleCart();
+    } else {
+        alert('المنتج غير موجود!');
+    }
 }
 
-closeModal?.addEventListener('click', () => invoiceModal.style.display = 'none');
-closeModalBtn?.addEventListener('click', () => invoiceModal.style.display = 'none');
-window.addEventListener('click', e => { if (e.target === invoiceModal) invoiceModal.style.display = 'none'; });
+// تحديث سلة الجملة
+function updateWholesaleCart() {
+    if (!wholesaleCartItems) return;
+    
+    wholesaleCartItems.innerHTML = '';
+    
+    let subtotal = 0;
+    
+    wholesaleCart.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        subtotal += itemTotal;
+        
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+            <div class="cart-item-info">
+                <img src="${item.image}" alt="${item.name}">
+                <div class="cart-item-details">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${item.price} جنيه (جملة)</div>
+                </div>
+            </div>
+            <div class="quantity-controls">
+                <button class="decrease-btn">-</button>
+                <span>${item.quantity}</span>
+                <button class="increase-btn">+</button>
+            </div>
+            <div>${itemTotal.toFixed(2)} جنيه</div>
+            <button class="remove-item">×</button>
+        `;
+        
+        // إضافة أحداث للأزرار
+        const decreaseBtn = cartItem.querySelector('.decrease-btn');
+        const increaseBtn = cartItem.querySelector('.increase-btn');
+        const removeBtn = cartItem.querySelector('.remove-item');
+        
+        decreaseBtn.addEventListener('click', () => {
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+                updateWholesaleCart();
+            }
+        });
+        
+        increaseBtn.addEventListener('click', () => {
+            const product = db.getProductById(item.id);
+            if (item.quantity < product.stock) {
+                item.quantity += 1;
+                updateWholesaleCart();
+            } else {
+                alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+            }
+        });
+        
+        removeBtn.addEventListener('click', () => {
+            wholesaleCart = wholesaleCart.filter(cartItem => cartItem.id !== item.id);
+            updateWholesaleCart();
+        });
+        
+        wholesaleCartItems.appendChild(cartItem);
+    });
+    
+    // حساب الخصم والضريبة والإجمالي
+    const discountRate = parseFloat(wholesaleDiscount.value) / 100;
+    const discountAmount = subtotal * discountRate;
+    const afterDiscount = subtotal - discountAmount;
+    const tax = afterDiscount * 0.14;
+    const total = afterDiscount + tax;
+    
+    if (wholesaleSubtotal) wholesaleSubtotal.textContent = `${subtotal.toFixed(2)} جنيه`;
+    if (wholesaleDiscountAmount) wholesaleDiscountAmount.textContent = `${discountAmount.toFixed(2)} جنيه`;
+    if (wholesaleTax) wholesaleTax.textContent = `${tax.toFixed(2)} جنيه`;
+    if (wholesaleTotal) wholesaleTotal.textContent = `${total.toFixed(2)} جنيه`;
+}
 
-printInvoiceBtn?.addEventListener('click', () => {
-    const content = document.querySelector('.modal-content').cloneNode(true);
-    const win = window.open('', '_blank');
-    win.document.write(`
-        <html dir="rtl"><head><title>فاتورة</title><style>body{font-family:'Cairo',sans-serif;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:right;}.modal-footer{display:none;}</style></head>
-        <body>${content.innerHTML}</body></html>
-    `);
-    win.document.close();
-    win.print();
+// إضافة حدث لإضافة منتج إلى سلة الجملة
+if (addWholesaleProductBtn) {
+    addWholesaleProductBtn.addEventListener('click', function() {
+        const barcode = wholesaleBarcode.value.trim();
+        if (barcode) {
+            addProductToWholesaleCart(barcode);
+            wholesaleBarcode.value = '';
+            wholesaleBarcode.focus();
+        }
+    });
+}
+
+if (wholesaleBarcode) {
+    wholesaleBarcode.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            const barcode = wholesaleBarcode.value.trim();
+            if (barcode) {
+                addProductToWholesaleCart(barcode);
+                wholesaleBarcode.value = '';
+                wholesaleBarcode.focus();
+            }
+        }
+    });
+}
+
+// إتمام فاتورة الجملة
+if (wholesaleCheckoutBtn) {
+    wholesaleCheckoutBtn.addEventListener('click', function() {
+        if (wholesaleCart.length === 0) {
+            alert('سلة الجملة فارغة. أضف منتجات قبل إتمام الفاتورة.');
+            return;
+        }
+        
+        const customer = wholesaleCustomer.value.trim();
+        if (!customer) {
+            alert('يرجى إدخال اسم العميل');
+            return;
+        }
+        
+        const subtotal = parseFloat(wholesaleSubtotal.textContent);
+        const discountAmount = parseFloat(wholesaleDiscountAmount.textContent);
+        const tax = parseFloat(wholesaleTax.textContent);
+        const total = parseFloat(wholesaleTotal.textContent);
+        const discountRate = parseFloat(wholesaleDiscount.value);
+        
+        // حفظ فاتورة الجملة في قاعدة البيانات
+        const invoiceId = db.addWholesaleInvoice({
+            customer: customer,
+            items: [...wholesaleCart],
+            subtotal: subtotal,
+            discount: discountRate,
+            discountAmount: discountAmount,
+            tax: tax,
+            total: total,
+            cashier: currentUser.username
+        });
+        
+        // تحديث المخزون
+        wholesaleCart.forEach(item => {
+            db.updateProductStock(item.id, item.quantity);
+        });
+        
+        // عرض تفاصيل فاتورة الجملة في النافذة المنبثقة
+        const invoiceData = {
+            id: invoiceId,
+            customer: customer,
+            date: new Date().toISOString(),
+            cashier: currentUser.username,
+            items: [...wholesaleCart],
+            subtotal: subtotal,
+            discount: discountRate,
+            discountAmount: discountAmount,
+            tax: tax,
+            total: total
+        };
+        
+        showInvoiceModal(invoiceData, true);
+        
+        // تفريغ سلة الجملة بعد إتمام الفاتورة
+        wholesaleCart = [];
+        wholesaleCustomer.value = '';
+        updateWholesaleCart();
+        loadWholesalePage(); // تحديث صفحة فواتير الجملة
+        loadRecentTransactions(); // تحديث المعاملات الحديثة
+        updateSidebarData(); // تحديث القائمة الجانبية
+    });
+}
+
+// عرض فاتورة الجملة
+function viewWholesaleInvoice(invoiceId) {
+    const invoices = db.getWholesaleInvoices();
+    const invoice = invoices.find(i => i.id === invoiceId);
+    
+    if (invoice) {
+        showInvoiceModal(invoice, true);
+    }
+}
+
+// تحديث سلة الجملة عند تغيير نسبة الخصم
+if (wholesaleDiscount) {
+    wholesaleDiscount.addEventListener('input', updateWholesaleCart);
+}
+
+// تحميل صفحة المخزون
+function loadInventoryPage() {
+    const products = db.getProducts();
+    const inventoryLog = db.getInventoryLog();
+    if (!inventoryTableBody) return;
+    
+    inventoryTableBody.innerHTML = '';
+    
+    products.forEach(product => {
+        // الحصول على آخر تحديث للمخزون
+        const lastUpdate = inventoryLog
+            .filter(log => log.productId === product.id)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+        
+        const lastUpdateDate = lastUpdate ? new Date(lastUpdate.date).toLocaleDateString('ar-EG') : 'لا يوجد';
+        
+        // تحديد حالة المخزون
+        let status = 'جيد';
+        let statusClass = '';
+        if (product.stock === 0) {
+            status = 'نفذ';
+            statusClass = 'stock-low';
+        } else if (product.stock <= product.minStock) {
+            status = 'منخفض';
+            statusClass = 'stock-low';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+             <td>${product.name}</td>
+             <td>${product.barcode}</td>
+             <td>${product.stock}</td>
+             <td>${lastUpdateDate}</td>
+            <td class="${statusClass}">${status}</td>
+             <td>
+                <button class="action-btn edit-btn" data-id="${product.id}">تعديل المخزون</button>
+             </td>
+        `;
+        inventoryTableBody.appendChild(row);
+    });
+    
+    // إضافة أحداث لأزرار التعديل
+    document.querySelectorAll('#inventoryTableBody .edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = parseInt(this.getAttribute('data-id'));
+            editInventory(productId);
+        });
+    });
+    
+    // إضافة حدث البحث
+    if (inventorySearch) {
+        inventorySearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = inventoryTableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+}
+
+// تعديل المخزون
+function editInventory(productId) {
+    const product = db.getProductById(productId);
+    const newStock = prompt(`إدارة مخزون ${product.name}\nالمخزون الحالي: ${product.stock}\nأدخل الكمية الجديدة:`, product.stock);
+    
+    if (newStock !== null && !isNaN(newStock) && newStock >= 0) {
+        const stockChange = parseInt(newStock) - product.stock;
+        const reason = prompt('سبب التعديل:', stockChange > 0 ? 'إضافة مخزون' : 'خصم مخزون');
+        
+        if (reason !== null) {
+            db.updateProduct(productId, { stock: parseInt(newStock) });
+            loadInventoryPage();
+            loadProducts(); // تحديث قائمة المنتجات في صفحة الكاشير
+            updateSidebarData(); // تحديث القائمة الجانبية
+            alert('تم تحديث المخزون بنجاح!');
+        }
+    }
+}
+
+// تحميل صفحة التقارير
+function loadReportsPage() {
+    const sales = db.getSales();
+    const products = db.getProducts();
+    const wholesaleInvoices = db.getWholesaleInvoices();
+    
+    // إحصائيات سريعة
+    const totalSales = sales.length;
+    const totalRevenue = sales.reduce((sum, sale) => sum + sale.total, 0);
+    const totalWholesale = wholesaleInvoices.length;
+    const wholesaleRevenue = wholesaleInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
+    const totalProducts = products.length;
+    const lowStockProducts = products.filter(p => p.stock <= p.minStock).length;
+    const outOfStockProducts = products.filter(p => p.stock === 0).length;
+    
+    const reportResults = document.getElementById('reportResults');
+    if (reportResults) {
+        reportResults.innerHTML = `
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                <h4>إحصائيات سريعة</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h5 style="color: var(--primary-color); margin-bottom: 10px;">فواتير التجزئة</h5>
+                        <p style="font-size: 24px; font-weight: bold;">${totalSales}</p>
+                        <p style="color: #666;">${totalRevenue.toFixed(2)} ج.م</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h5 style="color: var(--secondary-color); margin-bottom: 10px;">فواتير الجملة</h5>
+                        <p style="font-size: 24px; font-weight: bold;">${totalWholesale}</p>
+                        <p style="color: #666;">${wholesaleRevenue.toFixed(2)} ج.م</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h5 style="color: var(--accent-color); margin-bottom: 10px;">إجمالي المنتجات</h5>
+                        <p style="font-size: 24px; font-weight: bold;">${totalProducts}</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h5 style="color: var(--danger-color); margin-bottom: 10px;">منتجات منخفضة المخزون</h5>
+                        <p style="font-size: 24px; font-weight: bold;">${lowStockProducts}</p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h5 style="color: var(--danger-color); margin-bottom: 10px;">منتجات نفذت</h5>
+                        <p style="font-size: 24px; font-weight: bold;">${outOfStockProducts}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// ==================== وظائف القائمة الجانبية المحسنة ====================
+
+// إدارة التبويبات في القائمة الجانبية
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // إزالة الكلاس النشط من جميع الأزرار والمحتويات
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // إضافة الكلاس النشط للزر الحالي
+        this.classList.add('active');
+        
+        // إظهار المحتوى المناسب
+        const tabId = this.dataset.tab;
+        const tabContent = document.getElementById(tabId + 'Tab');
+        if (tabContent) {
+            tabContent.classList.add('active');
+        }
+    });
 });
 
-sendWhatsAppBtn?.addEventListener('click', () => {
-    const phone = currentCustomer?.phone || '';
-    const message = `شكراً لتسوقكم معنا\nرقم الفاتورة: ${modalInvoiceNumber.textContent}\nالإجمالي: ${modalTotal.textContent}`;
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-});
+// تحديث البيانات في القائمة الجانبية
+function updateSidebarData() {
+    // تحديث إحصائيات سريعة
+    updateQuickStats();
+    
+    // تحديث قائمة المعاملات
+    updateTransactionsList();
+    
+    // تحديث المنتجات الأكثر مبيعاً
+    updateTopProducts();
+    
+    // تحديث الكاشير النشط
+    updateActiveCashiers();
+    
+    // تحديث تنبيهات المخزون
+    updateStockAlerts();
+    
+    // تحديث مؤشرات الأداء
+    updatePerformanceMetrics();
+}
 
-// ==================== تحديث دوري ====================
-setInterval(() => { updateSidebarData(); }, 30000);
-const refreshSidebarBtn = document.getElementById('refreshSidebar');
-refreshSidebarBtn?.addEventListener('click', () => { updateSidebarData(); showNotification('تم تحديث البيانات', 'info'); });
+// تحديث الإحصائيات السريعة
+function updateQuickStats() {
+    const today = new Date().toDateString();
+    const sales = db.getSales();
+    const todayInvoices = sales.filter(inv => 
+        new Date(inv.date).toDateString() === today
+    );
+    
+    const todaySalesCount = todayInvoices.length;
+    const todayRevenue = todayInvoices.reduce((sum, inv) => sum + inv.total, 0);
+    
+    const todaySalesCountEl = document.getElementById('todaySalesCount');
+    const todayRevenueEl = document.getElementById('todayRevenue');
+    
+    if (todaySalesCountEl) todaySalesCountEl.textContent = todaySalesCount;
+    if (todayRevenueEl) todayRevenueEl.textContent = todayRevenue.toFixed(2) + ' ج';
+    
+    // عدد الكاشير النشط (محاكاة)
+    const activeCashiersCount = 3;
+    const activeCashiersEl = document.getElementById('activeCashiers');
+    if (activeCashiersEl) activeCashiersEl.textContent = activeCashiersCount;
+    
+    // المنتجات منخفضة المخزون
+    const products = db.getProducts();
+    const lowStockProducts = products.filter(p => p.stock < 10);
+    const lowStockEl = document.getElementById('lowStock');
+    if (lowStockEl) lowStockEl.textContent = lowStockProducts.length;
+}
+
+// تحديث قائمة المعاملات
+function updateTransactionsList() {
+    const transactionsList = document.getElementById('transactionsList');
+    if (!transactionsList) return;
+    
+    const invoices = db.getSales();
+    
+    // أخذ آخر 5 فواتير
+    const recentInvoices = [...invoices]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+    
+    transactionsList.innerHTML = recentInvoices.map(inv => {
+        const status = inv.status || 'completed';
+        const statusText = status === 'completed' ? 'مكتملة' : 'معلقة';
+        const statusClass = status === 'completed' ? 'completed' : 'pending';
+        
+        return `
+            <li class="transaction-item ${statusClass}" onclick="viewInvoiceDetails(${inv.id})">
+                <div class="transaction-icon">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <div class="transaction-info">
+                    <div class="transaction-header">
+                        <span class="transaction-title">فاتورة #${inv.id}</span>
+                        <span class="transaction-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="transaction-details">
+                        <span class="transaction-customer">
+                            <i class="bi bi-person"></i>
+                            ${inv.cashier || 'كاشير'}
+                        </span>
+                        <span class="transaction-amount">${inv.total.toFixed(2)} ج</span>
+                    </div>
+                    <div class="transaction-time">
+                        <i class="bi bi-clock"></i>
+                        ${new Date(inv.date).toLocaleTimeString('ar-EG')}
+                    </div>
+                </div>
+            </li>
+        `;
+    }).join('');
+    
+    // إذا لم توجد معاملات
+    if (recentInvoices.length === 0) {
+        transactionsList.innerHTML = `
+            <li class="transaction-item" style="justify-content: center; text-align: center; color: var(--gray-500);">
+                <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>لا توجد معاملات حديثة</p>
+            </li>
+        `;
+    }
+}
+
+// تحديث المنتجات الأكثر مبيعاً
+function updateTopProducts() {
+    const topProductsList = document.getElementById('topProductsList');
+    if (!topProductsList) return;
+    
+    const products = db.getProducts();
+    
+    // محاكاة لأكثر المنتجات مبيعاً
+    const topProducts = products
+        .map(p => ({...p, sales: Math.floor(Math.random() * 100) + 20 }))
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 5);
+    
+    topProductsList.innerHTML = topProducts.map((p, index) => `
+        <div class="top-product-item">
+            <span class="product-rank">${index + 1}</span>
+            <div class="product-info">
+                <div class="product-name">${p.name}</div>
+                <div class="product-stats">
+                    <span>${p.sales} مبيعات</span>
+                    <span class="product-sales">${(p.price * p.sales).toFixed(2)} ج</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// تحديث الكاشير النشط
+function updateActiveCashiers() {
+    const activeCashiersList = document.getElementById('activeCashiersList');
+    if (!activeCashiersList) return;
+    
+    const cashiers = [
+        { name: 'أحمد علي', shift: 'صباحي', sales: 25 },
+        { name: 'محمد حسن', shift: 'صباحي', sales: 18 },
+        { name: 'سارة أحمد', shift: 'مسائي', sales: 15 },
+        { name: 'نورا محمد', shift: 'مسائي', sales: 12 }
+    ];
+    
+    activeCashiersList.innerHTML = cashiers.map(c => `
+        <div class="cashier-item">
+            <div class="cashier-avatar">
+                ${c.name.charAt(0)}
+            </div>
+            <div class="cashier-info">
+                <div class="cashier-name">${c.name}</div>
+                <div class="cashier-status">
+                    <span class="status-dot"></span>
+                    ${c.shift} - ${c.sales} فاتورة
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// تحديث تنبيهات المخزون
+function updateStockAlerts() {
+    const stockAlertsList = document.getElementById('stockAlertsList');
+    if (!stockAlertsList) return;
+    
+    const products = db.getProducts();
+    const lowStockProducts = products.filter(p => p.stock < 10);
+    
+    stockAlertsList.innerHTML = lowStockProducts.map(p => {
+        const alertClass = p.stock < 5 ? 'danger' : 'warning';
+        const icon = p.stock < 5 ? 'bi-exclamation-circle-fill' : 'bi-exclamation-triangle-fill';
+        
+        return `
+            <div class="alert-item ${alertClass}">
+                <div class="alert-icon">
+                    <i class="bi ${icon}"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title">${p.name}</div>
+                    <div class="alert-desc">المتبقي: ${p.stock} وحدة</div>
+                </div>
+                <a href="#" class="alert-action" onclick="showPage('inventoryPage')">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+            </div>
+        `;
+    }).join('');
+    
+    if (lowStockProducts.length === 0) {
+        stockAlertsList.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: var(--gray-500);">
+                <i class="bi bi-check-circle" style="font-size: 2rem; color: var(--success-color);"></i>
+                <p>المخزون جيد، لا توجد تنبيهات</p>
+            </div>
+        `;
+    }
+}
+
+// تحديث مؤشرات الأداء
+function updatePerformanceMetrics() {
+    const sales = db.getSales();
+    
+    // حساب معدل المبيعات اليوم
+    const today = new Date().toDateString();
+    const todayInvoices = sales.filter(inv => 
+        new Date(inv.date).toDateString() === today
+    );
+    
+    const dailyTarget = 50; // الهدف اليومي 50 فاتورة
+    const dailyRate = Math.min(100, (todayInvoices.length / dailyTarget) * 100);
+    
+    const dailySalesRateEl = document.getElementById('dailySalesRate');
+    if (dailySalesRateEl) dailySalesRateEl.textContent = dailyRate.toFixed(0) + '%';
+    
+    const progressBars = document.querySelectorAll('#statsTab .metric-progress');
+    if (progressBars[0]) progressBars[0].style.width = dailyRate + '%';
+    
+    // دوران المخزون (محاكاة)
+    const turnover = 70;
+    const inventoryTurnoverEl = document.getElementById('inventoryTurnover');
+    if (inventoryTurnoverEl) inventoryTurnoverEl.textContent = turnover + '%';
+    if (progressBars[1]) progressBars[1].style.width = turnover + '%';
+    
+    // رضا العملاء (محاكاة)
+    const satisfaction = 92;
+    const customerSatisfactionEl = document.getElementById('customerSatisfaction');
+    if (customerSatisfactionEl) customerSatisfactionEl.textContent = satisfaction + '%';
+    if (progressBars[2]) progressBars[2].style.width = satisfaction + '%';
+}
+
+// زر تحديث القائمة الجانبية
+const refreshSidebar = document.getElementById('refreshSidebar');
+if (refreshSidebar) {
+    refreshSidebar.addEventListener('click', function() {
+        this.classList.add('pulse');
+        updateSidebarData();
+        setTimeout(() => this.classList.remove('pulse'), 300);
+        
+        // إظهار إشعار بالتحديث
+        showNotification('تم تحديث البيانات', 'info');
+    });
+}
+
+// البحث في القائمة الجانبية
+const sidebarSearch = document.getElementById('sidebarSearch');
+if (sidebarSearch) {
+    sidebarSearch.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const transactions = document.querySelectorAll('.transaction-item');
+        
+        transactions.forEach(trans => {
+            const text = trans.textContent.toLowerCase();
+            if (text.includes(searchTerm) || searchTerm === '') {
+                trans.style.display = 'flex';
+            } else {
+                trans.style.display = 'none';
+            }
+        });
+    });
+}
+
+// دالة إظهار الإشعارات
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// تحديث البيانات كل 30 ثانية
+setInterval(updateSidebarData, 30000);
+
+// التركيز على حقل الباركود عند تحميل الصفحة
+window.addEventListener('load', function() {
+    if (barcodeInput) {
+        barcodeInput.focus();
+    }
+    updateSidebarData();
+});
 
 // جعل الدوال متاحة عالمياً
 window.showPage = showPage;
 window.viewInvoiceDetails = viewInvoiceDetails;
 window.viewWholesaleInvoice = viewWholesaleInvoice;
-window.addToCart = addToCart;
-window.selectCustomer = selectCustomer;
