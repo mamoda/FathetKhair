@@ -2376,7 +2376,7 @@ class LoadingScreen {
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: url('/assets/loading-bg.png') no-repeat center center;
                     z-index: 999999;
                     display: flex;
                     justify-content: center;
@@ -2390,7 +2390,7 @@ class LoadingScreen {
                             <div class="spinner-ring"></div>
                         </div>
                         <div style="margin-top: 30px; color: white; font-size: 18px; font-weight: bold;">
-                            جاري تحميل سوبر ماركت فتحة خير...
+                            جاري تحميل حسابات فتحة خير...
                         </div>
                         <div style="margin-top: 10px; color: rgba(255,255,255,0.8); font-size: 14px;">
                             يرجى الانتظار
