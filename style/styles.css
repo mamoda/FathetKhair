@@ -1,37 +1,31 @@
 :root {
     /* نظام ألوان محسن */
-    --primary-color: #1a73e8;
-    --primary-dark: #0d62d9;
-    --primary-light: #e8f0fe;
-    --secondary-color: #34a853;
-    --secondary-dark: #2e8b47;
-    --secondary-light: #e6f4ea;
-    --accent-color: #fbbc05;
-    --accent-dark: #f29900;
-    --accent-light: #fef7e0;
-    --danger-color: #ea4335;
-    --danger-dark: #d33426;
-    --danger-light: #fce8e6;
-    --warning-color: #f29900;
-    --success-color: #34a853;
-    --info-color: #4285f4;
+  --primary-color: #2c5f2d;      /* لون أخضر غامق يتناسب مع اللوجو */
+    --primary-dark: #1e3a1e;       /* درجة أغمق */
+    --primary-light: #e8f0e8;      /* فاتح للخلفيات */
+    --secondary-color: #ffb347;    /* لون برتقالي ذهبي */
+    --secondary-dark: #e69500;
+    --secondary-light: #fff3e0;
+    --accent-color: #d4a373;       /* لون بيج أنيق */
+    --accent-dark: #b5835a;
+    --danger-color: #dc3545;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
     
-    /* ألوان محايدة أكثر احترافية */
+    /* ألوان محايدة */
     --light-color: #f8f9fa;
-    --lighter-color: #fafafa;
-    --dark-color: #202124;
-    --darker-color: #171717;
+    --dark-color: #212529;
     --gray-50: #f8f9fa;
     --gray-100: #f1f3f4;
-    --gray-200: #e8eaed;
-    --gray-300: #dadce0;
-    --gray-400: #bdc1c6;
-    --gray-500: #9aa0a6;
-    --gray-600: #80868b;
-    --gray-700: #5f6368;
-    --gray-800: #3c4043;
-    --gray-900: #202124;
-    
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-700: #495057;
+    --gray-800: #343a40;
+    --gray-900: #212529;    
     /* أبعاد وتخطيط */
     --sidebar-width: 280px;
     --transactions-width: 380px;

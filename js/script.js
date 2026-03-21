@@ -2333,3 +2333,413 @@ window.addEventListener('load', function() {
 window.showPage = showPage;
 window.viewInvoiceDetails = viewInvoiceDetails;
 window.viewWholesaleInvoice = viewWholesaleInvoice;
+
+
+
+
+
+// ==================== نظام المصروفات ====================
+const expensesManager = new ExpensesManager();
+
+// إضافة مصروف جديد
+const addExpenseBtn = document.getElementById('addExpenseBtn');
+if (addExpenseBtn) {
+    addExpenseBtn.addEventListener('click', function() {
+        const name = document.getElementById('expenseName').value.trim();
+        const amount = parseFloat(document.getElementById('expenseAmount').value);
+        const category = document.getElementById('expenseCategory').value;
+        
+        if (!name || !amount) {
+            alert('يرجى إدخال اسم المصروف والمبلغ');
+            return;
+        }
+        
+        expensesManager.addExpense({
+            name: name,
+            amount: amount,
+            category: category
+        });
+        
+        // تفريغ الحقول
+        document.getElementById('expenseName').value = '';
+        document.getElementById('expenseAmount').value = '';
+        
+        // تحديث الواجهة
+        loadExpensesTable();
+        updateSidebarData();
+        
+        showNotification('تم إضافة المصروف بنجاح', 'success');
+    });
+}
+
+// تحميل جدول المصروفات
+function loadExpensesTable() {
+    const expenses = expensesManager.getExpenses();
+    const tableBody = document.getElementById('expensesTableBody');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    expenses.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(expense => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(expense.date).toLocaleDateString('ar-EG')}</td>
+            <td>${expense.name}</td>
+            <td>${expense.category}</td>
+            <td>${expense.amount.toFixed(2)} ج.م</td>
+            <td>${expense.createdBy || 'نظام'}</td>
+            <td>
+                <button class="action-btn delete-btn" data-id="${expense.id}">
+                    <i class="bi bi-trash"></i> حذف
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // إضافة أحداث الحذف
+    document.querySelectorAll('#expensesTableBody .delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const expenseId = parseInt(this.getAttribute('data-id'));
+            if (confirm('هل أنت متأكد من حذف هذا المصروف؟')) {
+                const expenses = expensesManager.getExpenses();
+                const filteredExpenses = expenses.filter(e => e.id !== expenseId);
+                localStorage.setItem('expenses', JSON.stringify(filteredExpenses));
+                loadExpensesTable();
+                updateSidebarData();
+                showNotification('تم حذف المصروف', 'info');
+            }
+        });
+    });
+}
+
+// تحميل جدول تكاليف المنتجات
+function loadProductCostTable() {
+    const products = db.getProducts();
+    const tableBody = document.getElementById('productCostTableBody');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    
+    products.forEach(product => {
+        const currentCost = expensesManager.getProductCost(product.id);
+        const profit = currentCost ? product.price - currentCost : product.price * 0.3;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${product.price} ج.م</td>
+            <td>
+                <input type="number" class="cost-input" data-id="${product.id}" 
+                       value="${currentCost || ''}" placeholder="أدخل سعر التكلفة"
+                       style="width: 100px; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">
+            </td>
+            <td class="profit-cell" data-id="${product.id}">
+                ${profit.toFixed(2)} ج.م
+            </td>
+            <td>
+                <button class="action-btn save-cost-btn" data-id="${product.id}">
+                    <i class="bi bi-save"></i> حفظ
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // إضافة أحداث حفظ التكلفة
+    document.querySelectorAll('.save-cost-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = parseInt(this.getAttribute('data-id'));
+            const costInput = document.querySelector(`.cost-input[data-id="${productId}"]`);
+            const cost = parseFloat(costInput.value);
+            
+            if (cost && cost > 0) {
+                expensesManager.updateProductCost(productId, cost);
+                
+                // تحديث خلية الربح
+                const product = db.getProductById(productId);
+                const profit = product.price - cost;
+                const profitCell = document.querySelector(`.profit-cell[data-id="${productId}"]`);
+                profitCell.textContent = `${profit.toFixed(2)} ج.م`;
+                profitCell.style.color = profit > 0 ? '#28a745' : '#dc3545';
+                
+                showNotification('تم حفظ سعر التكلفة', 'success');
+            } else {
+                alert('يرجى إدخال سعر تكلفة صحيح');
+            }
+        });
+    });
+    
+    // إضافة حدث البحث
+    const productCostSearch = document.getElementById('productCostSearch');
+    if (productCostSearch) {
+        productCostSearch.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const productName = row.cells[0].textContent.toLowerCase();
+                row.style.display = productName.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+}
+
+// تحديث دالة generateReport لإنشاء تقارير الأرباح
+function generateAdvancedReport() {
+    const reportType = document.getElementById('reportType').value;
+    const dateFrom = document.getElementById('reportDateFrom').value;
+    const dateTo = document.getElementById('reportDateTo').value;
+    
+    if (!dateFrom || !dateTo) {
+        alert('يرجى تحديد الفترة الزمنية');
+        return;
+    }
+    
+    const reportResults = document.getElementById('reportResults');
+    
+    switch(reportType) {
+        case 'profit':
+            const profitReport = expensesManager.generateDetailedProfitReport(dateFrom, dateTo);
+            displayProfitReport(profitReport);
+            break;
+        case 'sales':
+            displaySalesReport(dateFrom, dateTo);
+            break;
+        case 'expenses':
+            displayExpensesReport(dateFrom, dateTo);
+            break;
+        case 'inventory':
+            displayInventoryReport();
+            break;
+        case 'topProducts':
+            displayTopProductsReport(dateFrom, dateTo);
+            break;
+        default:
+            displayProfitReport(expensesManager.generateDetailedProfitReport(dateFrom, dateTo));
+    }
+}
+
+// عرض تقرير الأرباح
+function displayProfitReport(report) {
+    const reportResults = document.getElementById('reportResults');
+    
+    reportResults.innerHTML = `
+        <div class="profit-report">
+            <div class="report-header">
+                <h4>تقرير الأرباح المفصل</h4>
+                <p>الفترة: ${new Date(report.period.startDate).toLocaleDateString('ar-EG')} - ${new Date(report.period.endDate).toLocaleDateString('ar-EG')}</p>
+            </div>
+            
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="card-icon"><i class="bi bi-cash-stack"></i></div>
+                    <div class="card-content">
+                        <div class="card-value">${report.summary.totalRevenue.toFixed(2)} ج.م</div>
+                        <div class="card-label">إجمالي الإيرادات</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon"><i class="bi bi-boxes"></i></div>
+                    <div class="card-content">
+                        <div class="card-value">${report.summary.totalCost.toFixed(2)} ج.م</div>
+                        <div class="card-label">إجمالي التكلفة</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon"><i class="bi bi-wallet2"></i></div>
+                    <div class="card-content">
+                        <div class="card-value">${report.summary.totalExpenses.toFixed(2)} ج.م</div>
+                        <div class="card-label">إجمالي المصروفات</div>
+                    </div>
+                </div>
+                <div class="summary-card profit-card">
+                    <div class="card-icon"><i class="bi bi-graph-up"></i></div>
+                    <div class="card-content">
+                        <div class="card-value">${report.summary.netProfit.toFixed(2)} ج.م</div>
+                        <div class="card-label">صافي الربح</div>
+                        <div class="card-sub">هامش الربح: ${report.summary.profitMargin.toFixed(2)}%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="report-sections">
+                <div class="report-section">
+                    <h5>المبيعات حسب الفئة</h5>
+                    <table class="report-table">
+                        <thead>
+                            <tr><th>الفئة</th><th>الكمية</th><th>الإيرادات</th></tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(report.salesByCategory).map(([cat, data]) => `
+                                <tr><td>${cat}</td><td>${data.quantity}</td><td>${data.revenue.toFixed(2)} ج.م</td></tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="report-section">
+                    <h5>المصروفات حسب الفئة</h5>
+                    <table class="report-table">
+                        <thead>
+                            <tr><th>الفئة</th><th>المبلغ</th> </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(report.expensesByCategory).map(([cat, amount]) => `
+                                <tr><td>${cat}</td><td>${amount.toFixed(2)} ج.م</td></tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="report-section">
+                <h5>التفاصيل اليومية</h5>
+                <div style="overflow-x: auto;">
+                    <table class="report-table">
+                        <thead>
+                            <tr><th>التاريخ</th><th>المبيعات</th><th>الإيرادات</th><th>التكلفة</th><th>المصروفات</th><th>الربح اليومي</th> </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(report.dailyBreakdown).map(([day, data]) => `
+                                <tr><td>${day}</td>
+                                    <td>${data.salesCount}</td>
+                                    <td>${data.revenue.toFixed(2)} ج.م</td>
+                                    <td>${data.cost.toFixed(2)} ج.م</td>
+                                    <td>${data.expenses.toFixed(2)} ج.م</td>
+                                    <td class="${data.profit >= 0 ? 'profit-positive' : 'profit-negative'}">
+                                        ${data.profit.toFixed(2)} ج.م
+                                    </td>
+                                 </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="report-actions">
+                <button class="btn" onclick="expensesManager.exportReportToExcel(${JSON.stringify(report).replace(/"/g, '&quot;')})">
+                    <i class="bi bi-file-excel"></i> تصدير إلى Excel
+                </button>
+                <button class="btn" onclick="window.print()">
+                    <i class="bi bi-printer"></i> طباعة التقرير
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// إضافة زر النسخ الاحتياطي في واجهة المستخدم
+function addBackupButton() {
+    const userInfo = document.querySelector('.user-info');
+    if (userInfo) {
+        const backupBtn = document.createElement('button');
+        backupBtn.className = 'logout-btn';
+        backupBtn.style.backgroundColor = '#28a745';
+        backupBtn.style.marginLeft = '10px';
+        backupBtn.innerHTML = '<i class="bi bi-cloud-upload"></i> نسخ احتياطي';
+        backupBtn.onclick = () => {
+            const backupManager = new BackupManager();
+            backupManager.exportAllDataToExcel();
+            showNotification('تم إنشاء نسخة احتياطية', 'success');
+        };
+        
+        const importBackupBtn = document.createElement('button');
+        importBackupBtn.className = 'logout-btn';
+        importBackupBtn.style.backgroundColor = '#17a2b8';
+        importBackupBtn.style.marginLeft = '10px';
+        importBackupBtn.innerHTML = '<i class="bi bi-cloud-download"></i> استعادة';
+        importBackupBtn.onclick = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const backupManager = new BackupManager();
+                    if (confirm('تحذير: استعادة النسخة الاحتياطية ستستبدل جميع البيانات الحالية. هل أنت متأكد؟')) {
+                        await backupManager.restoreFromBackup(file);
+                        showNotification('تم استعادة البيانات بنجاح', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                }
+            };
+            input.click();
+        };
+        
+        userInfo.appendChild(backupBtn);
+        userInfo.appendChild(importBackupBtn);
+    }
+}
+
+// تحديث دالة showPage لإضافة محتويات جديدة
+const originalShowPage = showPage;
+window.showPage = function(pageId) {
+    originalShowPage(pageId);
+    
+    if (pageId === 'reportsPage') {
+        loadExpensesTable();
+        loadProductCostTable();
+    }
+};
+
+// تحديث دالة updateSidebarData لإضافة إجمالي المصروفات اليومية
+const originalUpdateSidebarData = updateSidebarData;
+window.updateSidebarData = function() {
+    originalUpdateSidebarData();
+    
+    // إضافة المصروفات اليومية إلى الإحصائيات السريعة
+    const today = new Date().toDateString();
+    const expenses = expensesManager.getExpenses();
+    const todayExpenses = expenses.filter(e => new Date(e.date).toDateString() === today);
+    const totalTodayExpenses = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+    
+    // يمكن إضافة هذا إلى quick-stats إذا أردت
+    const quickStats = document.querySelector('.quick-stats');
+    if (quickStats && !document.getElementById('todayExpenses')) {
+        const expenseStat = document.createElement('div');
+        expenseStat.className = 'stat-card';
+        expenseStat.id = 'todayExpenses';
+        expenseStat.innerHTML = `
+            <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+            <div class="stat-value">${totalTodayExpenses.toFixed(2)}</div>
+            <div class="stat-label">مصروفات اليوم</div>
+        `;
+        quickStats.appendChild(expenseStat);
+    } else if (document.getElementById('todayExpenses')) {
+        document.getElementById('todayExpenses').querySelector('.stat-value').textContent = totalTodayExpenses.toFixed(2);
+    }
+};
+
+// إضافة حدث لتوليد التقرير المتقدم
+const generateReportBtn = document.getElementById('generateReportBtn');
+if (generateReportBtn) {
+    generateReportBtn.addEventListener('click', generateAdvancedReport);
+}
+
+// إضافة حدث لتصدير التقرير
+const exportReportBtn = document.getElementById('exportReportBtn');
+if (exportReportBtn) {
+    exportReportBtn.addEventListener('click', function() {
+        const dateFrom = document.getElementById('reportDateFrom').value;
+        const dateTo = document.getElementById('reportDateTo').value;
+        
+        if (!dateFrom || !dateTo) {
+            alert('يرجى تحديد الفترة الزمنية');
+            return;
+        }
+        
+        const report = expensesManager.generateDetailedProfitReport(dateFrom, dateTo);
+        expensesManager.exportReportToExcel(report);
+        showNotification('تم تصدير التقرير بنجاح', 'success');
+    });
+}
+
+// تهيئة النظام عند التحميل
+document.addEventListener('DOMContentLoaded', function() {
+    addBackupButton();
+    
+    // إعداد النسخ الاحتياطي التلقائي
+    const backupManager = new BackupManager();
+    backupManager.setupAutoBackup();
+});
