@@ -1212,10 +1212,21 @@ const inventoryTableBody = document.getElementById('inventoryTableBody');
 
 // ==================== الدوال الرئيسية ====================
 function showNotification(message, type = 'info') {
+    // إزالة أي نوتيفيكشن موجود مسبقاً لمنع التراكم
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notif => notif.remove());
+    
     const notification = document.createElement('div');
     notification.className = 'notification ' + type;
     notification.innerHTML = '<i class="bi bi-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle') + '"></i> ' + message;
     document.body.appendChild(notification);
+    
+    // فرض ارتفاع ثابت للنوتيفيكشن
+    notification.style.minHeight = '50px';
+    notification.style.maxHeight = '80px';
+    notification.style.height = 'auto';
+    notification.style.display = 'flex';
+    notification.style.alignItems = 'center';
     
     setTimeout(() => notification.classList.add('show'), 100);
     setTimeout(() => {
@@ -1223,7 +1234,6 @@ function showNotification(message, type = 'info') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
-
 function loadProducts() {
     const products = db.getProducts();
     if (!productsGrid) return;
