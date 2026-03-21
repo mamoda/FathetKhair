@@ -638,7 +638,7 @@ class InvoiceSystem {
                     }
                     
                     .total-row {
-                        font-size: 18px;
+                        font-size: 16px;
                         font-weight: bold;
                         color: #28a745;
                     }
@@ -1234,6 +1234,9 @@ function showNotification(message, type = 'info') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
+
+
+
 function loadProducts() {
     const products = db.getProducts();
     if (!productsGrid) return;
