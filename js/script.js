@@ -688,7 +688,8 @@ return `
             .totals-table {
                 width: 100%;
                 max-width: 400px;
-                margin-right: auto;
+                margin-right: 0;
+                margin-left: auto;
                 border-collapse: collapse;
             }
             
