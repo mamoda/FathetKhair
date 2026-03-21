@@ -381,7 +381,7 @@ class BackupManager {
     showBackupNotification() {
         const notification = document.createElement('div');
         notification.className = 'notification success';
-        notification.innerHTML = `<i class="bi bi-cloud-check"></i> تم إنشاء نسخة احتياطية تلقائية للبيانات`;
+        notification.innerHTML = '<i class="bi bi-cloud-check"></i> تم إنشاء نسخة احتياطية تلقائية للبيانات';
         document.body.appendChild(notification);
         
         setTimeout(() => {
@@ -457,6 +457,409 @@ class SessionManager {
                 sessionStorage.setItem(this.currentSessionKey, JSON.stringify(session));
             }
         }
+    }
+}
+
+// ==================== نظام الفواتير الاحترافي ====================
+class InvoiceSystem {
+    constructor() {
+        this.storeName = "سوبر ماركت فتحة خير";
+        this.storeAddress = "مصر - القاهرة";
+        this.storePhone = "01234567890";
+        this.storeTaxNumber = "123-456-789";
+    }
+
+    generateInvoiceHTML(invoiceData, type = 'sale') {
+        const invoiceNumber = invoiceData.id;
+        const date = new Date(invoiceData.date).toLocaleString('ar-EG');
+        const cashier = invoiceData.cashier || 'نظام';
+        
+        let itemsHTML = '';
+        let totalAmount = 0;
+        
+        invoiceData.items.forEach((item, index) => {
+            const itemTotal = item.price * item.quantity;
+            totalAmount += itemTotal;
+            itemsHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${itemTotal.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+        
+        let extraRows = '';
+        let subtotal = invoiceData.subtotal || totalAmount;
+        let tax = invoiceData.tax || (subtotal * 0.14);
+        let discount = invoiceData.discountAmount || 0;
+        let finalTotal = invoiceData.total || (subtotal + tax - discount);
+        
+        if (type === 'wholesale') {
+            extraRows = `
+                <tr class="total-row">
+                    <td colspan="4"><strong>الخصم (${invoiceData.discount}%)</strong></td>
+                    <td><strong>- ${discount.toFixed(2)} ج.م</strong></td>
+                </tr>
+            `;
+        }
+        
+        return `
+            <!DOCTYPE html>
+            <html dir="rtl" lang="ar">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>فاتورة #${invoiceNumber}</title>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: 'Tahoma', 'Arial', sans-serif;
+                        background: #f5f5f5;
+                        padding: 20px;
+                    }
+                    
+                    .invoice-container {
+                        max-width: 800px;
+                        margin: 0 auto;
+                        background: white;
+                        border-radius: 15px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                        overflow: hidden;
+                    }
+                    
+                    .invoice-header {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        padding: 30px;
+                        text-align: center;
+                    }
+                    
+                    .store-name {
+                        font-size: 28px;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .store-info {
+                        font-size: 14px;
+                        opacity: 0.9;
+                        line-height: 1.6;
+                    }
+                    
+                    .invoice-title {
+                        background: #f8f9fa;
+                        padding: 15px;
+                        text-align: center;
+                        border-bottom: 2px solid #e9ecef;
+                    }
+                    
+                    .invoice-title h2 {
+                        color: #495057;
+                        font-size: 24px;
+                    }
+                    
+                    .invoice-details {
+                        padding: 20px;
+                        background: #f8f9fa;
+                        display: flex;
+                        justify-content: space-between;
+                        border-bottom: 1px solid #dee2e6;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                    }
+                    
+                    .detail-group {
+                        text-align: center;
+                        flex: 1;
+                        min-width: 120px;
+                    }
+                    
+                    .detail-label {
+                        font-size: 12px;
+                        color: #6c757d;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .detail-value {
+                        font-size: 16px;
+                        font-weight: bold;
+                        color: #495057;
+                    }
+                    
+                    .items-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    
+                    .items-table th {
+                        background: #e9ecef;
+                        padding: 12px;
+                        text-align: center;
+                        font-weight: bold;
+                        color: #495057;
+                        border-bottom: 2px solid #dee2e6;
+                    }
+                    
+                    .items-table td {
+                        padding: 10px;
+                        text-align: center;
+                        border-bottom: 1px solid #dee2e6;
+                        color: #6c757d;
+                    }
+                    
+                    .items-table tr:hover {
+                        background: #f8f9fa;
+                    }
+                    
+                    .totals {
+                        padding: 20px;
+                        background: #f8f9fa;
+                        border-top: 2px solid #dee2e6;
+                    }
+                    
+                    .totals-table {
+                        width: 100%;
+                        max-width: 300px;
+                        margin-right: auto;
+                    }
+                    
+                    .totals-table td {
+                        padding: 8px;
+                        text-align: right;
+                    }
+                    
+                    .total-row {
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: #28a745;
+                    }
+                    
+                    .invoice-footer {
+                        padding: 20px;
+                        text-align: center;
+                        background: #f8f9fa;
+                        border-top: 1px solid #dee2e6;
+                        color: #6c757d;
+                        font-size: 12px;
+                    }
+                    
+                    .action-buttons {
+                        padding: 20px;
+                        display: flex;
+                        gap: 10px;
+                        justify-content: center;
+                        background: white;
+                        border-top: 1px solid #dee2e6;
+                        flex-wrap: wrap;
+                    }
+                    
+                    .btn {
+                        padding: 10px 20px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        font-weight: bold;
+                        transition: all 0.3s;
+                    }
+                    
+                    .btn-print {
+                        background: #28a745;
+                        color: white;
+                    }
+                    
+                    .btn-print:hover {
+                        background: #218838;
+                        transform: translateY(-2px);
+                    }
+                    
+                    .btn-whatsapp {
+                        background: #25D366;
+                        color: white;
+                    }
+                    
+                    .btn-whatsapp:hover {
+                        background: #128C7E;
+                        transform: translateY(-2px);
+                    }
+                    
+                    .btn-close {
+                        background: #6c757d;
+                        color: white;
+                    }
+                    
+                    .btn-close:hover {
+                        background: #5a6268;
+                        transform: translateY(-2px);
+                    }
+                    
+                    @media print {
+                        body {
+                            background: white;
+                            padding: 0;
+                        }
+                        .action-buttons {
+                            display: none;
+                        }
+                        .invoice-container {
+                            box-shadow: none;
+                            border-radius: 0;
+                        }
+                    }
+                    
+                    @media (max-width: 600px) {
+                        .invoice-details {
+                            flex-direction: column;
+                        }
+                        .items-table {
+                            font-size: 12px;
+                        }
+                        .items-table th,
+                        .items-table td {
+                            padding: 8px 4px;
+                        }
+                        .btn {
+                            padding: 8px 12px;
+                            font-size: 12px;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="invoice-container">
+                    <div class="invoice-header">
+                        <div class="store-name">${this.storeName}</div>
+                        <div class="store-info">
+                            ${this.storeAddress}<br>
+                            ت: ${this.storePhone} | الرقم الضريبي: ${this.storeTaxNumber}
+                        </div>
+                    </div>
+                    
+                    <div class="invoice-title">
+                        <h2>${type === 'wholesale' ? 'فاتورة بيع بالجملة' : 'فاتورة بيع بالتجزئة'}</h2>
+                    </div>
+                    
+                    <div class="invoice-details">
+                        <div class="detail-group">
+                            <div class="detail-label">رقم الفاتورة</div>
+                            <div class="detail-value">#${invoiceNumber}</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">التاريخ</div>
+                            <div class="detail-value">${date}</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">الكاشير</div>
+                            <div class="detail-value">${cashier}</div>
+                        </div>
+                        ${type === 'wholesale' ? `
+                        <div class="detail-group">
+                            <div class="detail-label">اسم العميل</div>
+                            <div class="detail-value">${invoiceData.customer || 'عميل جملة'}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>م</th>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHTML}
+                        </tbody>
+                    </table>
+                    
+                    <div class="totals">
+                        <table class="totals-table">
+                            <tr>
+                                <td>المجموع الفرعي:</td>
+                                <td>${subtotal.toFixed(2)} ج.م</td>
+                            </tr>
+                            ${extraRows}
+                            <tr>
+                                <td>الضريبة (14%):</td>
+                                <td>${tax.toFixed(2)} ج.م</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>الإجمالي النهائي:</td>
+                                <td>${finalTotal.toFixed(2)} ج.م</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="invoice-footer">
+                        <p>شكراً لتسوقكم في ${this.storeName}</p>
+                        <p>نتمنى لكم يوماً سعيداً - معنا دائماً الجودة والثقة</p>
+                        <p>${new Date().toLocaleDateString('ar-EG')}</p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-print" onclick="window.print()">
+                            <i class="bi bi-printer"></i> طباعة الفاتورة
+                        </button>
+                        <button class="btn btn-whatsapp" onclick="sendInvoiceToWhatsApp()">
+                            <i class="bi bi-whatsapp"></i> إرسال إلى واتساب
+                        </button>
+                        <button class="btn btn-close" onclick="window.close()">
+                            <i class="bi bi-x-lg"></i> إغلاق
+                        </button>
+                    </div>
+                </div>
+                
+                <script>
+                    function sendInvoiceToWhatsApp() {
+                        const phone = prompt('أدخل رقم الهاتف مع رمز الدولة (مثال: 201234567890):', '20');
+                        if (phone) {
+                            const invoiceContent = document.querySelector('.invoice-container').cloneNode(true);
+                            invoiceContent.querySelector('.action-buttons')?.remove();
+                            const tempDiv = document.createElement('div');
+                            tempDiv.appendChild(invoiceContent);
+                            let messageText = tempDiv.innerText;
+                            messageText = encodeURIComponent(messageText);
+                            window.open('https://wa.me/' + phone + '?text=' + messageText, '_blank');
+                        }
+                    }
+                </script>
+            </body>
+            </html>
+        `;
+    }
+
+    showInvoice(invoiceId, type = 'sale') {
+        let invoiceData;
+        
+        if (type === 'sale') {
+            const sales = db.getSales();
+            invoiceData = sales.find(s => s.id === invoiceId);
+        } else if (type === 'wholesale') {
+            const invoices = db.getWholesaleInvoices();
+            invoiceData = invoices.find(i => i.id === invoiceId);
+        }
+        
+        if (!invoiceData) {
+            showNotification('الفاتورة غير موجودة', 'error');
+            return;
+        }
+        
+        const invoiceHTML = this.generateInvoiceHTML(invoiceData, type);
+        const invoiceWindow = window.open('', '_blank', 'width=900,height=800,scrollbars=yes,resizable=yes');
+        invoiceWindow.document.write(invoiceHTML);
+        invoiceWindow.document.close();
     }
 }
 
@@ -656,7 +1059,7 @@ class Database {
         this.addRecentTransaction({
             type: 'بيع',
             amount: saleData.total,
-            details: `${saleData.items.length} منتج`,
+            details: saleData.items.length + ' منتج',
             cashier: saleData.cashier,
             time: new Date().toISOString()
         });
@@ -678,7 +1081,7 @@ class Database {
         this.addRecentTransaction({
             type: 'جملة',
             amount: invoiceData.total,
-            details: `عميل: ${invoiceData.customer}`,
+            details: 'عميل: ' + invoiceData.customer,
             cashier: invoiceData.cashier,
             time: new Date().toISOString()
         });
@@ -810,8 +1213,8 @@ const inventoryTableBody = document.getElementById('inventoryTableBody');
 // ==================== الدوال الرئيسية ====================
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle'}"></i> ${message}`;
+    notification.className = 'notification ' + type;
+    notification.innerHTML = '<i class="bi bi-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle') + '"></i> ' + message;
     document.body.appendChild(notification);
     
     setTimeout(() => notification.classList.add('show'), 100);
@@ -830,7 +1233,7 @@ function loadProducts() {
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
-        const stockWarning = product.stock <= product.minStock ? `<div class="stock-low">منخفض (${product.stock})</div>` : '';
+        const stockWarning = product.stock <= product.minStock ? '<div class="stock-low">منخفض (' + product.stock + ')</div>' : '';
         
         productCard.innerHTML = `
             <img src="${product.image}" onerror="this.src='/assets/background.png'" alt="${product.name}">
@@ -852,7 +1255,7 @@ function addToCart(product) {
         if (existingItem.quantity < product.stock) {
             existingItem.quantity += 1;
         } else {
-            alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+            alert('لا يوجد مخزون كافي! المخزون المتاح: ' + product.stock);
             return;
         }
     } else {
@@ -920,7 +1323,7 @@ function updateCart() {
                 item.quantity += 1;
                 updateCart();
             } else {
-                alert(`لا يوجد مخزون كافي! المخزون المتاح: ${product.stock}`);
+                alert('لا يوجد مخزون كافي! المخزون المتاح: ' + product.stock);
             }
         });
         
@@ -935,9 +1338,9 @@ function updateCart() {
     const tax = subtotal * 0.14;
     const total = subtotal + tax;
     
-    if (subtotalElement) subtotalElement.textContent = `${subtotal.toFixed(2)} جنيه`;
-    if (taxElement) taxElement.textContent = `${tax.toFixed(2)} جنيه`;
-    if (totalElement) totalElement.textContent = `${total.toFixed(2)} جنيه`;
+    if (subtotalElement) subtotalElement.textContent = subtotal.toFixed(2) + ' جنيه';
+    if (taxElement) taxElement.textContent = tax.toFixed(2) + ' جنيه';
+    if (totalElement) totalElement.textContent = total.toFixed(2) + ' جنيه';
 }
 
 function searchByBarcode(barcode) {
@@ -947,7 +1350,7 @@ function searchByBarcode(barcode) {
     if (product) {
         addToCart(product);
         if (barcodeInput) barcodeInput.value = '';
-        showNotification(`تم إضافة ${product.name}`, 'success');
+        showNotification('تم إضافة ' + product.name, 'success');
     } else {
         showNotification('المنتج غير موجود!', 'error');
         if (barcodeInput) barcodeInput.value = '';
@@ -971,52 +1374,83 @@ if (barcodeInput) {
     });
 }
 
-if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', function() {
-        if (cart.length === 0) {
-            alert('السلة فارغة');
-            return;
-        }
-        
-        const subtotal = parseFloat(subtotalElement.textContent);
-        const tax = parseFloat(taxElement.textContent);
-        const total = parseFloat(totalElement.textContent);
-        
-        db.addSale({
-            items: [...cart],
-            subtotal: subtotal,
-            tax: tax,
-            total: total,
-            cashier: currentUser ? currentUser.username : 'system'
-        });
-        
-        cart.forEach(item => db.updateProductStock(item.id, item.quantity));
-        
-        cart = [];
-        updateCart();
-        loadProducts();
-        updateSidebarData();
-        showNotification('تم إتمام عملية البيع بنجاح', 'success');
+// ==================== دوال الفواتير المحسنة ====================
+function loadInvoicesPage() {
+    const sales = db.getSales();
+    if (!invoicesTableBody) return;
+    
+    invoicesTableBody.innerHTML = '';
+    sales.slice().reverse().forEach(sale => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${sale.id}</td>
+            <td>${new Date(sale.date).toLocaleDateString('ar-EG')}</td>
+            <td>${new Date(sale.date).toLocaleTimeString('ar-EG')}</td>
+            <td>${sale.cashier}</td>
+            <td>${sale.items.length} منتج</td>
+            <td>${sale.total.toFixed(2)} جنيه</td>
+            <td>
+                <button class="action-btn view-invoice-btn" data-id="${sale.id}" data-type="sale">
+                    <i class="bi bi-eye"></i> عرض
+                </button>
+            </td>
+        `;
+        invoicesTableBody.appendChild(row);
     });
+    
+    document.querySelectorAll('.view-invoice-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            const type = this.dataset.type;
+            const invoiceSystem = new InvoiceSystem();
+            invoiceSystem.showInvoice(id, type);
+        });
+    });
+    
+    if (invoiceSearch) {
+        invoiceSearch.addEventListener('input', function() {
+            const term = this.value.toLowerCase();
+            const rows = invoicesTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+    }
 }
 
-function showPage(pageId) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.style.display = 'none';
+function loadWholesalePage() {
+    const invoices = db.getWholesaleInvoices();
+    if (!wholesaleTableBody) return;
+    
+    wholesaleTableBody.innerHTML = '';
+    invoices.slice().reverse().forEach(inv => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${inv.id}</td>
+            <td>${inv.customer}</td>
+            <td>${new Date(inv.date).toLocaleDateString('ar-EG')}</td>
+            <td>${new Date(inv.date).toLocaleTimeString('ar-EG')}</td>
+            <td>${inv.discount}%</td>
+            <td>${inv.items.length} منتج</td>
+            <td>${inv.total.toFixed(2)} جنيه</td>
+            <td>
+                <button class="action-btn view-invoice-btn" data-id="${inv.id}" data-type="wholesale">
+                    <i class="bi bi-eye"></i> عرض
+                </button>
+            </td>
+        `;
+        wholesaleTableBody.appendChild(row);
     });
     
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) targetPage.style.display = 'block';
-    
-    if (pageId === 'productsPage') loadProductsTable();
-    else if (pageId === 'barcodeMemoryPage') loadBarcodeMemoryPage();
-    else if (pageId === 'invoicesPage') loadInvoicesPage();
-    else if (pageId === 'wholesalePage') loadWholesalePage();
-    else if (pageId === 'inventoryPage') loadInventoryPage();
-    else if (pageId === 'reportsPage') {
-        loadExpensesTable();
-        loadProductCostTable();
-    }
+    document.querySelectorAll('.view-invoice-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = parseInt(this.dataset.id);
+            const type = this.dataset.type;
+            const invoiceSystem = new InvoiceSystem();
+            invoiceSystem.showInvoice(id, type);
+        });
+    });
 }
 
 function loadProductsTable() {
@@ -1107,7 +1541,7 @@ function loadBarcodeMemoryPage() {
         products.forEach(product => {
             const option = document.createElement('option');
             option.value = product.id;
-            option.textContent = `${product.name} - ${product.barcode}`;
+            option.textContent = product.name + ' - ' + product.barcode;
             memoryProductSelect.appendChild(option);
         });
     }
@@ -1153,61 +1587,6 @@ if (saveBarcodeBtn) {
         loadBarcodeMemoryPage();
         memoryBarcodeInput.value = '';
         showNotification('تم حفظ الباركود', 'success');
-    });
-}
-
-function loadInvoicesPage() {
-    const sales = db.getSales();
-    if (!invoicesTableBody) return;
-    
-    invoicesTableBody.innerHTML = '';
-    sales.slice().reverse().forEach(sale => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${sale.id}</td>
-            <td>${new Date(sale.date).toLocaleDateString('ar-EG')}</td>
-            <td>${sale.cashier}</td>
-            <td>${sale.total.toFixed(2)} جنيه</td>
-            <td><button class="action-btn view-btn" data-id="${sale.id}">عرض</button></td>
-        `;
-        invoicesTableBody.appendChild(row);
-    });
-    
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = parseInt(this.dataset.id);
-            const sale = db.getSales().find(s => s.id === id);
-            if (sale) alert(`فاتورة #${sale.id}\nالمجموع: ${sale.total.toFixed(2)} جنيه\nالتاريخ: ${new Date(sale.date).toLocaleString('ar-EG')}`);
-        });
-    });
-    
-    if (invoiceSearch) {
-        invoiceSearch.addEventListener('input', function() {
-            const term = this.value.toLowerCase();
-            const rows = invoicesTableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
-            });
-        });
-    }
-}
-
-function loadWholesalePage() {
-    const invoices = db.getWholesaleInvoices();
-    if (!wholesaleTableBody) return;
-    
-    wholesaleTableBody.innerHTML = '';
-    invoices.slice().reverse().forEach(inv => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${inv.id}</td>
-            <td>${inv.customer}</td>
-            <td>${new Date(inv.date).toLocaleDateString('ar-EG')}</td>
-            <td>${inv.discount}%</td>
-            <td>${inv.total.toFixed(2)} جنيه</td>
-            <td><button class="action-btn view-btn" data-id="${inv.id}">عرض</button></td>
-        `;
-        wholesaleTableBody.appendChild(row);
     });
 }
 
@@ -1271,10 +1650,10 @@ function updateWholesaleCart() {
     const tax = afterDiscount * 0.14;
     const total = afterDiscount + tax;
     
-    if (wholesaleSubtotal) wholesaleSubtotal.textContent = `${subtotal.toFixed(2)} جنيه`;
-    if (wholesaleDiscountAmount) wholesaleDiscountAmount.textContent = `${discountAmount.toFixed(2)} جنيه`;
-    if (wholesaleTax) wholesaleTax.textContent = `${tax.toFixed(2)} جنيه`;
-    if (wholesaleTotal) wholesaleTotal.textContent = `${total.toFixed(2)} جنيه`;
+    if (wholesaleSubtotal) wholesaleSubtotal.textContent = subtotal.toFixed(2) + ' جنيه';
+    if (wholesaleDiscountAmount) wholesaleDiscountAmount.textContent = discountAmount.toFixed(2) + ' جنيه';
+    if (wholesaleTax) wholesaleTax.textContent = tax.toFixed(2) + ' جنيه';
+    if (wholesaleTotal) wholesaleTotal.textContent = total.toFixed(2) + ' جنيه';
 }
 
 function addProductToWholesaleCart(barcode) {
@@ -1309,42 +1688,6 @@ if (addWholesaleProductBtn) {
     });
 }
 
-if (wholesaleCheckoutBtn) {
-    wholesaleCheckoutBtn.addEventListener('click', () => {
-        if (wholesaleCart.length === 0) {
-            alert('سلة الجملة فارغة');
-            return;
-        }
-        
-        const customer = wholesaleCustomer.value.trim();
-        if (!customer) {
-            alert('يرجى إدخال اسم العميل');
-            return;
-        }
-        
-        const subtotal = parseFloat(wholesaleSubtotal.textContent);
-        const discountAmount = parseFloat(wholesaleDiscountAmount.textContent);
-        const tax = parseFloat(wholesaleTax.textContent);
-        const total = parseFloat(wholesaleTotal.textContent);
-        const discountRate = parseFloat(wholesaleDiscount.value);
-        
-        db.addWholesaleInvoice({
-            customer, items: [...wholesaleCart],
-            subtotal, discount: discountRate,
-            discountAmount, tax, total,
-            cashier: currentUser ? currentUser.username : 'system'
-        });
-        
-        wholesaleCart.forEach(item => db.updateProductStock(item.id, item.quantity));
-        
-        wholesaleCart = [];
-        wholesaleCustomer.value = '';
-        updateWholesaleCart();
-        loadWholesalePage();
-        showNotification('تم إتمام فاتورة الجملة', 'success');
-    });
-}
-
 function loadInventoryPage() {
     const products = db.getProducts();
     if (!inventoryTableBody) return;
@@ -1372,7 +1715,7 @@ function loadInventoryPage() {
         btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
             const product = db.getProductById(id);
-            const newStock = prompt(`تعديل مخزون ${product.name}\nالمخزون الحالي: ${product.stock}`, product.stock);
+            const newStock = prompt('تعديل مخزون ' + product.name + '\nالمخزون الحالي: ' + product.stock, product.stock);
             if (newStock !== null && !isNaN(newStock) && newStock >= 0) {
                 db.updateProduct(id, { stock: parseInt(newStock) });
                 loadInventoryPage();
@@ -1449,14 +1792,14 @@ function loadProductCostTable() {
     document.querySelectorAll('.save-cost-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = parseInt(this.dataset.id);
-            const input = document.querySelector(`.cost-input[data-id="${id}"]`);
+            const input = document.querySelector('.cost-input[data-id="' + id + '"]');
             const cost = parseFloat(input.value);
             if (cost && cost > 0) {
                 expensesManager.updateProductCost(id, cost);
                 const product = db.getProductById(id);
                 const profit = product.price - cost;
-                const profitCell = document.querySelector(`.profit-cell[data-id="${id}"]`);
-                profitCell.textContent = `${profit.toFixed(2)} ج.م`;
+                const profitCell = document.querySelector('.profit-cell[data-id="' + id + '"]');
+                profitCell.textContent = profit.toFixed(2) + ' ج.م';
                 profitCell.style.color = profit > 0 ? '#28a745' : '#dc3545';
                 showNotification('تم حفظ سعر التكلفة', 'success');
             } else {
@@ -1508,11 +1851,15 @@ function displayProfitReport(report) {
                 <div class="summary-card profit-card"><div class="card-icon"><i class="bi bi-graph-up"></i></div><div class="card-content"><div class="card-value">${report.summary.netProfit.toFixed(2)} ج.م</div><div class="card-label">صافي الربح</div><div class="card-sub">هامش الربح: ${report.summary.profitMargin.toFixed(2)}%</div></div></div>
             </div>
             <div class="report-actions">
-                <button class="btn" onclick="expensesManager.exportReportToExcel(${JSON.stringify(report).replace(/"/g, '&quot;')})"><i class="bi bi-file-excel"></i> تصدير إلى Excel</button>
+                <button class="btn" id="exportReportExcelBtn"><i class="bi bi-file-excel"></i> تصدير إلى Excel</button>
                 <button class="btn" onclick="window.print()"><i class="bi bi-printer"></i> طباعة</button>
             </div>
         </div>
     `;
+    
+    document.getElementById('exportReportExcelBtn').addEventListener('click', function() {
+        expensesManager.exportReportToExcel(report);
+    });
 }
 
 function addBackupButton() {
@@ -1570,9 +1917,14 @@ function loadSidebarMenu() {
         { id: 'reportsPage', name: 'التقارير', icon: 'bi-pie-chart' }
     ];
     
-    [...baseItems, ...(currentUser && (currentUser.role === 'admin' || currentUser.role === 'owner') ? adminItems : [])].forEach(item => {
+    const itemsToShow = [...baseItems];
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'owner')) {
+        itemsToShow.push(...adminItems);
+    }
+    
+    itemsToShow.forEach(item => {
         const li = document.createElement('li');
-        li.innerHTML = `<a href="#" data-page="${item.id}"><i class="bi ${item.icon}"></i> ${item.name}</a>`;
+        li.innerHTML = '<a href="#" data-page="' + item.id + '"><i class="bi ' + item.icon + '"></i> ' + item.name + '</a>';
         sidebarMenu.appendChild(li);
     });
     
@@ -1607,7 +1959,7 @@ function loadQuickLinks() {
         a.href = '#';
         a.className = 'quick-link';
         a.onclick = () => { showPage(link.page); return false; };
-        a.innerHTML = `<i class="bi ${link.icon}"></i> ${link.name}`;
+        a.innerHTML = '<i class="bi ' + link.icon + '"></i> ' + link.name;
         container.appendChild(a);
     });
 }
@@ -1649,6 +2001,25 @@ function updateSidebarData() {
     loadRecentTransactions();
 }
 
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none';
+    });
+    
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) targetPage.style.display = 'block';
+    
+    if (pageId === 'productsPage') loadProductsTable();
+    else if (pageId === 'barcodeMemoryPage') loadBarcodeMemoryPage();
+    else if (pageId === 'invoicesPage') loadInvoicesPage();
+    else if (pageId === 'wholesalePage') loadWholesalePage();
+    else if (pageId === 'inventoryPage') loadInventoryPage();
+    else if (pageId === 'reportsPage') {
+        loadExpensesTable();
+        loadProductCostTable();
+    }
+}
+
 // ==================== أحداث تسجيل الدخول والخروج ====================
 if (loginBtn) {
     loginBtn.addEventListener('click', function() {
@@ -1663,7 +2034,7 @@ if (loginBtn) {
             
             loginPage.style.display = 'none';
             dashboard.style.display = 'block';
-            userDisplay.textContent = `مرحباً، ${username}`;
+            userDisplay.textContent = 'مرحباً، ' + username;
             
             loadSidebarMenu();
             loadQuickLinks();
@@ -1694,6 +2065,92 @@ if (logoutBtn) {
     });
 }
 
+// ==================== أحداث الدفع المحسنة ====================
+if (checkoutBtn) {
+    const newCheckoutBtn = checkoutBtn.cloneNode(true);
+    checkoutBtn.parentNode.replaceChild(newCheckoutBtn, checkoutBtn);
+    
+    newCheckoutBtn.addEventListener('click', function() {
+        if (cart.length === 0) {
+            alert('السلة فارغة');
+            return;
+        }
+        
+        const subtotal = parseFloat(subtotalElement.textContent);
+        const tax = parseFloat(taxElement.textContent);
+        const total = parseFloat(totalElement.textContent);
+        
+        const saleId = db.addSale({
+            items: [...cart],
+            subtotal: subtotal,
+            tax: tax,
+            total: total,
+            cashier: currentUser ? currentUser.username : 'system'
+        });
+        
+        cart.forEach(item => db.updateProductStock(item.id, item.quantity));
+        
+        cart = [];
+        updateCart();
+        loadProducts();
+        updateSidebarData();
+        showNotification('تم إتمام عملية البيع بنجاح', 'success');
+        
+        setTimeout(() => {
+            const invoiceSystem = new InvoiceSystem();
+            invoiceSystem.showInvoice(saleId, 'sale');
+        }, 500);
+    });
+}
+
+if (wholesaleCheckoutBtn) {
+    const newWholesaleCheckoutBtn = wholesaleCheckoutBtn.cloneNode(true);
+    wholesaleCheckoutBtn.parentNode.replaceChild(newWholesaleCheckoutBtn, wholesaleCheckoutBtn);
+    
+    newWholesaleCheckoutBtn.addEventListener('click', () => {
+        if (wholesaleCart.length === 0) {
+            alert('سلة الجملة فارغة');
+            return;
+        }
+        
+        const customer = wholesaleCustomer.value.trim();
+        if (!customer) {
+            alert('يرجى إدخال اسم العميل');
+            return;
+        }
+        
+        const subtotal = parseFloat(wholesaleSubtotal.textContent);
+        const discountAmount = parseFloat(wholesaleDiscountAmount.textContent);
+        const tax = parseFloat(wholesaleTax.textContent);
+        const total = parseFloat(wholesaleTotal.textContent);
+        const discountRate = parseFloat(wholesaleDiscount.value);
+        
+        const invoiceId = db.addWholesaleInvoice({
+            customer, 
+            items: [...wholesaleCart],
+            subtotal, 
+            discount: discountRate,
+            discountAmount, 
+            tax, 
+            total,
+            cashier: currentUser ? currentUser.username : 'system'
+        });
+        
+        wholesaleCart.forEach(item => db.updateProductStock(item.id, item.quantity));
+        
+        wholesaleCart = [];
+        wholesaleCustomer.value = '';
+        updateWholesaleCart();
+        loadWholesalePage();
+        showNotification('تم إتمام فاتورة الجملة', 'success');
+        
+        setTimeout(() => {
+            const invoiceSystem = new InvoiceSystem();
+            invoiceSystem.showInvoice(invoiceId, 'wholesale');
+        }, 500);
+    });
+}
+
 // ==================== تهيئة الصفحة ====================
 document.addEventListener('DOMContentLoaded', function() {
     const session = new SessionManager().getSession();
@@ -1701,7 +2158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentUser = session;
         loginPage.style.display = 'none';
         dashboard.style.display = 'block';
-        userDisplay.textContent = `مرحباً، ${session.username}`;
+        userDisplay.textContent = 'مرحباً، ' + session.username;
         loadSidebarMenu();
         loadQuickLinks();
         showPage('cashierPage');
