@@ -2352,64 +2352,209 @@ window.showPage = showPage;
 window.updateSidebarData = updateSidebarData;
 window.expensesManager = expensesManager;
 
-// ==================== تهيئة الصفحة المحسنة ====================
+
+
+
+
+
+
+
+
+// ==================== شاشة التحميل ====================
+class LoadingScreen {
+    constructor() {
+        this.createLoadingScreen();
+    }
+    
+    createLoadingScreen() {
+        // إنشاء عنصر شاشة التحميل إذا لم يكن موجوداً
+        if (!document.getElementById('loadingScreen')) {
+            const loadingHTML = `
+                <div id="loadingScreen" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    z-index: 999999;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    transition: opacity 0.5s ease;
+                    opacity: 1;
+                ">
+                    <div style="text-align: center;">
+                        <div class="spinner-container">
+                            <div class="spinner"></div>
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <div style="margin-top: 30px; color: white; font-size: 18px; font-weight: bold;">
+                            جاري تحميل سوبر ماركت فتحة خير...
+                        </div>
+                        <div style="margin-top: 10px; color: rgba(255,255,255,0.8); font-size: 14px;">
+                            يرجى الانتظار
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', loadingHTML);
+            
+            // إضافة CSS للسبينر
+            this.addSpinnerStyles();
+        }
+    }
+    
+    addSpinnerStyles() {
+        if (!document.getElementById('spinnerStyles')) {
+            const styles = `
+                <style id="spinnerStyles">
+                    .spinner-container {
+                        position: relative;
+                        width: 80px;
+                        height: 80px;
+                        margin: 0 auto;
+                    }
+                    
+                    .spinner {
+                        position: absolute;
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.5) 100%);
+                        animation: pulse 1.5s ease-in-out infinite;
+                    }
+                    
+                    .spinner-ring {
+                        position: absolute;
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        border: 3px solid rgba(255,255,255,0.3);
+                        border-top: 3px solid white;
+                        border-right: 3px solid white;
+                        animation: spin 0.8s linear infinite;
+                    }
+                    
+                    @keyframes spin {
+                        0% {
+                            transform: rotate(0deg);
+                        }
+                        100% {
+                            transform: rotate(360deg);
+                        }
+                    }
+                    
+                    @keyframes pulse {
+                        0%, 100% {
+                            transform: scale(0.8);
+                            opacity: 0.5;
+                        }
+                        50% {
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                    }
+                    
+                    @keyframes fadeOut {
+                        from {
+                            opacity: 1;
+                        }
+                        to {
+                            opacity: 0;
+                            visibility: hidden;
+                        }
+                    }
+                    
+                    .loading-fade-out {
+                        animation: fadeOut 0.5s ease forwards;
+                    }
+                </style>
+            `;
+            document.head.insertAdjacentHTML('beforeend', styles);
+        }
+    }
+    
+    show() {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+            loadingScreen.classList.remove('loading-fade-out');
+        }
+    }
+    
+    hide() {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.classList.add('loading-fade-out');
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }
+    }
+}
+
+// إنشاء شاشة التحميل
+const loadingScreen = new LoadingScreen();
+
+// ==================== تهيئة الصفحة المحسنة مع شاشة التحميل ====================
 document.addEventListener('DOMContentLoaded', function() {
+    // إظهار شاشة التحميل
+    loadingScreen.show();
+    
     // محاولة استعادة الجلسة من localStorage أو sessionStorage
     const sessionManager = new SessionManager();
     const session = sessionManager.getSession();
     
-    // التحقق من وجود مستخدم نشط
-    if (session && session.username) {
-        // استعادة المستخدم الحالي
-        currentUser = session;
-        
-        // تحديث واجهة المستخدم
-        loginPage.style.display = 'none';
-        dashboard.style.display = 'block';
-        userDisplay.textContent = 'مرحباً، ' + session.username;
-        
-        // تحميل جميع البيانات
-        loadSidebarMenu();
-        loadQuickLinks();
-        showPage('cashierPage');
-        loadProducts();
-        loadRecentTransactions();
-        updateSidebarData();
-        addBackupButton();
-        
-        // تفعيل التركيز على حقل الباركود
-        if (barcodeInput) barcodeInput.focus();
-        
-        // بدء النسخ الاحتياطي التلقائي
-        new BackupManager().setupAutoBackup();
-        
-        // تحديث الجلسة لمنع انتهائها
-        sessionManager.refreshSession();
-        
-        showNotification('تم استعادة الجلسة بنجاح', 'success');
-    } else {
-        // لا يوجد جلسة نشطة، عرض صفحة تسجيل الدخول
-        loginPage.style.display = 'flex';
-        dashboard.style.display = 'none';
-        
-        // تنظيف أي بيانات قديمة
-        cart = [];
-        wholesaleCart = [];
-        currentUser = null;
-    }
-    
-    // إعداد مستمعي الأحداث
-    setupEventListeners();
-    
-    // تحديث البيانات كل 30 ثانية
-    setInterval(updateSidebarData, 30000);
-    
-    // تحديث الجلسة كل 15 دقيقة
-    setInterval(() => {
-        if (currentUser) {
+    // محاكاة وقت تحميل بسيط للتأكد من ظهور شاشة التحميل
+    setTimeout(() => {
+        // التحقق من وجود مستخدم نشط
+        if (session && session.username) {
+            // استعادة المستخدم الحالي
+            currentUser = session;
+            
+            // تحديث واجهة المستخدم
+            loginPage.style.display = 'none';
+            dashboard.style.display = 'block';
+            userDisplay.textContent = 'مرحباً، ' + session.username;
+            
+            // تحميل جميع البيانات
+            loadSidebarMenu();
+            loadQuickLinks();
+            showPage('cashierPage');
+            loadProducts();
+            loadRecentTransactions();
+            updateSidebarData();
+            addBackupButton();
+            
+            // تفعيل التركيز على حقل الباركود
+            if (barcodeInput) barcodeInput.focus();
+            
+            // بدء النسخ الاحتياطي التلقائي
+            new BackupManager().setupAutoBackup();
+            
+            // تحديث الجلسة لمنع انتهائها
             sessionManager.refreshSession();
+            
+            showNotification('تم استعادة الجلسة بنجاح', 'success');
+        } else {
+            // لا يوجد جلسة نشطة، عرض صفحة تسجيل الدخول
+            loginPage.style.display = 'flex';
+            dashboard.style.display = 'none';
+            
+            // تنظيف أي بيانات قديمة
+            cart = [];
+            wholesaleCart = [];
+            currentUser = null;
         }
-    }, 15 * 60 * 1000);
+        
+        // إخفاء شاشة التحميل بعد اكتمال التحميل
+        setTimeout(() => {
+            loadingScreen.hide();
+        }, 500);
+        
+    }, 300); // تأخير بسيط لضمان ظهور شاشة التحميل
 });
 
 // دالة لتجميع جميع مستمعي الأحداث
