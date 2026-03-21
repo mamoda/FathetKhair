@@ -506,338 +506,474 @@ class InvoiceSystem {
             `;
         }
         
-        return `
-            <!DOCTYPE html>
-            <html dir="rtl" lang="ar">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>فاتورة #${invoiceNumber}</title>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-                <style>
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
-                    
-                    body {
-                        font-family: 'Tahoma', 'Arial', sans-serif;
-                        background: #f5f5f5;
-                        padding: 20px;
-                    }
-                    
-                    .invoice-container {
-                        max-width: 800px;
-                        margin: 0 auto;
-                        background: white;
-                        border-radius: 15px;
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                        overflow: hidden;
-                    }
-                    
-                    .invoice-header {
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        padding: 30px;
-                        text-align: center;
-                    }
-                    
-                    .store-name {
-                        font-size: 28px;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .store-info {
-                        font-size: 14px;
-                        opacity: 0.9;
-                        line-height: 1.6;
-                    }
-                    
-                    .invoice-title {
-                        background: #f8f9fa;
-                        padding: 15px;
-                        text-align: center;
-                        border-bottom: 2px solid #e9ecef;
-                    }
-                    
-                    .invoice-title h2 {
-                        color: #495057;
-                        font-size: 24px;
-                    }
-                    
-                    .invoice-details {
-                        padding: 20px;
-                        background: #f8f9fa;
-                        display: flex;
-                        justify-content: space-between;
-                        border-bottom: 1px solid #dee2e6;
-                        flex-wrap: wrap;
-                        gap: 10px;
-                    }
-                    
-                    .detail-group {
-                        text-align: center;
-                        flex: 1;
-                        min-width: 120px;
-                    }
-                    
-                    .detail-label {
-                        font-size: 12px;
-                        color: #6c757d;
-                        margin-bottom: 5px;
-                    }
-                    
-                    .detail-value {
-                        font-size: 16px;
-                        font-weight: bold;
-                        color: #495057;
-                    }
-                    
-                    .items-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    
-                    .items-table th {
-                        background: #e9ecef;
-                        padding: 12px;
-                        text-align: center;
-                        font-weight: bold;
-                        color: #495057;
-                        border-bottom: 2px solid #dee2e6;
-                    }
-                    
-                    .items-table td {
-                        padding: 10px;
-                        text-align: center;
-                        border-bottom: 1px solid #dee2e6;
-                        color: #6c757d;
-                    }
-                    
-                    .items-table tr:hover {
-                        background: #f8f9fa;
-                    }
-                    
-                    .totals {
-                        padding: 20px;
-                        background: #f8f9fa;
-                        border-top: 2px solid black;
-                    }
-                    
-                    .totals-table {
-                        width: 100%;
-                        max-width: 300px;
-                        margin-right: 0 auto;
-                    }
-                    
-                    .totals-table td {
-                        padding: 8px;
-                        text-align: right;
-                    }
-                    
-                    .total-row {
-                        font-size: 16px;
-                        font-weight: bold;
-                        color: #28a745;
-                    }
-                    
-                    .invoice-footer {
-                        padding: 20px;
-                        text-align: center;
-                        background: #f8f9fa;
-                        border-top: 1px solid #dee2e6;
-                        color: #6c757d;
-                        font-size: 12px;
-                    }
-                    
-                    .action-buttons {
-                        padding: 20px;
-                        display: flex;
-                        gap: 10px;
-                        justify-content: center;
-                        background: white;
-                        border-top: 1px solid #dee2e6;
-                        flex-wrap: wrap;
-                    }
-                    
-                    .btn {
-                        padding: 10px 20px;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        font-weight: bold;
-                        transition: all 0.3s;
-                    }
-                    
-                    .btn-print {
-                        background: #28a745;
-                        color: white;
-                    }
-                    
-                    .btn-print:hover {
-                        background: #218838;
-                        transform: translateY(-2px);
-                    }
-                    
-                    .btn-whatsapp {
-                        background: #25D366;
-                        color: white;
-                    }
-                    
-                    .btn-whatsapp:hover {
-                        background: #128C7E;
-                        transform: translateY(-2px);
-                    }
-                    
-                    .btn-close {
-                        background: #6c757d;
-                        color: white;
-                    }
-                    
-                    .btn-close:hover {
-                        background: #5a6268;
-                        transform: translateY(-2px);
-                    }
-                    
-                    @media print {
-                        body {
-                            background: white;
-                            padding: 0;
-                        }
-                        .action-buttons {
-                            display: none;
-                        }
-                        .invoice-container {
-                            box-shadow: none;
-                            border-radius: 0;
-                        }
-                    }
-                    
-                    @media (max-width: 600px) {
-                        .invoice-details {
-                            flex-direction: column;
-                        }
-                        .items-table {
-                            font-size: 12px;
-                        }
-                        .items-table th,
-                        .items-table td {
-                            padding: 8px 4px;
-                        }
-                        .btn {
-                            padding: 8px 12px;
-                            font-size: 12px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="invoice-container">
-                    <div class="invoice-header">
-                        <div class="store-name">${this.storeName}</div>
-                        <div class="store-info">
-                            ${this.storeAddress}<br>
-                            ت: ${this.storePhone} | الرقم الضريبي: ${this.storeTaxNumber}
-                        </div>
-                    </div>
-                    
-                    <div class="invoice-title">
-                        <h2>${type === 'wholesale' ? 'فاتورة بيع بالجملة' : 'فاتورة بيع بالتجزئة'}</h2>
-                    </div>
-                    
-                    <div class="invoice-details">
-                        <div class="detail-group">
-                            <div class="detail-label">رقم الفاتورة</div>
-                            <div class="detail-value">#${invoiceNumber}</div>
-                        </div>
-                        <div class="detail-group">
-                            <div class="detail-label">التاريخ</div>
-                            <div class="detail-value">${date}</div>
-                        </div>
-                        <div class="detail-group">
-                            <div class="detail-label">الكاشير</div>
-                            <div class="detail-value">${cashier}</div>
-                        </div>
-                        ${type === 'wholesale' ? `
-                        <div class="detail-group">
-                            <div class="detail-label">اسم العميل</div>
-                            <div class="detail-value">${invoiceData.customer || 'عميل جملة'}</div>
-                        </div>
-                        ` : ''}
-                    </div>
-                    
-                    <table class="items-table">
-                        <thead>
-                            <tr>
-                                <th>م</th>
-                                <th>المنتج</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHTML}
-                        </tbody>
-                    </table>
-                    
-                    <div class="totals">
-                        <table class="totals-table">
-                            <tr>
-                                <td>المجموع الفرعي:</td>
-                                <td>${subtotal.toFixed(2)} ج.م</td>
-                            </tr>
-                            ${extraRows}
-                            <tr>
-                                <td>الضريبة (14%):</td>
-                                <td>${tax.toFixed(2)} ج.م</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td>الإجمالي النهائي:</td>
-                                <td>${finalTotal.toFixed(2)} ج.م</td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <div class="invoice-footer">
-                        <p>شكراً لتسوقكم في ${this.storeName}</p>
-                        <p>نتمنى لكم يوماً سعيداً - معنا دائماً الجودة والثقة</p>
-                        <p>${new Date().toLocaleDateString('ar-EG')}</p>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-print" onclick="window.print()">
-                            <i class="bi bi-printer"></i> طباعة الفاتورة
-                        </button>
-                        <button class="btn btn-whatsapp" onclick="sendInvoiceToWhatsApp()">
-                            <i class="bi bi-whatsapp"></i> إرسال إلى واتساب
-                        </button>
-                        <button class="btn btn-close" onclick="window.close()">
-                            <i class="bi bi-x-lg"></i> إغلاق
-                        </button>
-                    </div>
+return `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>فاتورة #${invoiceNumber}</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Tahoma', 'Arial', 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+                min-height: 100vh;
+            }
+            
+            .invoice-container {
+                max-width: 850px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                overflow: hidden;
+                animation: slideIn 0.5s ease;
+            }
+            
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .invoice-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 35px 30px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .invoice-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 1%, transparent 1%);
+                background-size: 50px 50px;
+                animation: shimmer 20s linear infinite;
+            }
+            
+            @keyframes shimmer {
+                from {
+                    transform: translate(0, 0);
+                }
+                to {
+                    transform: translate(50px, 50px);
+                }
+            }
+            
+            .store-name {
+                font-size: 32px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                position: relative;
+                z-index: 1;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            }
+            
+            .store-info {
+                font-size: 14px;
+                opacity: 0.95;
+                line-height: 1.6;
+                position: relative;
+                z-index: 1;
+            }
+            
+            .invoice-title {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                padding: 20px;
+                text-align: center;
+                border-bottom: 3px solid #667eea;
+            }
+            
+            .invoice-title h2 {
+                color: #495057;
+                font-size: 26px;
+                font-weight: bold;
+                margin: 0;
+            }
+            
+            .invoice-details {
+                padding: 25px;
+                background: white;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                border-bottom: 2px solid #e9ecef;
+            }
+            
+            .detail-group {
+                text-align: center;
+                padding: 12px;
+                background: #f8f9fa;
+                border-radius: 12px;
+                transition: transform 0.3s, box-shadow 0.3s;
+            }
+            
+            .detail-group:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+            
+            .detail-label {
+                font-size: 12px;
+                color: #6c757d;
+                margin-bottom: 8px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+            
+            .detail-value {
+                font-size: 18px;
+                font-weight: bold;
+                color: #495057;
+            }
+            
+            .items-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+            
+            .items-table th {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 12px;
+                text-align: center;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            
+            .items-table td {
+                padding: 12px;
+                text-align: center;
+                border-bottom: 1px solid #e9ecef;
+                color: #495057;
+                font-size: 14px;
+            }
+            
+            .items-table tr:hover {
+                background: #f8f9fa;
+                transition: background 0.3s;
+            }
+            
+            .items-table tr:last-child td {
+                border-bottom: none;
+            }
+            
+            .totals {
+                padding: 25px;
+                background: #f8f9fa;
+                border-top: 3px solid #667eea;
+                margin-top: 20px;
+            }
+            
+            .totals-table {
+                width: 100%;
+                max-width: 400px;
+                margin-right: auto;
+                border-collapse: collapse;
+            }
+            
+            .totals-table td {
+                padding: 12px 15px;
+                text-align: right;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .totals-table tr:last-child td {
+                border-bottom: none;
+            }
+            
+            .discount-row td {
+                background: #fff3cd;
+                color: #856404;
+                font-weight: bold;
+            }
+            
+            .total-row td {
+                background: #d4edda;
+                font-size: 18px;
+                font-weight: bold;
+                color: #155724;
+                border-top: 2px solid #28a745;
+            }
+            
+            .total-row td:first-child {
+                font-size: 18px;
+            }
+            
+            .total-row td:last-child {
+                font-size: 20px;
+                color: #28a745;
+            }
+            
+            .invoice-footer {
+                padding: 25px;
+                text-align: center;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                color: #6c757d;
+                font-size: 13px;
+            }
+            
+            .invoice-footer p {
+                margin: 5px 0;
+            }
+            
+            .invoice-footer p:first-child {
+                font-size: 16px;
+                font-weight: bold;
+                color: #667eea;
+            }
+            
+            .action-buttons {
+                padding: 25px;
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                background: white;
+                border-top: 1px solid #e9ecef;
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+                transition: all 0.3s;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            
+            .btn i {
+                font-size: 16px;
+            }
+            
+            .btn-print {
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+            }
+            
+            .btn-print:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+            }
+            
+            .btn-whatsapp {
+                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                color: white;
+            }
+            
+            .btn-whatsapp:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(37,211,102,0.3);
+            }
+            
+            .btn-close {
+                background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+                color: white;
+            }
+            
+            .btn-close:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(108,117,125,0.3);
+            }
+            
+            @media print {
+                body {
+                    background: white;
+                    padding: 0;
+                    margin: 0;
+                }
+                .action-buttons {
+                    display: none;
+                }
+                .invoice-container {
+                    box-shadow: none;
+                    border-radius: 0;
+                    max-width: 100%;
+                }
+                .btn {
+                    display: none;
+                }
+                .items-table th {
+                    background: #e9ecef;
+                    color: #495057;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .invoice-header {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                body {
+                    padding: 10px;
+                }
+                .invoice-details {
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                    padding: 15px;
+                }
+                .items-table {
+                    font-size: 11px;
+                }
+                .items-table th,
+                .items-table td {
+                    padding: 8px 4px;
+                }
+                .btn {
+                    padding: 8px 16px;
+                    font-size: 12px;
+                }
+                .totals-table {
+                    max-width: 100%;
+                }
+                .detail-value {
+                    font-size: 14px;
+                }
+                .store-name {
+                    font-size: 24px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="invoice-container">
+            <div class="invoice-header">
+                <div class="store-name">${this.storeName}</div>
+                <div class="store-info">
+                    <i class="bi bi-geo-alt-fill"></i> ${this.storeAddress}<br>
+                    <i class="bi bi-telephone-fill"></i> ${this.storePhone} | 
+                    <i class="bi bi-building"></i> الرقم الضريبي: ${this.storeTaxNumber}
                 </div>
-                
-                <script>
-                    function sendInvoiceToWhatsApp() {
-                        const phone = prompt('أدخل رقم الهاتف مع رمز الدولة (مثال: 201234567890):', '20');
-                        if (phone) {
-                            const invoiceContent = document.querySelector('.invoice-container').cloneNode(true);
-                            invoiceContent.querySelector('.action-buttons')?.remove();
-                            const tempDiv = document.createElement('div');
-                            tempDiv.appendChild(invoiceContent);
-                            let messageText = tempDiv.innerText;
-                            messageText = encodeURIComponent(messageText);
-                            window.open('https://wa.me/' + phone + '?text=' + messageText, '_blank');
-                        }
-                    }
-                </script>
-            </body>
-            </html>
-        `;
+            </div>
+            
+            <div class="invoice-title">
+                <h2><i class="bi bi-receipt"></i> ${type === 'wholesale' ? 'فاتورة بيع بالجملة' : 'فاتورة بيع بالتجزئة'}</h2>
+            </div>
+            
+            <div class="invoice-details">
+                <div class="detail-group">
+                    <div class="detail-label"><i class="bi bi-hash"></i> رقم الفاتورة</div>
+                    <div class="detail-value">#${invoiceNumber}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label"><i class="bi bi-calendar3"></i> التاريخ</div>
+                    <div class="detail-value">${date}</div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-label"><i class="bi bi-person-badge"></i> الكاشير</div>
+                    <div class="detail-value">${cashier}</div>
+                </div>
+                ${type === 'wholesale' ? `
+                <div class="detail-group">
+                    <div class="detail-label"><i class="bi bi-person"></i> اسم العميل</div>
+                    <div class="detail-value">${invoiceData.customer || 'عميل جملة'}</div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">#</th>
+                        <th style="width: 40%">المنتج</th>
+                        <th style="width: 15%">الكمية</th>
+                        <th style="width: 15%">السعر</th>
+                        <th style="width: 20%">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHTML}
+                </tbody>
+            </table>
+            
+            <div class="totals">
+                <table class="totals-table">
+                    <tr>
+                        <td><strong>المجموع الفرعي</strong></td>
+                        <td>${subtotal.toFixed(2)} ج.م</td>
+                    </tr>
+                    ${extraRows}
+                    <tr>
+                        <td><strong>الضريبة (14%)</strong></td>
+                        <td>${tax.toFixed(2)} ج.م</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td><strong>الإجمالي النهائي</strong></td>
+                        <td><strong>${finalTotal.toFixed(2)} ج.م</strong></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="invoice-footer">
+                <p><i class="bi bi-heart-fill"></i> شكراً لتسوقكم في ${this.storeName} <i class="bi bi-heart-fill"></i></p>
+                <p>نتمنى لكم يوماً سعيداً - معنا دائماً الجودة والثقة</p>
+                <p><i class="bi bi-clock"></i> ${new Date().toLocaleString('ar-EG')}</p>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-print" onclick="window.print()">
+                    <i class="bi bi-printer"></i> طباعة الفاتورة
+                </button>
+                <button class="btn btn-whatsapp" onclick="sendInvoiceToWhatsApp()">
+                    <i class="bi bi-whatsapp"></i> إرسال إلى واتساب
+                </button>
+                <button class="btn btn-close" onclick="window.close()">
+                    <i class="bi bi-x-lg"></i> إغلاق
+                </button>
+            </div>
+        </div>
+        
+        <script>
+            function sendInvoiceToWhatsApp() {
+                const phone = prompt('📱 أدخل رقم الهاتف مع رمز الدولة (مثال: 201234567890):', '20');
+                if (phone && phone.trim()) {
+                    const invoiceContent = document.querySelector('.invoice-container').cloneNode(true);
+                    const actionButtons = invoiceContent.querySelector('.action-buttons');
+                    if (actionButtons) actionButtons.remove();
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.appendChild(invoiceContent);
+                    
+                    let messageText = tempDiv.innerText;
+                    messageText = '📄 *فاتورة ' + (${type === 'wholesale' ? "'جملة'" : "'تجزئة'"}) + '*\\n\\n' + messageText;
+                    messageText = encodeURIComponent(messageText);
+                    
+                    window.open('https://wa.me/' + phone.replace(/^0+/, '') + '?text=' + messageText, '_blank');
+                } else if (phone === '') {
+                    alert('❌ الرجاء إدخال رقم الهاتف');
+                }
+            }
+        </script>
+    </body>
+    </html>
+`;      
     }
 
     showInvoice(invoiceId, type = 'sale') {
