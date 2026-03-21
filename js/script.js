@@ -623,13 +623,13 @@ class InvoiceSystem {
                     .totals {
                         padding: 20px;
                         background: #f8f9fa;
-                        border-top: 2px solid #dee2e6;
+                        border-top: 2px solid black;
                     }
                     
                     .totals-table {
                         width: 100%;
                         max-width: 300px;
-                        margin-right: auto;
+                        margin-right: 0 auto;
                     }
                     
                     .totals-table td {
